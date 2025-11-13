@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Cache - INTRANEURO</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpiar Cache de INTRANEURO</h1>
+        <p>Esta herramienta eliminará todo el cache del Service Worker y recargará la aplicación.</p>
+
+        <div id="status" class="status info">
+            Esperando acción...
+        </div>
+
+        <button id="clearBtn" onclick="clearEverything()">
+            🗑️ Limpiar Todo y Recargar
+        </button>
+
+        <button onclick="window.location.href='/'">
+            🏠 Volver al Inicio
+        </button>
+
+        <div id="log" class="log" style="display: none;"></div>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+        const clearBtn = document.getElementById('clearBtn');
+
+        function log(message) {
+            logDiv.style.display = 'block';
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${time}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        async function clearEverything() {
+            clearBtn.disabled = true;
+            statusDiv.className = 'status info';
+            statusDiv.textContent = '🔄 Limpiando...';
+
+            try {
+                // 1. Des-registrar Service Worker
+                log('Des-registrando Service Worker...');
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    await registration.unregister();
+                    log('✅ Service Worker des-registrado');
+                } else {
+                    log('ℹ️ No hay Service Worker registrado');
+                }
+
+                // 2. Limpiar todos los caches
+                log('Limpiando caches...');
+                const cacheNames = await caches.keys();
+                log(`Encontrados ${cacheNames.length} caches: ${cacheNames.join(', ')}`);
+
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                    log(`✅ Cache eliminado: ${cacheName}`);
+                }
+
+                // 3. Limpiar localStorage
+                log('Limpiando localStorage...');
+                localStorage.clear();
+                log('✅ localStorage limpiado');
+
+                // 4. Limpiar sessionStorage
+                log('Limpiando sessionStorage...');
+                sessionStorage.clear();
+                log('✅ sessionStorage limpiado');
+
+                // Éxito
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Todo limpiado correctamente. Recargando en 2 segundos...';
+                log('🎉 Proceso completado exitosamente');
+
+                // Recargar después de 2 segundos
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+
+            } catch (error) {
+                statusDiv.className = 'status';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.textContent = '❌ Error: ' + error.message;
+                log('❌ Error: ' + error.message);
+                clearBtn.disabled = false;
+            }
+        }
+
+        // Auto-detectar estado actual
+        window.addEventListener('load', async () => {
+            const registration = await navigator.serviceWorker.getRegistration();
+            const cacheNames = await caches.keys();
+
+            if (registration) {
+                log(`Service Worker activo: ${registration.scope}`);
+            }
+            if (cacheNames.length > 0) {
+                log(`Caches existentes: ${cacheNames.join(', ')}`);
+            }
+        });
+    </script>
+</body>
+</html>

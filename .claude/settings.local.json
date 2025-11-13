@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//var/log/**)",
+      "Read(//root/.pm2/logs/**)",
+      "Bash(psql -U intraneuro_user -d intraneuro_db -c \"SELECT p.id, p.name, a.id as admission_id, a.status, a.admission_date FROM patients p LEFT JOIN admissions a ON p.id = a.patient_id ORDER BY p.id;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT p.id, p.name, a.id as admission_id, a.status, a.admission_date FROM patients p LEFT JOIN admissions a ON p.id = a.patient_id ORDER BY p.id LIMIT 20;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT COUNT(*) as total_pacientes, COUNT(CASE WHEN a.status = ''active'' THEN 1 END) as con_admision_activa, COUNT(CASE WHEN a.status IS NULL THEN 1 END) as sin_admision FROM patients p LEFT JOIN admissions a ON p.id = a.patient_id AND a.status = ''active'';\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT p.id, p.name FROM patients p WHERE NOT EXISTS (SELECT 1 FROM admissions a WHERE a.patient_id = p.id AND a.status = ''active'') ORDER BY p.id LIMIT 10;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT COUNT(*) as total_observaciones FROM observations;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT o.id, o.admission_id, o.observation, o.created_by, o.created_at, p.name FROM observations o JOIN admissions a ON o.admission_id = a.id JOIN patients p ON a.patient_id = p.id ORDER BY o.created_at DESC LIMIT 5;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT COUNT(*) as total_tareas FROM pending_tasks;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT pt.id, pt.admission_id, pt.task, pt.created_by, pt.created_at, p.name FROM pending_tasks pt JOIN admissions a ON pt.admission_id = a.id JOIN patients p ON a.patient_id = p.id ORDER BY pt.created_at DESC LIMIT 5;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT o.id, o.observation, o.created_at FROM observations o JOIN admissions a ON o.admission_id = a.id WHERE a.patient_id = 90 ORDER BY o.created_at DESC;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT pt.id, pt.task, pt.created_at FROM pending_tasks pt JOIN admissions a ON pt.admission_id = a.id WHERE a.patient_id = 90 ORDER BY pt.created_at DESC;\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT COUNT(*) as total_pacientes, COUNT(CASE WHEN a.status = ''active'' THEN 1 END) as con_admision_activa, COUNT(CASE WHEN a.status IS NULL OR a.status != ''active'' THEN 1 END) as sin_admision_activa FROM patients p LEFT JOIN admissions a ON p.id = a.patient_id AND a.status = ''active'';\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT COUNT(*) as total_pacientes, COUNT(CASE WHEN a.status = ''active'' THEN 1 END) as con_admision_activa, COUNT(CASE WHEN a.status IS NULL THEN 1 END) as sin_admision_activa FROM patients p LEFT JOIN admissions a ON p.id = a.patient_id AND a.status = ''active'';\")",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT id, observation, created_at FROM observations WHERE admission_id IN (SELECT id FROM admissions WHERE patient_id = 90) ORDER BY created_at DESC LIMIT 5;\")",
+      "Bash(./scripts/backup_automatico.sh)",
+      "Bash(bash scripts/backup_automatico.sh)",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT pt.id, pt.task, pt.created_at FROM pending_tasks pt JOIN admissions a ON pt.admission_id = a.id WHERE a.patient_id = 210 ORDER BY pt.created_at DESC LIMIT 5;\")",
+      "Bash(pm2 list)",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT count(*) as conexiones_activas FROM pg_stat_activity WHERE datname = ''intraneuro_db'';\")",
+      "Bash(top -bn1)",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql -U intraneuro_user -h localhost -d intraneuro_db -c \"SELECT pg_size_pretty(pg_database_size(''intraneuro_db'')) as tamaño_db;\")",
+      "Bash(pm2 logs:*)",
+      "Bash(PGPASSWORD=IntraNeuro2025 psql:*)",
+      "Bash(crontab:*)",
+      "Bash(systemctl status:*)",
+      "Bash(bash:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(TIMESTAMP=\"20251023_020149\")",
+      "Bash(BACKUP_DIR=\"/tmp/intraneuro_stable_$TIMESTAMP\")",
+      "Bash(echo:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

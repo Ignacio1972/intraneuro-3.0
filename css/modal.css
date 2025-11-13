@@ -1,0 +1,759 @@
+/* Modal Styles - INTRANEURO */
+
+/* Base Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+}
+
+/* Close Button */
+.close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+    z-index: 9999;
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+/* Login Modal */
+.login-content {
+    width: 400px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.login-container {
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.login-logo {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
+}
+
+.login-container h2 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+#loginForm .form-group {
+    margin-bottom: 1rem;
+}
+
+#loginForm input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+#loginForm .btn-primary {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+/* Admission Modal */
+#admissionModal .modal-content {
+    width: 700px;
+    padding: 2rem;
+}
+
+#admissionModal h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+/* Patient Modal */
+.patient-modal-content {
+    width: 95%;
+    max-width: min(1000px, 100vw);
+    padding: 0;
+}
+
+.patient-modal-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 400px;
+}
+
+.modal-section {
+    padding: 2rem;
+}
+
+.modal-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.admission-section {
+    border-right: 1px solid var(--border-color);
+}
+
+.discharge-section {
+    background-color: var(--background);
+}
+
+/* Patient Data Display */
+.patient-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.patient-info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+/* Discharge Form in Modal */
+.discharge-form {
+    margin-top: 1rem;
+    color: var(--text-primary);
+}
+
+.discharge-form h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.discharge-form label {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.discharge-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.ranking-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.star {
+    font-size: 1.5rem;
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.star:hover,
+.star.active {
+    color: var(--warning-color);
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 2rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--background);
+}
+
+.observations-section {
+    margin-top: 1.5rem;
+}
+
+.observations-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.observations-section textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: vertical;
+}
+
+/* Timeline */
+#patientTimeline {
+    margin-bottom: 2rem;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0.5rem;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+.timeline-event {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .patient-modal-split {
+        grid-template-columns: 1fr;
+    }
+    
+    .admission-section {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+
+@media (max-width: 768px) {
+    .modal {
+        padding: 0;
+        overflow-x: hidden;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        margin: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border-radius: 0;
+        box-sizing: border-box;
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Botón close fijo para mobile */
+    .close {
+        position: fixed !important;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: #333;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        z-index: 10000;
+    }
+    
+    .close:hover {
+        background: rgba(255, 255, 255, 1);
+        color: #000;
+        transform: scale(1.05);
+    }
+    
+    .patient-modal-content {
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        margin: 0;
+        padding: 0;
+        padding-top: 70px; /* Espacio para el botón compartir circular */
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    
+    .patient-modal-split {
+        display: block;
+        overflow-x: hidden;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .modal-section {
+        padding: 1.5rem !important;
+        padding-right: 1.5rem !important; /* Asegurar padding derecho completo */
+        overflow-x: hidden;
+        word-wrap: break-word;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Arreglar título cortado en móviles */
+    .modal-section h2 {
+        margin-top: 0.5rem !important;
+        padding-top: 0.5rem !important;
+        line-height: 1.4 !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Estilos del botón compartir se manejan dinámicamente en JS */
+    
+    .modal-section * {
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+    }
+    
+    .admission-section {
+        border-right: none !important;
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 1rem;
+        padding-top: 0.5rem !important; /* Evitar que el título se corte */
+    }
+    
+    .discharge-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin: 0.5rem;
+    }
+    
+    .modal-section h2 {
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.75rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .patient-info-row {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        padding: 1rem 0.75rem;
+        margin: 0;
+        overflow-x: hidden;
+        word-wrap: break-word;
+        box-sizing: border-box;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.3rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .info-value {
+        display: block;
+        font-size: 0.95rem;
+        margin: 0;
+        padding: 0.2rem 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        width: 100%;
+        white-space: normal;
+        line-height: 1.4;
+        color: var(--text-primary);
+    }
+    
+    /* Textareas específicas que causan overflow */
+    #patientObservations,
+    #patientPendingTasks,
+    textarea {
+        width: calc(100% - 1rem) !important;
+        max-width: calc(100% - 1rem) !important;
+        min-width: 0 !important;
+        padding: 0.75rem !important;
+        margin: 0.5rem !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+        resize: vertical !important;
+        font-size: 14px !important;
+        overflow-x: hidden !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    .login-content {
+        width: 90%;
+        max-width: 400px;
+    }
+    
+    /* Botón de guardar observaciones/tareas en móvil */
+    .btn.btn-primary {
+        width: 100% !important;
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        margin-top: 1rem;
+        border-radius: 8px;
+    }
+    
+    /* Mejorar inputs y selects en móviles */
+    .discharge-form input,
+    .discharge-form select,
+    .discharge-form textarea {
+        width: 100% !important;
+        padding: 0.75rem !important;
+        font-size: 16px !important; /* Previene zoom en iOS */
+        border-radius: 6px !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Toggle de alta programada */
+    .form-group[style*="background: #f0f8ff"] {
+        margin: 0.5rem !important;
+        border-radius: 12px !important;
+    }
+}
+/* Modal de admisión más grande */
+.admission-modal .modal-content {
+    max-width: 800px;
+    width: 90%;
+}
+
+/* Hacer que diagnóstico tenga más protagonismo */
+#diagnosis {
+    font-size: 16px;
+    padding: 12px;
+}
+
+#diagnosisDetails {
+    font-size: 15px;
+    padding: 10px;
+    min-height: 80px;
+}
+
+/* Contenedor de observaciones y pendientes */
+.observations-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 1.5rem;
+}
+
+.observations-column {
+    flex: 1;
+}
+
+.observations-column h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.observations-column textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+/* Responsive: columnas apiladas en pantallas pequeñas */
+@media (max-width: 768px) {
+    .observations-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+/* Estilos para Escala de Rankin */
+.rankin-selector {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    align-items: center;
+}
+
+.rankin-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.circle {
+    font-size: 1.5rem;
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.3s ease;
+    user-select: none;
+}
+
+.circle:hover,
+.circle.active {
+    color: var(--primary-color);
+}
+
+.rankin-number {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Mejorar textarea de detalles adicionales */
+#dischargeDetails {
+    min-height: 100px;
+    resize: vertical;
+}
+
+#dischargePendingTasks {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Espaciado mejorado para autorización */
+.discharge-form .form-group:last-of-type {
+    margin-bottom: 1.5rem;
+}
+
+/* Modal de paciente - definición removida para evitar conflictos */
+
+/* Arreglar alineación de datos de paciente */
+.patient-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.patient-info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    flex: 0 0 auto;
+    min-width: 120px;
+    text-align: left;
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    flex: 1;
+    text-align: right;
+    word-wrap: break-word;
+}
+
+/* Para las filas en grid, mantener la alineación */
+.grid-info-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.grid-info-row .patient-info-row {
+    margin: 0;
+    padding: 0.5rem 0;
+}
+
+/* Responsive para modal más ancho */
+@media (max-width: 1300px) {
+    .patient-modal-content {
+        width: 95%;
+        max-width: 1200px;
+    }
+}
+
+/* Switch Toggle Styles - Hermoso diseño original */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Botón compartir mejorado */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Toggle Alta Programada */
+.scheduled-discharge-toggle {
+    margin-bottom: 20px;
+}
+
+.btn-scheduled {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-scheduled.inactive {
+    background-color: #f8f9fa;
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.btn-scheduled.inactive:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-scheduled.active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.btn-scheduled.active:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+}

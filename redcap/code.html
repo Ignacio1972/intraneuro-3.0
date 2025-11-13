@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Registro de ACV Isquémico</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1193d4",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<header class="sticky top-0 z-20 flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 bg-white dark:bg-background-dark px-6 py-3 font-display">
+<div class="flex items-center gap-4 text-gray-800 dark:text-white">
+<span class="material-symbols-outlined text-primary text-3xl">neurology</span>
+<h1 class="text-xl font-bold leading-tight tracking-[-0.015em]">Registro de ACV Isquémico</h1>
+</div>
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white">
+<span class="material-symbols-outlined">person</span>
+</button>
+</header>
+<div class="flex flex-1">
+<aside class="sticky top-[69px] h-[calc(100vh-69px)] w-64 bg-white dark:bg-background-dark border-r border-gray-200 dark:border-gray-700 p-4 shrink-0">
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20" href="#identificacion">
+<span class="material-symbols-outlined text-primary">person</span>
+<p class="text-sm font-medium text-primary">Identificación del Paciente</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#evento">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">emergency</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Datos del Evento ACVi</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#antecedentes">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">history</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Antecedentes y Riesgo</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#evaluacion">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">clinical_notes</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Evaluación Clínica Inicial</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#imagen">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">radiology</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Estudios de Imagen</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#tratamiento">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">pill</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Tratamiento</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#evolucion">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">trending_up</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Evolución y Seguimiento</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#notas">
+<span class="material-symbols-outlined text-gray-700 dark:text-gray-300">note_add</span>
+<p class="text-sm font-medium text-gray-800 dark:text-gray-200">Notas Adicionales</p>
+</a>
+</div>
+</div>
+</aside>
+<main class="flex-1 p-8">
+<div class="max-w-4xl mx-auto space-y-8">
+<!-- Identificación del Paciente -->
+<section class="bg-white dark:bg-background-dark p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" id="identificacion">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Identificación del Paciente</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">Nombre completo*</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal" placeholder="Ej. Juan Pérez" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">ID de historia clínica*</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal" placeholder="Ej. 12345678" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">Fecha de nacimiento*</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal" type="date"/>
+</label>
+<div class="grid grid-cols-2 gap-4">
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">Edad*</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal" placeholder="Años" type="number" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">Género*</p>
+<select class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal">
+<option>Seleccionar</option>
+<option>Masculino</option>
+<option>Femenino</option>
+<option>Otro</option>
+</select>
+</label>
+</div>
+</div>
+</section>
+<!-- Datos del Evento ACVi -->
+<section class="bg-white dark:bg-background-dark p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" id="evento">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Datos del Evento ACVi</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">Fecha y hora de inicio de síntomas*</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal" type="datetime-local"/>
+</label>
+<label class="flex flex-col">
+<p class="text-base font-medium text-gray-800 dark:text-gray-200 pb-2">Fecha y hora de llegada al hospital*</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-12 px-4 text-base font-normal" type="datetime-local"/>
+</label>
+</div>
+</section>
+<!-- Antecedentes y Factores de Riesgo -->
+<section class="bg-white dark:bg-background-dark p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" id="antecedentes">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Antecedentes y Factores de Riesgo</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+<label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-primary/10">
+<input class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary/50 border-gray-400" type="checkbox"/>
+<span class="text-gray-800 dark:text-gray-200 font-medium">Hipertensión</span>
+</label>
+<label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-primary/10">
+<input class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary/50 border-gray-400" type="checkbox"/>
+<span class="text-gray-800 dark:text-gray-200 font-medium">Diabetes Mellitus</span>
+</label>
+<label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-primary/10">
+<input class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary/50 border-gray-400" type="checkbox"/>
+<span class="text-gray-800 dark:text-gray-200 font-medium">Tabaquismo</span>
+</label>
+<label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-primary/10">
+<input class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary/50 border-gray-400" type="checkbox"/>
+<span class="text-gray-800 dark:text-gray-200 font-medium">Fibrilación Auricular</span>
+</label>
+<label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-primary/10">
+<input class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary/50 border-gray-400" type="checkbox"/>
+<span class="text-gray-800 dark:text-gray-200 font-medium">Dislipidemia</span>
+</label>
+<label class="flex items-center space-x-3 p-3 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-primary/10">
+<input class="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary/50 border-gray-400" type="checkbox"/>
+<span class="text-gray-800 dark:text-gray-200 font-medium">ACV Previo</span>
+</label>
+</div>
+</section>
+<!-- Notas Adicionales -->
+<section class="bg-white dark:bg-background-dark p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" id="notas">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Notas Adicionales</h2>
+<textarea class="form-textarea w-full min-h-[120px] rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-4 text-base font-normal" placeholder="Añadir observaciones relevantes..."></textarea>
+</section>
+<!-- Botón de Guardar -->
+<div class="flex justify-end pt-4">
+<button class="flex items-center justify-center gap-2 rounded-lg bg-primary h-12 px-6 text-white text-base font-bold leading-normal tracking-wide shadow-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50 dark:focus:ring-offset-background-dark">
+<span class="material-symbols-outlined">save</span>
+                            Guardar Registro
+                        </button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

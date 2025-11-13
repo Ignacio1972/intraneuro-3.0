@@ -1,0 +1,32 @@
+# Archivos de entorno
+.env
+*.env
+
+# Node modules
+node_modules/
+backend/node_modules/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Backups
+backups/
+*.backup
+*.sql
+
+# Temporales
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PM2
+.pm2/

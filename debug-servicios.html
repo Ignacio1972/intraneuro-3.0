@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Servicios - INTRANEURO</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .section {
+            background: #2d2d2d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        .success { border-left-color: #4ec9b0; }
+        .error { border-left-color: #f48771; }
+        .warning { border-left-color: #dcdcaa; }
+        h2 { margin-top: 0; color: #4ec9b0; }
+        pre {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover { background: #005a9e; }
+        .good { color: #4ec9b0; }
+        .bad { color: #f48771; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico: Filtro de Servicios</h1>
+    <button onclick="runDiagnostics()">▶️ Ejecutar Diagnóstico</button>
+    <button onclick="location.href='/'">🏠 Volver</button>
+
+    <div id="results"></div>
+
+    <script>
+        async function runDiagnostics() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="section"><h2>⏳ Ejecutando diagnóstico...</h2></div>';
+
+            let html = '';
+
+            // 1. Verificar módulo ServicesModule
+            html += '<div class="section ' + (typeof ServicesModule !== 'undefined' ? 'success' : 'error') + '">';
+            html += '<h2>1. Módulo ServicesModule</h2>';
+            if (typeof ServicesModule !== 'undefined') {
+                html += '<p class="good">✅ ServicesModule está cargado</p>';
+                html += '<pre>' + JSON.stringify(Object.keys(ServicesModule), null, 2) + '</pre>';
+            } else {
+                html += '<p class="bad">❌ ServicesModule NO está cargado</p>';
+                html += '<p>El archivo js/modules/services.js no se cargó correctamente</p>';
+            }
+            html += '</div>';
+
+            // 2. Verificar filtro en el DOM
+            const serviceFilter = document.getElementById('serviceFilter');
+            html += '<div class="section ' + (serviceFilter ? 'success' : 'error') + '">';
+            html += '<h2>2. Filtro de Servicio en el DOM</h2>';
+            if (serviceFilter) {
+                html += '<p class="good">✅ El filtro de servicio existe en el DOM</p>';
+                html += '<pre>ID: ' + serviceFilter.id + '\n';
+                html += 'Opciones: ' + serviceFilter.options.length + '\n';
+                html += 'HTML: ' + serviceFilter.outerHTML.substring(0, 200) + '...</pre>';
+            } else {
+                html += '<p class="bad">❌ El filtro de servicio NO existe en el DOM</p>';
+
+                // Verificar si doctorFilter existe
+                const doctorFilter = document.getElementById('doctorFilter');
+                if (doctorFilter) {
+                    html += '<p class="good">✅ doctorFilter existe (se puede insertar el filtro junto a él)</p>';
+                } else {
+                    html += '<p class="bad">❌ doctorFilter NO existe (no hay dónde insertar el filtro)</p>';
+                }
+            }
+            html += '</div>';
+
+            // 3. Verificar tarjetas de pacientes
+            const patientCards = document.querySelectorAll('.patient-card');
+            html += '<div class="section ' + (patientCards.length > 0 ? 'success' : 'warning') + '">';
+            html += '<h2>3. Tarjetas de Pacientes</h2>';
+            html += '<p>Total de tarjetas: <strong>' + patientCards.length + '</strong></p>';
+
+            if (patientCards.length > 0) {
+                let cardsWithService = 0;
+                let cardsWithDataAttributes = 0;
+                let serviceSummary = {};
+
+                patientCards.forEach(card => {
+                    const service = card.dataset.service;
+                    const unit = card.dataset.unit;
+
+                    if (card.hasAttribute('data-service')) cardsWithDataAttributes++;
+                    if (service) {
+                        cardsWithService++;
+                        serviceSummary[service] = (serviceSummary[service] || 0) + 1;
+                    }
+                });
+
+                html += '<p>Tarjetas con data-service attribute: <strong class="' + (cardsWithDataAttributes === patientCards.length ? 'good' : 'bad') + '">' + cardsWithDataAttributes + '</strong></p>';
+                html += '<p>Tarjetas con servicio asignado: <strong>' + cardsWithService + '</strong></p>';
+
+                if (Object.keys(serviceSummary).length > 0) {
+                    html += '<p>Distribución por servicio:</p><pre>' + JSON.stringify(serviceSummary, null, 2) + '</pre>';
+                } else {
+                    html += '<p class="warning">⚠️ Ninguna tarjeta tiene servicio asignado</p>';
+                }
+
+                // Mostrar ejemplo de la primera tarjeta
+                const firstCard = patientCards[0];
+                html += '<p>Ejemplo de primera tarjeta:</p>';
+                html += '<pre>data-service: "' + (firstCard.dataset.service || '') + '"\n';
+                html += 'data-unit: "' + (firstCard.dataset.unit || '') + '"\n';
+                html += 'HTML snippet: ' + firstCard.outerHTML.substring(0, 300) + '...</pre>';
+            } else {
+                html += '<p class="bad">❌ No hay tarjetas de pacientes en el DOM</p>';
+            }
+            html += '</div>';
+
+            // 4. Verificar renderPatientCard
+            html += '<div class="section ' + (typeof renderPatientCard !== 'undefined' ? 'success' : 'error') + '">';
+            html += '<h2>4. Función renderPatientCard</h2>';
+            if (typeof renderPatientCard !== 'undefined') {
+                html += '<p class="good">✅ renderPatientCard está definida</p>';
+
+                // Probar con datos dummy
+                const testPatient = {
+                    id: 999,
+                    name: 'Test Patient',
+                    age: 30,
+                    daysInHospital: 5,
+                    diagnosis: 'TEST',
+                    diagnosisText: 'Test',
+                    bed: 'Test',
+                    service: 'UCI',
+                    unit: '302'
+                };
+
+                try {
+                    const testHTML = renderPatientCard(testPatient);
+                    const hasDataService = testHTML.includes('data-service="UCI"');
+                    const hasBadge = testHTML.includes('service-badge');
+
+                    html += '<p>Test con paciente UCI:</p>';
+                    html += '<p class="' + (hasDataService ? 'good' : 'bad') + '">data-service attribute: ' + (hasDataService ? '✅' : '❌') + '</p>';
+                    html += '<p class="' + (hasBadge ? 'good' : 'bad') + '">Badge de servicio: ' + (hasBadge ? '✅' : '❌') + '</p>';
+                    html += '<details><summary>Ver HTML generado</summary><pre>' + testHTML.substring(0, 500) + '...</pre></details>';
+                } catch (e) {
+                    html += '<p class="bad">❌ Error ejecutando renderPatientCard: ' + e.message + '</p>';
+                }
+            } else {
+                html += '<p class="bad">❌ renderPatientCard NO está definida</p>';
+            }
+            html += '</div>';
+
+            // 5. Verificar errores en consola
+            html += '<div class="section warning">';
+            html += '<h2>5. Consola del Navegador</h2>';
+            html += '<p>Abre la consola (F12) y busca:</p>';
+            html += '<ul>';
+            html += '<li>❌ Errores en rojo</li>';
+            html += '<li>✅ "Módulo de Servicios cargado"</li>';
+            html += '<li>✅ "Integración de Servicios activa"</li>';
+            html += '</ul>';
+            html += '</div>';
+
+            // 6. Scripts cargados
+            const scripts = Array.from(document.querySelectorAll('script[src]'));
+            const relevantScripts = scripts.filter(s =>
+                s.src.includes('services') ||
+                s.src.includes('pacientes-ui')
+            );
+
+            html += '<div class="section">';
+            html += '<h2>6. Scripts Cargados</h2>';
+            if (relevantScripts.length > 0) {
+                html += '<pre>';
+                relevantScripts.forEach(s => {
+                    const url = new URL(s.src);
+                    html += url.pathname + '\n';
+                });
+                html += '</pre>';
+            } else {
+                html += '<p class="warning">⚠️ No se encontraron scripts de servicios</p>';
+            }
+            html += '</div>';
+
+            results.innerHTML = html;
+        }
+
+        // Auto-ejecutar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostics, 500);
+        });
+    </script>
+</body>
+</html>

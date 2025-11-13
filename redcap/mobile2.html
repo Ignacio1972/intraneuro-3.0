@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Registro de Paciente</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style type="text/tailwindcss">
+    :root {
+      --background-light: #F9FAFB;
+      --background-dark: #111827;
+      --text-light: #1F2937;
+      --text-dark: #F9FAFB;
+      --primary: #60A5FA;
+      --primary-dark: #3B82F6;
+      --card-light: #FFFFFF;
+      --card-dark: #1F2937;
+      --border-light: #E5E7EB;
+      --border-dark: #374151;
+      --input-bg-light: #F3F4F6;
+      --input-bg-dark: #374151;
+      --placeholder-light: #9CA3AF;
+      --placeholder-dark: #6B7280;
+    }
+  </style>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "var(--primary)",
+            "primary-dark": "var(--primary-dark)",
+            "background-light": "var(--background-light)",
+            "background-dark": "var(--background-dark)",
+            "text-light": "var(--text-light)",
+            "text-dark": "var(--text-dark)",
+            "card-light": "var(--card-light)",
+            "card-dark": "var(--card-dark)",
+            "border-light": "var(--border-light)",
+            "border-dark": "var(--border-dark)",
+            "input-bg-light": "var(--input-bg-light)",
+            "input-bg-dark": "var(--input-bg-dark)",
+            "placeholder-light": "var(--placeholder-light)",
+            "placeholder-dark": "var(--placeholder-dark)",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "lg": "0.75rem",
+            "xl": "1rem",
+            "2xl": "1.5rem"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<header class="sticky top-0 z-10 flex items-center bg-background-light/80 dark:bg-background-dark/80 p-4 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
+<button class="text-text-light dark:text-text-dark flex size-10 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-text-light dark:text-text-dark text-lg font-semibold leading-tight flex-1 text-center">Datos del Paciente</h1>
+<div class="size-10 shrink-0"></div>
+</header>
+<main class="flex-1 p-4 sm:p-6 space-y-6">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm p-5">
+<h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4">Información Personal</h2>
+<div class="space-y-4">
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="patient-id">Identificador del Paciente</label>
+<input class="form-input mt-1 block w-full rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 placeholder:text-placeholder-light dark:placeholder-placeholder-dark px-4 text-base" id="patient-id" placeholder="Ingrese identificador" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="age">Edad</label>
+<input class="form-input mt-1 block w-full rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 placeholder:text-placeholder-light dark:placeholder-placeholder-dark px-4 text-base" id="age" placeholder="Edad" type="number"/>
+</div>
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80">Sexo</label>
+<div class="relative mt-1">
+<select class="form-select w-full appearance-none rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 px-4 text-base">
+<option>Masculino</option>
+<option>Femenino</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm p-5">
+<h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4">Registro de Tiempos</h2>
+<div class="space-y-4">
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="symptom-start">Inicio de Síntomas</label>
+<input class="form-input mt-1 block w-full rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 placeholder:text-placeholder-light dark:placeholder-placeholder-dark px-4 text-base" id="symptom-start" type="datetime-local"/>
+</div>
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="hospital-arrival">Llegada al Hospital</label>
+<input class="form-input mt-1 block w-full rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 placeholder:text-placeholder-light dark:placeholder-placeholder-dark px-4 text-base" id="hospital-arrival" type="datetime-local"/>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm p-5">
+<h2 class="text-text-light dark:text-text-dark text-xl font-bold mb-4">Información Adicional</h2>
+<div class="space-y-4">
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="residence">Comuna/Región de Residencia</label>
+<div class="relative mt-1">
+<select class="form-select block w-full appearance-none rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 px-4 text-base" id="residence">
+<option>Seleccionar comuna o región</option>
+<option>Santiago</option>
+<option>Valparaíso</option>
+<option>Concepción</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="education-level">Nivel Educacional</label>
+<div class="relative mt-1">
+<select class="form-select block w-full appearance-none rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 px-4 text-base" id="education-level">
+<option>Seleccionar nivel</option>
+<option>Básica</option>
+<option>Media</option>
+<option>Técnica</option>
+<option>Universitaria</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark/80" for="health-insurance">Previsión de Salud</label>
+<div class="relative mt-1">
+<select class="form-select block w-full appearance-none rounded-lg border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark text-text-light dark:text-text-dark focus:border-primary focus:ring-primary h-12 px-4 text-base" id="health-insurance">
+<option>Seleccionar previsión</option>
+<option>FONASA</option>
+<option>Isapre</option>
+<option>Particular</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-6 pb-4">
+<button class="flex w-full items-center justify-center rounded-xl bg-primary-dark h-14 text-white text-lg font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-colors">Guardar Datos</button>
+</div>
+</main>
+</div>
+
+</body></html>

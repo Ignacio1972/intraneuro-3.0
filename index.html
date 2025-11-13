@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INTRANEURO - Sistema de Gestión Clínica</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema de gestión hospitalaria para clínica psiquiátrica">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="INTRANEURO">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+
+<!-- CSS Files (en el <head>) -->
+<link rel="stylesheet" href="css/main.css?v=23">
+<link rel="stylesheet" href="css/pacientes.css?v=23">
+<link rel="stylesheet" href="css/modal.css?v=23">
+<link rel="stylesheet" href="css/pacientes-print.css?v=23">
+<link rel="stylesheet" href="css/chat-notes.css?v=5">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Modal (initially shown) -->
+    <div id="loginModal" class="modal active">
+        <div class="modal-content login-content">
+            <div class="login-container">
+                <img src="assets/img/logo.png" alt="INTRANEURO" class="login-logo">
+                <h2>Sistema de Gestión Clínica</h2>
+                <form id="loginForm">
+                    <div class="form-group" style="display: none;">
+                        <input type="text" id="username" value="sistema" placeholder="Usuario">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" placeholder="Clave de Acceso" required autofocus>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application (hidden until login) -->
+    <div id="mainApp" style="display: none;">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="assets/img/logo.png" alt="INTRANEURO" class="header-logo">
+                    <span class="clinic-name">INTRANEURO</span>
+                </div>
+                <div class="user-section">
+                    <span id="currentUser">Acceso autorizado</span>
+                    <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard -->
+            <section class="dashboard">
+                <!-- Primera fila: Acción principal y vistas -->
+                <div class="dashboard-row">
+                    <button id="newAdmissionBtn" class="btn btn-primary btn-admission">
+                        <span class="icon">+</span> NUEVO INGRESO
+                    </button>
+                    
+                    <div class="separator"></div>
+                    
+                    <div class="dashboard-group">
+                        <button class="view-btn" data-view="cards">📇 Tarjetas</button>
+                        <button class="view-btn active" data-view="list">📋 Lista</button>
+                        <button class="view-btn" onclick="window.location.href='archivos.html'">📁 Archivo</button>
+                    </div>
+                </div>
+                
+                <!-- Segunda fila: Herramientas -->
+                <div class="dashboard-row">
+                    <!-- Filtro por médico tratante -->
+                    <select id="doctorFilter" onchange="filterByDoctor()" class="btn-tool filter-select">
+                        <option value="">🔍 Todos los médicos</option>
+                    </select>
+                    
+                    <!-- Dropdown de exportación con selector de mes -->
+                    <div class="export-controls" style="display: inline-block; position: relative;">
+                        <button onclick="toggleExportMenu()" class="btn-tool">
+                            📊 Excel ▼
+                        </button>
+                    <div id="exportMenu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; min-width: 200px;">
+                        <div style="padding: 10px;">
+                            <button onclick="exportActivePatientsToExcel()" class="btn btn-secondary" style="display: block; width: 100%; margin-bottom: 10px; text-align: left;">
+                                📊 Todos los activos
+                            </button>
+                            <hr style="margin: 10px 0;">
+                            <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Por mes específico:</label>
+                            <select id="exportMonth" style="width: 100%; padding: 5px; margin-bottom: 5px;">
+                                <option value="">-- Seleccionar mes --</option>
+                            </select>
+                            <button onclick="exportByMonth()" class="btn btn-success" style="display: block; width: 100%;">
+                                Exportar mes seleccionado
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <!-- Botón seleccionar todo -->
+                    <button onclick="selectAll()" class="btn-tool">
+                        <input type="checkbox" id="selectAllCheckbox" style="margin-right: 5px;">
+                        ☑️ Seleccionar todos
+                    </button>
+                    
+                    <!-- Botón imprimir -->
+                    <button onclick="printActivePatients()" class="btn-icon" title="Imprimir">
+                        🖨️
+                    </button>
+                </div>
+                
+                <script>
+                    // Poblar dropdown con últimos 12 meses
+                    function initExportDropdown() {
+                        const select = document.getElementById('exportMonth');
+                        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                        const today = new Date();
+                        
+                        for (let i = 0; i < 12; i++) {
+                            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                            const option = document.createElement('option');
+                            option.value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            option.textContent = `${months[date.getMonth()]} ${date.getFullYear()}`;
+                            select.appendChild(option);
+                        }
+                    }
+                    
+                    function toggleExportMenu() {
+                        const menu = document.getElementById('exportMenu');
+                        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+                    }
+                    
+                    // Cerrar menú al hacer clic fuera
+                    document.addEventListener('click', function(e) {
+                        const exportControls = document.querySelector('.export-controls');
+                        if (!exportControls.contains(e.target)) {
+                            document.getElementById('exportMenu').style.display = 'none';
+                        }
+                    });
+                    
+                    // Inicializar al cargar
+                    document.addEventListener('DOMContentLoaded', initExportDropdown);
+                </script>
+<!-- Botones de acción en masa (ocultos hasta seleccionar) -->
+<div id="bulkActions" style="display: none;">
+    <button onclick="exportSelectedToExcel()" class="btn btn-info" id="exportSelectedBtn">
+        📊 Exportar seleccionados
+    </button>
+    <button onclick="deleteSelectedPatients()" class="btn btn-danger" id="deleteSelectedBtn">
+        🗑️ Eliminar seleccionados (<span id="selectedCount">0</span>)
+    </button>
+</div>
+
+            </section>
+
+
+            <!-- Patients Container -->
+            <section id="patientsContainer" class="patients-grid">
+                <!-- Patient cards will be dynamically inserted here -->
+            </section>
+
+            <!-- Archive Link -->
+            <div class="archive-link">
+            <a href="archivos.html">📁 Ver Archivo de Pacientes Egresados</a>
+            </div>
+        </main>
+    </div>
+
+    <!-- Patient Modal -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content patient-modal-content">
+            <span class="close">&times;</span>
+            <div class="patient-modal-split">
+                <!-- Admission Data -->
+                <div class="modal-section admission-section">
+                    <h2>DATOS DE INGRESO</h2>
+                    <div id="admissionData"></div>
+                </div>
+                <!-- Discharge Data -->
+                <div class="modal-section discharge-section">
+                    <h2>DATOS DE EGRESO</h2>
+                    <div id="dischargeData"></div>
+                </div>
+            </div>
+        
+        </div>
+        </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close" onclick="closeModal('shareModal')">&times;</span>
+            <h2>Compartir Ficha del Paciente</h2>
+            <div id="shareModalContent"></div>
+        </div>
+    </div>
+
+    <!-- New Admission Modal -->
+<!-- New Admission Modal -->
+<div id="admissionModal" class="modal admission-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Nuevo Ingreso</h2>
+        <form id="admissionForm">
+            <div class="form-section">
+                <h3>📝 Datos Personales</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre y Apellido</label>
+                        <input type="text" id="patientName" required>
+                    </div>
+                </div>
+               
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>RUT (Opcional)</label>
+                        <input type="text" id="patientRut" placeholder="Opcional - Sin validación">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>📅 Ingreso</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Ingreso</label>
+                        <div class="date-input-group">
+                            <input type="date" id="admissionDate" required>
+                            <button type="button" class="btn-today" onclick="setToday('admissionDate')">HOY</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group diagnosis-group">
+                   
+                     <label>Diagnóstico de Ingreso</label>
+<input type="text" id="diagnosis" placeholder="Ingrese el diagnóstico..." required>
+                    </div>
+                   <!-- CAMPO ALERGIAS TEMPORALMENTE DESHABILITADO - 08/08/2025
+<div class="form-group">
+    <label>¿Presenta alergias?</label>
+    <div class="radio-group">
+        <label><input type="radio" name="allergies" value="no" checked> No</label>
+        <label><input type="radio" name="allergies" value="yes"> Sí</label>
+    </div>
+    <textarea id="allergyDetails" style="display: none;" placeholder="Especifique alergias..."></textarea>
+</div>
+-->
+                </div>
+
+                <!-- Campos ocultos para compatibilidad -->
+                <input type="hidden" id="patientAge" value="0">
+                <input type="hidden" id="patientPrevision" value="">
+                <input type="hidden" id="patientBed" value="">
+                <input type="hidden" id="diagnosisDetails" value="">
+                <input type="hidden" id="admittedBy" value="Sistema">
+                <input type="hidden" id="noRut" value="false">
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('admissionModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Ingreso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+     <script src="assets/libs/xlsx.full.min.js"></script>
+
+<!-- Core y utilidades primero -->
+<script src="js/api.js?v=21"></script>
+<script src="js/validaciones.js?v=25"></script>
+<script src="js/data-catalogos.js?v=21"></script>
+<!-- Módulos de UI -->
+<script src="js/pacientes-ui.js?v=46"></script>
+<!-- Módulos principales -->
+<script src="js/auth.js?v=25"></script>
+<script src="js/ingreso.js?v=22"></script>
+<!-- Main DEBE ir antes de pacientes-refactored para declarar variables globales -->
+<script src="js/main.js?v=27"></script>
+<!-- Módulos refactorizados de pacientes - DESPUÉS de main.js -->
+<script src="js/modules/pacientes/pacientes-api.js?v=34"></script>
+<script src="js/modules/pacientes/pacientes-edit.js?v=27"></script>
+<script src="js/modules/pacientes/pacientes-discharge.js?v=37"></script>
+<script src="js/pacientes-refactored.js?v=38"></script>
+<!-- Sistema SIMPLIFICADO de notas - Solo textareas -->
+<script src="js/simple-notes.js?v=3"></script>
+<!-- Archivo principal de pacientes - comentado para evitar conflictos con pacientes-refactored.js -->
+<!-- <script src="js/pacientes.js?v=40"></script> -->
+
+<!-- Módulo de Servicios -->
+<script src="js/modules/services.js?v=3"></script>
+<script src="js/services-integration.js"></script>
+
+<!-- PWA Service Worker -->
+<script src="js/sw-register.js"></script>
+
+<!-- Agregar antes del cierre de </body> en index.html -->
+<footer class="app-footer">
+    <small>
+        <strong>INTRANEURO</strong> v2.7.0 | 
+        © 2025 <span style="color: #828e9a; font-weight: 200;">Lobo-Media</span> | 
+        Sistema de Gestión Clínica | 
+        Licencia Propietaria
+    </small>
+</footer>
+</body>
+
+</html>
