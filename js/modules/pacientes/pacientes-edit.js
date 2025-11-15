@@ -163,73 +163,197 @@ async function editPatientBed(event, patientId) {
 // Editar previsión del paciente
 async function editPatientPrevision(event, patientId) {
     event.stopPropagation();
-    
-    const patient = patients.find(p => p.id === patientId);
-    if (!patient) return;
-    
-    const currentPrevision = patient.prevision || '';
-    
-    // Crear HTML para el prompt personalizado
-    const selectHTML = `
-Seleccione la previsión del paciente:
 
-Previsión actual: ${currentPrevision || 'No especificada'}
-
-Opciones:
-1 - Fonasa
-2 - Isapre Banmédica
-3 - Isapre Colmena
-4 - Isapre Consalud
-5 - Isapre Cruz Blanca
-6 - Isapre Nueva Masvida
-7 - Isapre Vida Tres
-8 - Isapre Esencial
-9 - Particular
-10 - Otro
-0 - Sin previsión
-
-Ingrese el número de la opción:`;
-    
-    const selection = prompt(selectHTML);
-    
-    if (selection !== null) {
-        let newPrevision = '';
-        switch(selection.trim()) {
-            case '1': newPrevision = 'Fonasa'; break;
-            case '2': newPrevision = 'Isapre Banmédica'; break;
-            case '3': newPrevision = 'Isapre Colmena'; break;
-            case '4': newPrevision = 'Isapre Consalud'; break;
-            case '5': newPrevision = 'Isapre Cruz Blanca'; break;
-            case '6': newPrevision = 'Isapre Nueva Masvida'; break;
-            case '7': newPrevision = 'Isapre Vida Tres'; break;
-            case '8': newPrevision = 'Isapre Esencial'; break;
-            case '9': newPrevision = 'Particular'; break;
-            case '10': newPrevision = 'Otro'; break;
-            case '0': newPrevision = ''; break;
-            default:
-                if (selection.trim() !== '') {
-                    showToast('Opción inválida. Use 0-10', 'error');
-                    return;
-                }
+    // Verificar que la variable global patients esté disponible
+    if (typeof patients === 'undefined' || !Array.isArray(patients)) {
+        console.error('Variable patients no disponible');
+        if (typeof showToast === 'function') {
+            showToast('Error: Datos no cargados correctamente', 'error');
+        } else {
+            alert('Error: Datos no cargados correctamente');
         }
-        
+        return;
+    }
+
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) {
+        console.error('Paciente no encontrado:', patientId);
+        if (typeof showToast === 'function') {
+            showToast('Error: Paciente no encontrado', 'error');
+        } else {
+            alert('Error: Paciente no encontrado');
+        }
+        return;
+    }
+
+    const currentPrevision = patient.prevision || '';
+
+    // Crear modal personalizado con dropdown
+    const modalId = 'editPrevisionModal';
+    let existingModal = document.getElementById(modalId);
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'modal active';
+    modal.style.zIndex = '10000';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px; padding: 2rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
+                Editar Previsión de Salud
+            </h3>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 14px;">
+                Previsión actual: <strong>${currentPrevision || 'No especificada'}</strong>
+            </p>
+            <div id="edit-prevision-container" style="margin-bottom: 1.5rem;">
+                <!-- El dropdown se insertará aquí -->
+            </div>
+            <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove()">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="savePrevisionBtn">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Inicializar dropdown en el contenedor
+    const container = document.getElementById('edit-prevision-container');
+    if (container) {
+        // Lista de previsiones en Chile (sincronizada con DropdownSystem)
+        const previsiones = [
+            'Fonasa A',
+            'Fonasa B',
+            'Fonasa C',
+            'Fonasa D',
+            'Isapre Banmédica',
+            'Isapre Consalud',
+            'Isapre Cruz Blanca',
+            'Isapre Colmena',
+            'Isapre Vida Tres',
+            'Isapre Nueva Masvida',
+            'Particular',
+            'Sin previsión'
+        ];
+
+        container.innerHTML = `
+            <label>Nueva Previsión</label>
+            <select id="edit-prevision-select" class="prevision-dropdown" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">-- Sin previsión --</option>
+                ${previsiones.map(p => `<option value="${p}" ${p === currentPrevision ? 'selected' : ''}>${p}</option>`).join('')}
+                <option value="otro">── Otra previsión ──</option>
+            </select>
+            <div id="edit-prevision-otro-container" style="display: none; margin-top: 10px;">
+                <input type="text"
+                       id="edit-prevision-otro"
+                       class="prevision-input-otro"
+                       placeholder="Escriba la previsión..."
+                       value="${!previsiones.includes(currentPrevision) && currentPrevision ? currentPrevision : ''}"
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+        `;
+
+        // Configurar eventos del dropdown
+        const select = document.getElementById('edit-prevision-select');
+        const otroContainer = document.getElementById('edit-prevision-otro-container');
+        const otroInput = document.getElementById('edit-prevision-otro');
+
+        // Si la previsión actual no está en la lista, seleccionar "otro"
+        if (currentPrevision && !previsiones.includes(currentPrevision)) {
+            select.value = 'otro';
+            otroContainer.style.display = 'block';
+        }
+
+        select.addEventListener('change', function() {
+            if (this.value === 'otro') {
+                otroContainer.style.display = 'block';
+                otroInput.required = true;
+                otroInput.focus();
+            } else {
+                otroContainer.style.display = 'none';
+                otroInput.required = false;
+            }
+        });
+    }
+
+    // Configurar botón de guardar
+    const saveBtn = document.getElementById('savePrevisionBtn');
+    saveBtn.onclick = async () => {
+        const select = document.getElementById('edit-prevision-select');
+        const otroInput = document.getElementById('edit-prevision-otro');
+
+        let newPrevision = '';
+        if (select.value === 'otro') {
+            newPrevision = otroInput.value.trim();
+        } else {
+            newPrevision = select.value;
+        }
+
+        // Permitir previsión vacía
+        console.log('[Edit Prevision] Enviando nueva previsión:', newPrevision);
+        console.log('[Edit Prevision] Patient ID:', patientId);
+
         try {
             const response = await apiRequest(`/patients/${patientId}/prevision`, {
                 method: 'PUT',
                 body: JSON.stringify({ prevision: newPrevision || null })
             });
-            
+
+            console.log('[Edit Prevision] Respuesta del servidor:', response);
+
             if (response.success) {
-                patient.prevision = newPrevision || null;
-                document.getElementById(`prevision-${patientId}`).textContent = newPrevision || 'No especificada';
-                renderPatients();
-                showToast('Previsión actualizada correctamente');
+                // Actualizar datos locales
+                patient.prevision = response.prevision !== undefined ? response.prevision : (newPrevision || null);
+                console.log('[Edit Prevision] Paciente actualizado localmente:', patient);
+
+                // Actualizar UI
+                const previsionElement = document.getElementById(`prevision-${patientId}`);
+                if (previsionElement) {
+                    previsionElement.textContent = patient.prevision || 'No especificada';
+                    console.log('[Edit Prevision] UI actualizada');
+                }
+
+                // Recargar datos desde el servidor para asegurar sincronización
+                if (typeof PacientesAPI !== 'undefined' && PacientesAPI.loadPatientsFromAPI) {
+                    console.log('[Edit Prevision] Recargando datos desde API con force reload...');
+                    await PacientesAPI.loadPatientsFromAPI(true); // Force reload para evitar cache
+                }
+
+                // Actualizar lista de pacientes si la función está disponible
+                if (typeof renderPatients === 'function') {
+                    renderPatients();
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast('Previsión actualizada correctamente');
+                }
+                modal.remove();
+            } else {
+                console.error('[Edit Prevision] Respuesta no exitosa:', response);
+                if (typeof showToast === 'function') {
+                    showToast(response.error || 'Error al actualizar previsión', 'error');
+                }
             }
         } catch (error) {
-            console.error('Error actualizando previsión:', error);
-            showToast('Error al actualizar previsión', 'error');
+            console.error('[Edit Prevision] Error actualizando previsión:', error);
+            if (typeof showToast === 'function') {
+                showToast('Error al actualizar previsión', 'error');
+            }
         }
-    }
+    };
+
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }
 
 // Editar fecha de ingreso
@@ -405,28 +529,160 @@ async function editBed(event, patientId) {
 // Función para editar diagnóstico desde la lista (diferente a editDiagnosis del modal)
 async function editPatientDiagnosis(event, patientId) {
     event.stopPropagation();
-    
+
+    // Verificar que la variable global patients esté disponible
+    if (typeof patients === 'undefined' || !Array.isArray(patients)) {
+        console.error('Variable patients no disponible');
+        if (typeof showToast === 'function') {
+            showToast('Error: Datos no cargados correctamente', 'error');
+        } else {
+            alert('Error: Datos no cargados correctamente');
+        }
+        return;
+    }
+
     const patient = patients.find(p => p.id === patientId);
-    if (!patient) return;
-    
-    const currentDiagnosis = patient.diagnosis || '';
-    const newDiagnosis = prompt(
-        `Editar diagnóstico del paciente:\n\n` +
-        `Diagnóstico actual: ${catalogos.getDiagnosisText(currentDiagnosis)}\n\n` +
-        `Ingrese el nuevo diagnóstico:`,
-        currentDiagnosis
-    );
-    
-    if (newDiagnosis !== null && newDiagnosis !== '') {
+    if (!patient) {
+        console.error('Paciente no encontrado:', patientId);
+        if (typeof showToast === 'function') {
+            showToast('Error: Paciente no encontrado', 'error');
+        } else {
+            alert('Error: Paciente no encontrado');
+        }
+        return;
+    }
+
+    const currentDiagnosis = patient.diagnosis || patient.diagnosisText || '';
+
+    // Crear modal personalizado con dropdown
+    const modalId = 'editDiagnosisModal';
+    let existingModal = document.getElementById(modalId);
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'modal active';
+    modal.style.zIndex = '10000';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px; padding: 2rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
+                Editar Diagnóstico
+            </h3>
+            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 14px;">
+                Diagnóstico actual: <strong>${currentDiagnosis || 'Sin diagnóstico'}</strong>
+            </p>
+            <div id="edit-diagnosis-container" style="margin-bottom: 1.5rem;">
+                <!-- El dropdown se insertará aquí -->
+            </div>
+            <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove()">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="saveDiagnosisBtn">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Inicializar dropdown en el contenedor
+    const container = document.getElementById('edit-diagnosis-container');
+    if (container) {
+        // Crear dropdown usando el mismo código que en diagnosis-dropdown.js
+        const diagnosticos = [
+            'ACV Isquémico',
+            'ACV Hemorrágico',
+            'Epilepsia',
+            'Crisis Convulsiva',
+            'Cefalea',
+            'Migraña',
+            'Demencia tipo Alzheimer',
+            'Demencia Vascular',
+            'Enfermedad de Parkinson',
+            'Esclerosis Múltiple',
+            'Neuropatía Periférica',
+            'Síndrome de Guillain-Barré',
+            'Meningitis',
+            'Encefalitis',
+            'Tumor Cerebral',
+            'Traumatismo Craneoencefálico',
+            'Hidrocefalia',
+            'Vértigo',
+            'Miastenia Gravis',
+            'Esclerosis Lateral Amiotrófica'
+        ];
+
+        container.innerHTML = `
+            <label>Nuevo Diagnóstico</label>
+            <select id="edit-diagnosis-select" class="diagnosis-dropdown" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">-- Seleccione un diagnóstico --</option>
+                ${diagnosticos.map(d => `<option value="${d}" ${d === currentDiagnosis ? 'selected' : ''}>${d}</option>`).join('')}
+                <option value="otro">── Otro diagnóstico ──</option>
+            </select>
+            <div id="edit-diagnosis-otro-container" style="display: none; margin-top: 10px;">
+                <input type="text"
+                       id="edit-diagnosis-otro"
+                       class="diagnosis-input-otro"
+                       placeholder="Escriba el diagnóstico..."
+                       value="${!diagnosticos.includes(currentDiagnosis) && currentDiagnosis ? currentDiagnosis : ''}"
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+        `;
+
+        // Configurar eventos del dropdown
+        const select = document.getElementById('edit-diagnosis-select');
+        const otroContainer = document.getElementById('edit-diagnosis-otro-container');
+        const otroInput = document.getElementById('edit-diagnosis-otro');
+
+        // Si el diagnóstico actual no está en la lista, seleccionar "otro"
+        if (currentDiagnosis && !diagnosticos.includes(currentDiagnosis)) {
+            select.value = 'otro';
+            otroContainer.style.display = 'block';
+        }
+
+        select.addEventListener('change', function() {
+            if (this.value === 'otro') {
+                otroContainer.style.display = 'block';
+                otroInput.required = true;
+                otroInput.focus();
+            } else {
+                otroContainer.style.display = 'none';
+                otroInput.required = false;
+            }
+        });
+    }
+
+    // Configurar botón de guardar
+    const saveBtn = document.getElementById('saveDiagnosisBtn');
+    saveBtn.onclick = async () => {
+        const select = document.getElementById('edit-diagnosis-select');
+        const otroInput = document.getElementById('edit-diagnosis-otro');
+
+        let newDiagnosis = '';
+        if (select.value === 'otro') {
+            newDiagnosis = otroInput.value.trim();
+        } else {
+            newDiagnosis = select.value;
+        }
+
+        if (!newDiagnosis) {
+            showToast('Por favor seleccione o escriba un diagnóstico', 'error');
+            return;
+        }
+
         try {
             const response = await apiRequest(`/patients/${patientId}/admission`, {
                 method: 'PUT',
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     diagnosis_code: newDiagnosis,
                     diagnosis_text: newDiagnosis
                 })
             });
-            
+
             if (response.success) {
                 patient.diagnosis = newDiagnosis;
                 patient.diagnosisText = newDiagnosis;
@@ -434,14 +690,31 @@ async function editPatientDiagnosis(event, patientId) {
                 if (diagElement) {
                     diagElement.textContent = newDiagnosis;
                 }
-                renderPatients();
-                showToast('Diagnóstico actualizado correctamente');
+
+                // Actualizar lista de pacientes si la función está disponible
+                if (typeof renderPatients === 'function') {
+                    renderPatients();
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast('Diagnóstico actualizado correctamente');
+                }
+                modal.remove();
             }
         } catch (error) {
             console.error('Error actualizando diagnóstico:', error);
-            showToast('Error al actualizar diagnóstico', 'error');
+            if (typeof showToast === 'function') {
+                showToast('Error al actualizar diagnóstico', 'error');
+            }
         }
-    }
+    };
+
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }
 
 // Hacer la función global para el onclick

@@ -42,12 +42,12 @@
         </select>
       </div>
 
-      <div class="form-group unit-group" style="margin-top: 12px;">
-        <label>📍 Unidad / Área (Opcional)</label>
+      <div class="form-group bed-group" style="margin-top: 12px;">
+        <label>🛏️ Número de Cama</label>
         <input
           type="text"
-          id="admissionUnit"
-          placeholder="Ej: Sala A, Cama 3, etc."
+          id="patientBedInput"
+          placeholder="Ej: 12A, 5B, etc."
           style="
             width: 100%;
             padding: 10px;
@@ -138,21 +138,17 @@
   // Obtener datos del formulario (para integración con ingreso.js)
   function getFormData() {
     const serviceSelect = document.getElementById('admissionService');
-    const unitInput = document.getElementById('admissionUnit');
 
     return {
-      service: serviceSelect ? serviceSelect.value || null : null,
-      unit: unitInput ? unitInput.value.trim() || null : null
+      service: serviceSelect ? serviceSelect.value || null : null
     };
   }
 
   // Limpiar formulario
   function clearForm() {
     const serviceSelect = document.getElementById('admissionService');
-    const unitInput = document.getElementById('admissionUnit');
 
     if (serviceSelect) serviceSelect.value = '';
-    if (unitInput) unitInput.value = '';
   }
 
   // Exponer API pública

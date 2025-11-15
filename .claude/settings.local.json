@@ -34,7 +34,9 @@
       "Bash(BACKUP_DIR=\"/tmp/intraneuro_stable_$TIMESTAMP\")",
       "Bash(echo:*)",
       "Bash(curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

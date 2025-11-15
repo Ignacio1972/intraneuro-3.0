@@ -25,6 +25,7 @@ router.post('/:id/admission/tasks', authMiddleware, patientsController.createTas
 router.put('/:id/admission', authMiddleware, patientsController.updateActiveAdmission);
 router.put('/:id/discharge', authMiddleware, patientsController.updateDischarge);
 router.put('/:id/bed', authMiddleware, patientsController.updateBed);
+router.put('/:id/service', authMiddleware, patientsController.updateService);
 router.put('/:id/prevision', authMiddleware, patientsController.updatePrevision);
 router.put('/:id/admittedBy', authMiddleware, patientsController.updateAdmittedBy);
 router.put('/:id/diagnosis-details', authMiddleware, patientsController.updateDiagnosisDetails);

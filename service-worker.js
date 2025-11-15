@@ -1,8 +1,9 @@
-// INTRANEURO - Service Worker v3.1
+// INTRANEURO - Service Worker v3.2
 // PWA con estrategia de cache para funcionalidad offline
+// v3.2: Corregido manejo de PUT/POST requests
 
-const CACHE_NAME = 'intraneuro-v3.1';
-const RUNTIME_CACHE = 'intraneuro-runtime-v3.1';
+const CACHE_NAME = 'intraneuro-v3.2';
+const RUNTIME_CACHE = 'intraneuro-runtime-v3.2';
 
 // Assets estáticos para cachear en instalación
 const STATIC_ASSETS = [
@@ -92,19 +93,21 @@ async function networkFirstStrategy(request) {
     // Intentar obtener de la red
     const networkResponse = await fetch(request);
 
-    // Si es exitoso, actualizar cache
-    if (networkResponse && networkResponse.status === 200) {
+    // Solo cachear requests GET exitosas
+    if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
       cache.put(request, networkResponse.clone());
     }
 
     return networkResponse;
   } catch (error) {
-    // Si falla la red, intentar cache
-    const cachedResponse = await cache.match(request);
+    // Si falla la red, intentar cache (solo para GET)
+    if (request.method === 'GET') {
+      const cachedResponse = await cache.match(request);
 
-    if (cachedResponse) {
-      console.log('[SW] Sirviendo desde cache (offline):', request.url);
-      return cachedResponse;
+      if (cachedResponse) {
+        console.log('[SW] Sirviendo desde cache (offline):', request.url);
+        return cachedResponse;
+      }
     }
 
     // Si no hay cache, retornar error

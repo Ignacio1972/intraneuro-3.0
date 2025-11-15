@@ -6,8 +6,8 @@ function renderPatientCard(patient) {
     const days = patient.daysInHospital;
     const diagnosisText = catalogos.getDiagnosisText(patient.diagnosis);
 
-    // Configuración de servicios (mismo que en services.js)
-    const SERVICES = {
+    // Usar configuración global de servicios
+    const SERVICES = window.HOSPITAL_SERVICES_CONFIG || {
         UCI: { label: 'UCI', color: '#dc2626', icon: '🏥' },
         UTI: { label: 'UTI', color: '#ea580c', icon: '⚕️' },
         MQ: { label: 'MQ', color: '#2563eb', icon: '🔬' },
@@ -105,6 +105,10 @@ function renderPatientTable(activePatients) {
                         <input type="checkbox" id="selectAllTable" onchange="selectAll()" style="cursor: pointer;">
                     </th>
                     <th style="width: 40px; text-align: center;">#</th>
+                    <th onclick="sortByColumn('service')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
+                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
+                        Servicio <span style="opacity: 0.6; font-size: 14px;">⇅</span>
+                    </th>
                     <th onclick="sortByColumn('bed')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
                         onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
                         Cama <span style="opacity: 0.6; font-size: 14px;">⇅</span>
@@ -118,7 +122,10 @@ function renderPatientTable(activePatients) {
                         onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
                         Edad <span style="opacity: 0.6; font-size: 14px;">⇅</span>
                     </th>
-                    <th>Diagnóstico</th>
+                    <th onclick="sortByColumn('diagnosis')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
+                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
+                        Diagnóstico <span style="opacity: 0.6; font-size: 14px;">⇅</span>
+                    </th>
                     <th onclick="sortByColumn('doctor')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
                         onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
                         Médico Tratante <span style="opacity: 0.6; font-size: 14px;">⇅</span>
@@ -145,6 +152,57 @@ function renderPatientTable(activePatients) {
                                    style="cursor: pointer;">
                         </td>
                         <td style="text-align: center;">${index + 1}</td>
+                        <td>${patient.service ? `
+                            <span style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 4px;
+                                padding: 4px 8px;
+                                background: ${(() => {
+                                    const SERVICES = {
+                                        UCI: '#dc2626',
+                                        UTI: '#ea580c',
+                                        MQ: '#2563eb',
+                                        Urgencias: '#ca8a04',
+                                        Interconsulta: '#16a34a'
+                                    };
+                                    return SERVICES[patient.service] || '#666';
+                                })()}15;
+                                border: 1px solid ${(() => {
+                                    const SERVICES = {
+                                        UCI: '#dc2626',
+                                        UTI: '#ea580c',
+                                        MQ: '#2563eb',
+                                        Urgencias: '#ca8a04',
+                                        Interconsulta: '#16a34a'
+                                    };
+                                    return SERVICES[patient.service] || '#666';
+                                })()}40;
+                                border-radius: 12px;
+                                font-size: 11px;
+                                font-weight: 600;
+                                color: ${(() => {
+                                    const SERVICES = {
+                                        UCI: '#dc2626',
+                                        UTI: '#ea580c',
+                                        MQ: '#2563eb',
+                                        Urgencias: '#ca8a04',
+                                        Interconsulta: '#16a34a'
+                                    };
+                                    return SERVICES[patient.service] || '#666';
+                                })()};
+                            ">
+                                ${(() => {
+                                    const SERVICES_ICONS = {
+                                        UCI: '🏥',
+                                        UTI: '⚕️',
+                                        MQ: '🔬',
+                                        Urgencias: '🚨',
+                                        Interconsulta: '📋'
+                                    };
+                                    return SERVICES_ICONS[patient.service] || '🏥';
+                                })()} ${patient.service}
+                            </span>` : '<span style="color: #999;">-</span>'}</td>
                         <td>
                             <span class="bed-display">
                                 ${patient.bed || 'Sin asignar'}
@@ -164,8 +222,8 @@ function renderPatientTable(activePatients) {
                         <td>${patient.daysInHospital}</td>
                         <td>${formatDate(patient.admissionDate)}</td>
                         <td>
-                            <button onclick="sharePatientFromList(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')" 
-                                    class="share-btn-inline" 
+                            <button onclick="sharePatientFromList(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')"
+                                    class="share-btn-inline"
                                     title="Compartir ficha"
                                     style="background: none; border: none; cursor: pointer; padding: 5px; opacity: 0.7; transition: all 0.2s ease;"
                                     onmouseover="this.style.opacity='1'; this.style.color='#4CAF50';"
@@ -175,8 +233,8 @@ function renderPatientTable(activePatients) {
                                     <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
                                 </svg>
                             </button>
-                            <button onclick="deletePatient(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')" 
-                                    class="delete-btn-inline" 
+                            <button onclick="deletePatient(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')"
+                                    class="delete-btn-inline"
                                     title="Eliminar paciente"
                                     style="background: none; border: none; cursor: pointer; padding: 5px; color: #dc3545; opacity: 0.7; transition: all 0.2s ease;"
                                     onmouseover="this.style.opacity='1';"
@@ -205,7 +263,16 @@ function renderEmptyState() {
 // Render admission data (info del paciente en modal)
 function renderAdmissionData(patient) {
     const diagnosisText = catalogos.getDiagnosisText(patient.diagnosis);
-    
+
+    // Usar configuración global de servicios
+    const SERVICES = window.HOSPITAL_SERVICES_CONFIG || {
+        UCI: { label: 'UCI', color: '#dc2626', icon: '🏥' },
+        UTI: { label: 'UTI', color: '#ea580c', icon: '⚕️' },
+        MQ: { label: 'MQ', color: '#2563eb', icon: '🔬' },
+        Urgencias: { label: 'Urgencias', color: '#ca8a04', icon: '🚨' },
+        Interconsulta: { label: 'Interconsulta', color: '#16a34a', icon: '📋' }
+    };
+
     // Cargar observaciones y tareas al abrir el modal
     setTimeout(() => {
         loadObservationHistory(patient.id);
@@ -215,27 +282,27 @@ function renderAdmissionData(patient) {
     return `
         <div class="patient-info-row">
             <span class="info-label">
-                <span onclick="editPatientName(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar nombre">✏️</span>
+                <span onclick="editPatientField(event, ${patient.id}, 'name')"
+                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
+                      title="Editar nombre (Sistema Refactorizado)">✏️</span>
                 Nombre:
             </span>
             <span class="info-value" id="name-${patient.id}">${patient.name}</span>
         </div>
         <div class="patient-info-row">
             <span class="info-label">
-                <span onclick="editPatientAge(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar edad">✏️</span>
+                <span onclick="editPatientField(event, ${patient.id}, 'age')"
+                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
+                      title="Editar edad (Sistema Refactorizado)">✏️</span>
                 Edad:
             </span>
             <span class="info-value" id="age-${patient.id}">${patient.age} años</span>
         </div>
         <div class="patient-info-row">
             <span class="info-label">
-                <span onclick="editPatientRut(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar RUT">✏️</span>
+                <span onclick="editPatientField(event, ${patient.id}, 'rut')"
+                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
+                      title="Editar RUT (Sistema Refactorizado)">✏️</span>
                 RUT:
             </span>
             <span class="info-value" id="rut-${patient.id}">${patient.rut || 'Sin RUT'}</span>
@@ -251,17 +318,43 @@ function renderAdmissionData(patient) {
         </div>
         <div class="patient-info-row">
             <span class="info-label">
-                <span onclick="editPatientBed(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar cama">✏️</span>
+                <span onclick="editPatientField(event, ${patient.id}, 'bed')"
+                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
+                      title="Editar cama (Sistema Refactorizado)">✏️</span>
                 Cama:
             </span>
             <span class="info-value" id="bed-${patient.id}">${patient.bed || 'Sin asignar'}</span>
         </div>
         <div class="patient-info-row">
             <span class="info-label">
-                <span onclick="editAdmissionDate(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
+                <span onclick="editPatientService(event, ${patient.id})"
+                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
+                      title="Editar servicio hospitalario">✏️</span>
+                Servicio:
+            </span>
+            <span class="info-value" id="service-${patient.id}">
+                ${patient.service ? `
+                    <span style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        padding: 2px 8px;
+                        border-radius: 12px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        background: ${SERVICES[patient.service]?.color || '#666'}15;
+                        color: ${SERVICES[patient.service]?.color || '#666'};
+                        border: 1px solid ${SERVICES[patient.service]?.color || '#666'}40;
+                    ">
+                        ${SERVICES[patient.service]?.icon || '🏥'} ${patient.service}
+                    </span>
+                ` : 'Sin servicio asignado'}
+            </span>
+        </div>
+        <div class="patient-info-row">
+            <span class="info-label">
+                <span onclick="editAdmissionDate(event, ${patient.id})"
+                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
                       title="Editar fecha de ingreso">✏️</span>
                 Fecha Ingreso:
             </span>
@@ -451,6 +544,100 @@ function formatDate(dateString) {
         month: '2-digit',
         year: 'numeric'
     });
+}
+
+// Función temporal simplificada para editar servicio
+// (Se reemplazará cuando cargue el módulo completo pacientes-service-edit.js)
+if (typeof window.editPatientService === 'undefined') {
+    window.editPatientService = async function(event, patientId) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        const patient = patients.find(p => p.id === patientId);
+        if (!patient) {
+            showToast('Paciente no encontrado', 'error');
+            return;
+        }
+
+        const services = ['', 'UCI', 'UTI', 'MQ', 'Urgencias', 'Interconsulta'];
+        const currentService = patient.service || '';
+
+        const newService = prompt(
+            `Editar servicio hospitalario\n\n` +
+            `Paciente: ${patient.name}\n` +
+            `Servicio actual: ${currentService || 'Sin servicio'}\n\n` +
+            `Opciones disponibles:\n` +
+            `• UCI\n• UTI\n• MQ\n• Urgencias\n• Interconsulta\n\n` +
+            `(Dejar vacío para quitar servicio)`,
+            currentService
+        );
+
+        if (newService === null) return;
+
+        const trimmedService = newService.trim();
+        if (trimmedService && !services.includes(trimmedService)) {
+            showToast('Servicio no válido. Use: UCI, UTI, MQ, Urgencias o Interconsulta', 'error');
+            return;
+        }
+
+        if (trimmedService === currentService) {
+            showToast('Sin cambios en el servicio', 'info');
+            return;
+        }
+
+        try {
+            const response = await apiRequest(`/patients/${patientId}/service`, {
+                method: 'PUT',
+                body: JSON.stringify({ service: trimmedService || null })
+            });
+
+            if (response.success) {
+                patient.service = trimmedService || null;
+
+                // Actualizar UI del modal
+                const serviceElement = document.getElementById(`service-${patientId}`);
+                if (serviceElement) {
+                    if (trimmedService && window.HOSPITAL_SERVICES_CONFIG) {
+                        const config = window.HOSPITAL_SERVICES_CONFIG[trimmedService];
+                        if (config) {
+                            serviceElement.innerHTML = `
+                                <span style="
+                                    display: inline-flex;
+                                    align-items: center;
+                                    gap: 4px;
+                                    padding: 2px 8px;
+                                    border-radius: 12px;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    background: ${config.color}15;
+                                    color: ${config.color};
+                                    border: 1px solid ${config.color}40;
+                                ">
+                                    ${config.icon} ${trimmedService}
+                                </span>
+                            `;
+                        } else {
+                            serviceElement.textContent = trimmedService;
+                        }
+                    } else {
+                        serviceElement.textContent = 'Sin servicio asignado';
+                    }
+                }
+
+                // Actualizar lista de pacientes
+                if (typeof renderPatients === 'function') {
+                    renderPatients();
+                }
+
+                showToast('Servicio actualizado correctamente');
+            }
+        } catch (error) {
+            console.error('Error actualizando servicio:', error);
+            showToast('Error al actualizar servicio', 'error');
+        }
+    };
 }
 
 // Exportar funciones necesarias para otros módulos

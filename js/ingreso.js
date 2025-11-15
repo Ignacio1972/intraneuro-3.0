@@ -1,37 +1,119 @@
 // ingreso.js - INTRANEURO Admission Management
 
+// Variable global para el dropdown de diagnóstico
+let diagnosisDropdownInstance = null;
+
 // Initialize admission form
 document.addEventListener('DOMContentLoaded', () => {
     const admissionForm = document.getElementById('admissionForm');
     if (admissionForm) {
         admissionForm.addEventListener('submit', handleAdmission);
     }
-    
-    // Sin validaciones ni handlers para RUT
+
+    // Inicializar dropdown de diagnóstico con retry
+    initializeDiagnosisDropdown();
 });
+
+// Función para inicializar el dropdown con reintentos
+function initializeDiagnosisDropdown() {
+    const maxAttempts = 10;
+    let attempts = 0;
+
+    function tryInit() {
+        attempts++;
+        console.log(`[ingreso.js] Intento ${attempts} de inicializar dropdown...`);
+
+        const diagnosisContainer = document.getElementById('diagnosis-container');
+
+        if (!diagnosisContainer) {
+            console.log('[ingreso.js] Contenedor diagnosis-container no encontrado aún');
+            if (attempts < maxAttempts) {
+                setTimeout(tryInit, 500);
+            }
+            return;
+        }
+
+        if (!window.DropdownSystem) {
+            console.log('[ingreso.js] DropdownSystem no cargado aún');
+            if (attempts < maxAttempts) {
+                setTimeout(tryInit, 500);
+            }
+            return;
+        }
+
+        // Si el dropdown ya existe, no re-crear
+        if (diagnosisContainer.querySelector('.intraneuro-dropdown')) {
+            console.log('[ingreso.js] Dropdown ya existe');
+            return;
+        }
+
+        try {
+            diagnosisDropdownInstance = window.DropdownSystem.createDiagnosisDropdown({
+                containerId: 'diagnosis-container',
+                required: true
+            });
+
+            // Hacer la instancia disponible globalmente para debug
+            window.diagnosisDropdownInstance = diagnosisDropdownInstance;
+
+            console.log('[ingreso.js] ✅ Dropdown de diagnóstico inicializado correctamente');
+        } catch (error) {
+            console.error('[ingreso.js] Error creando dropdown:', error);
+            if (attempts < maxAttempts) {
+                setTimeout(tryInit, 1000);
+            }
+        }
+    }
+
+    tryInit();
+}
 
 // MODIFICADA: Handle admission form submission con API
 async function handleAdmission(e) {
     e.preventDefault();
-    
+
+    console.log('📝 INICIANDO PROCESO DE INGRESO...');
+
     // Get form data - SIMPLIFICADO
+    console.log('🔍 Verificando dropdown de diagnóstico...');
+
+    const diagnosisValue = diagnosisDropdownInstance ? diagnosisDropdownInstance.getValue() : '';
+    console.log('📋 Valor del diagnóstico obtenido:', diagnosisValue);
+
+    // Obtener el valor de la cama del campo de entrada
+    const bedInput = document.getElementById('patientBedInput');
+    const bedValue = bedInput ? bedInput.value.trim() : '';
+
     const formData = {
         name: document.getElementById('patientName').value,
         age: 18, // Edad mínima válida por defecto, se actualizará desde el modal
         rut: document.getElementById('patientRut').value || null, // Sin validación
         prevision: null, // Se agregará desde el modal del paciente
-        bed: 'Sin asignar', // Se asignará desde el modal del paciente
+        bed: bedValue || 'Sin asignar', // Usar el valor ingresado o 'Sin asignar' si está vacío
         admissionDate: document.getElementById('admissionDate').value,
-        diagnosis: document.getElementById('diagnosis').value,
-        diagnosisText: document.getElementById('diagnosis').value,
+        diagnosis: diagnosisValue,
+        diagnosisText: diagnosisValue,
         diagnosisDetails: '', // Ya no se usa en el ingreso
         allergies: null,
         admittedBy: 'Sistema', // Se actualizará desde el modal del paciente
         status: 'active'
     };
-    
+
+    console.log('Diagnóstico seleccionado:', diagnosisValue);
+    console.log('Cama asignada:', bedValue || 'Sin asignar');
+
+    // Validar que se haya seleccionado un diagnóstico
+    if (!diagnosisValue || diagnosisValue.trim() === '') {
+        if (typeof showToast === 'function') {
+            showToast('Por favor seleccione un diagnóstico', 'error');
+        } else {
+            alert('Por favor seleccione un diagnóstico');
+        }
+        return;
+    }
+
     // Sin validación de RUT - ingreso rápido
-    
+
     // NUEVO: Intentar guardar en API primero
     console.log('Enviando datos del paciente:', formData);
     try {
@@ -41,7 +123,9 @@ async function handleAdmission(e) {
         });
         
         console.log('Respuesta del servidor:', response);
-        
+        console.log('Paciente creado con ID:', response?.patient?.id);
+        console.log('Admisión creada con ID:', response?.admission?.id);
+
         if (response && response.patient) {
             console.log('Paciente guardado en BD:', response);
             
@@ -66,15 +150,40 @@ async function handleAdmission(e) {
             
             // Show success message
             showAdmissionSuccess(newPatient);
-            
+
             // Reset form
             e.target.reset();
-            
-            // Close modal y recargar página para mostrar nuevo paciente
-            setTimeout(() => {
+
+            // Limpiar dropdown de diagnósticos
+            if (diagnosisDropdownInstance && typeof diagnosisDropdownInstance.clear === 'function') {
+                diagnosisDropdownInstance.clear();
+            }
+
+            // Limpiar campo de cama
+            if (bedInput) {
+                bedInput.value = '';
+            }
+
+            // Close modal y actualizar la lista de pacientes
+            setTimeout(async () => {
                 closeModal('admissionModal');
-                // Recargar la página para mostrar el nuevo paciente
-                window.location.reload();
+
+                // Actualizar la lista de pacientes sin recargar toda la página
+                if (typeof renderPatients === 'function') {
+                    // Forzar recarga desde la API con un pequeño delay adicional
+                    setTimeout(async () => {
+                        console.log('Actualizando lista de pacientes...');
+                        await renderPatients(false, true); // false = no skip API load, true = force reload
+
+                        // Actualizar también el dashboard si existe
+                        if (typeof updateDashboard === 'function') {
+                            updateDashboard();
+                        }
+                    }, 500); // Delay adicional para asegurar que la BD esté actualizada
+                } else {
+                    // Fallback: recargar la página si no encuentra la función
+                    window.location.reload();
+                }
             }, 1500);
             
             return; // Salir si API funcionó
@@ -82,7 +191,18 @@ async function handleAdmission(e) {
             console.error('Respuesta inesperada del servidor:', response);
         }
     } catch (error) {
-        console.error('Error guardando en API:', error);
+        console.error('❌ ERROR CRÍTICO guardando en API:', error);
+        console.error('Detalles del error:', error.message);
+
+        // Mostrar error al usuario
+        if (typeof showToast === 'function') {
+            showToast(`Error al crear ingreso: ${error.message}`, 'error');
+        } else {
+            alert(`Error al crear ingreso: ${error.message}`);
+        }
+
+        // NO continuar con el fallback si hay error
+        return;
     }
     
     // FALLBACK: Lógica original si API falla

@@ -2,14 +2,28 @@
 // Todas las interacciones con el backend
 
 // Cargar pacientes activos desde API
-async function loadPatientsFromAPI() {
+async function loadPatientsFromAPI(forceReload = false) {
     try {
         const timestamp = Date.now();
-        const response = await apiRequest(`/patients/active?_t=${timestamp}`);
-        
+        // Agregar header para evitar cache si es necesario
+        const headers = forceReload ? {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        } : {};
+
+        const response = await apiRequest(`/patients/active?_t=${timestamp}&force=${forceReload}&nocache=${Math.random()}`, {
+            headers: headers
+        });
+
         if (Array.isArray(response)) {
             patients = response;
             console.log('Pacientes cargados desde API:', patients.length);
+
+            // Log de previsiones para debug
+            const withPrevision = patients.filter(p => p.prevision).length;
+            console.log(`[API] Pacientes con previsión: ${withPrevision}/${patients.length}`);
+
             return true;
         } else {
             throw new Error('Respuesta inválida de API');

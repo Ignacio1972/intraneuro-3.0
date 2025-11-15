@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificación del Refactoring</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación del Sistema Refactorizado</h1>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        async function verify() {
+            let html = '';
+
+            // 1. Verificar que el script refactorizado se carga
+            html += '<div class="status pending">Verificando carga del módulo refactorizado...</div>';
+            results.innerHTML = html;
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            if (typeof window.PacientesEditRefactored !== 'undefined') {
+                html += '<div class="status success">✅ Módulo PacientesEditRefactored cargado correctamente</div>';
+            } else {
+                html += '<div class="status error">❌ Error: Módulo PacientesEditRefactored no encontrado</div>';
+            }
+
+            // 2. Verificar función principal
+            if (typeof window.editPatientField === 'function') {
+                html += '<div class="status success">✅ Función editPatientField disponible globalmente</div>';
+            } else {
+                html += '<div class="status error">❌ Error: Función editPatientField no disponible</div>';
+            }
+
+            // 3. Verificar configuración de campos
+            if (window.PacientesEditRefactored && window.PacientesEditRefactored.FIELD_CONFIGS) {
+                const fields = Object.keys(window.PacientesEditRefactored.FIELD_CONFIGS);
+                html += `<div class="status success">✅ ${fields.length} campos configurados: ${fields.join(', ')}</div>`;
+            }
+
+            // 4. Verificar API
+            html += '<div class="status pending">Verificando conexión con API...</div>';
+            results.innerHTML = html;
+
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+
+                if (data.status === 'healthy') {
+                    html += `<div class="status success">✅ API funcionando: ${data.database.patients} pacientes en BD</div>`;
+                } else {
+                    html += '<div class="status error">❌ API no responde correctamente</div>';
+                }
+            } catch (error) {
+                html += `<div class="status error">❌ Error conectando con API: ${error.message}</div>`;
+            }
+
+            // 5. Mostrar instrucciones
+            html += `
+                <h2>📋 Instrucciones de Prueba</h2>
+                <ol>
+                    <li>Abre <a href="https://dev.intraneurodavila.com" target="_blank">https://dev.intraneurodavila.com</a></li>
+                    <li>Inicia sesión con tus credenciales</li>
+                    <li>Ve a la lista de pacientes</li>
+                    <li>Haz clic en el ícono ✏️ junto a:
+                        <ul>
+                            <li><strong>Nombre</strong> - Usa sistema refactorizado</li>
+                            <li><strong>Edad</strong> - Usa sistema refactorizado</li>
+                            <li><strong>RUT</strong> - Usa sistema refactorizado</li>
+                            <li><strong>Cama</strong> - Usa sistema refactorizado</li>
+                            <li><strong>Previsión</strong> - Todavía usa sistema original</li>
+                        </ul>
+                    </li>
+                    <li>Edita un valor y verifica que:
+                        <ul>
+                            <li>Se actualiza en pantalla inmediatamente</li>
+                            <li>Persiste al recargar la página</li>
+                            <li>Aparece un toast de confirmación</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Consola del Navegador</h3>
+                <p>Abre la consola (F12) y deberías ver logs como estos al editar:</p>
+                <pre>[EditField] Editando campo name para paciente 123
+[EditField] Valor actual de name: Juan Pérez
+[EditField] Valor transformado: María González
+[EditField] Enviando actualización a API: María González
+[EditField] Actualización exitosa</pre>
+            `;
+
+            results.innerHTML = html;
+        }
+
+        // Esperar a que todo cargue
+        window.addEventListener('load', () => {
+            setTimeout(verify, 1000);
+        });
+    </script>
+
+    <!-- Cargar los scripts necesarios -->
+    <script src="js/modules/pacientes/pacientes-edit-refactored.js"></script>
+</body>
+</html>

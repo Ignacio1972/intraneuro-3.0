@@ -4,6 +4,7 @@ const router = require('express').Router();
 const authRoutes = require('./auth.routes');
 const patientsRoutes = require('./patients.routes');
 const dashboardRoutes = require('./dashboard.routes');
+const diagnosisRoutes = require('./diagnosis.routes'); // Nuevo: Catálogo de diagnósticos
 const healthController = require('../controllers/health.controller');
 
 // Health check endpoints
@@ -14,6 +15,7 @@ router.get('/health/detailed', healthController.detailedHealth);
 router.use('/', authRoutes);  // Login estará en /api/login
 router.use('/patients', patientsRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/diagnosis', diagnosisRoutes); // Nuevo: Catálogo de diagnósticos
 
 // Ruta de prueba adicional
 router.get('/status', (req, res) => {

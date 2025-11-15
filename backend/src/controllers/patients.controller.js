@@ -208,8 +208,7 @@ exports.getActivePatients = async (req, res) => {
                 status: 'active',
                 daysInHospital: calculateDays(admission.admission_date),
                 scheduledDischarge: admission.scheduled_discharge,
-                service: admission.service || null,
-                unit: admission.unit || null
+                service: admission.service || null
             };
         });
         
@@ -257,16 +256,39 @@ exports.createPatient = async (req, res) => {
             name, age = 0, rut = '', prevision = '', bed,
             admissionDate, diagnosis, diagnosisText,
             diagnosisDetails = '', admittedBy = 'Sistema',
-            service, unit
+            service
         } = req.body;
-        
-        
+
+        console.log('Datos recibidos - Cama:', bed || 'Sin asignar');
+
         // Buscar si existe paciente con ese RUT
         let patient = null;
         if (rut && rut.trim() !== '') {
-            patient = await Patient.findOne({ where: { rut } });
+            patient = await Patient.findOne({
+                where: { rut },
+                transaction
+            });
+
+            // Si existe, verificar que no tenga admisión activa
+            if (patient) {
+                const existingActiveAdmission = await Admission.findOne({
+                    where: {
+                        patient_id: patient.id,
+                        status: 'active'
+                    },
+                    transaction
+                });
+
+                if (existingActiveAdmission) {
+                    await transaction.rollback();
+                    return res.status(400).json({
+                        error: 'El paciente ya tiene una admisión activa',
+                        message: `El paciente ${patient.name} con RUT ${rut} ya está ingresado`
+                    });
+                }
+            }
         }
-        
+
         // Si no existe, crear
         if (!patient) {
             const patientData = {
@@ -275,22 +297,26 @@ exports.createPatient = async (req, res) => {
                 rut: rut || null,
                 prevision: prevision || null
             };
-            
+
             patient = await Patient.create(patientData, { transaction });
+            console.log(`Nuevo paciente creado: ID ${patient.id}, RUT: ${rut}`);
+        } else {
+            console.log(`Paciente existente encontrado: ID ${patient.id}, RUT: ${rut}`);
         }
-        
+
         // Crear admisión
+        // Usar el texto del diagnóstico para ambos campos
+        const diagnosisValue = diagnosis || diagnosisText || 'Evaluación pendiente';
         const admissionData = {
             patient_id: patient.id,
             admission_date: admissionDate || new Date(),
             bed: bed || 'Sin asignar',
-            diagnosis_code: diagnosis || 'F00',
-            diagnosis_text: diagnosisText || '',
+            diagnosis_code: diagnosisValue,  // Ahora usa el texto directo
+            diagnosis_text: diagnosisValue,  // Mismo valor para consistencia
             diagnosis_details: diagnosisDetails || '',
             admitted_by: normalizeDoctorName(admittedBy) || 'Sistema',
             status: 'active',
-            service: service || null,
-            unit: unit || null
+            service: service || null
         };
         
         const admission = await Admission.create(admissionData, { transaction });
@@ -433,30 +459,62 @@ exports.updateBed = async (req, res) => {
     try {
         const { id } = req.params;
         const { bed } = req.body;
-        
+
         // Buscar admisión activa
         const admission = await Admission.findOne({
-            where: { 
+            where: {
                 patient_id: id,
                 status: 'active'
             }
         });
-        
+
         if (!admission) {
             return res.status(404).json({ error: 'Admisión activa no encontrada' });
         }
-        
+
         admission.bed = bed || 'Sin asignar';
         await admission.save();
-        
-        res.json({ 
-            success: true, 
-            bed: admission.bed 
+
+        res.json({
+            success: true,
+            bed: admission.bed
         });
-        
+
     } catch (error) {
         console.error('Error actualizando cama:', error);
         res.status(500).json({ error: 'Error al actualizar cama' });
+    }
+};
+
+// Actualizar servicio del paciente
+exports.updateService = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { service } = req.body;
+
+        // Buscar admisión activa
+        const admission = await Admission.findOne({
+            where: {
+                patient_id: id,
+                status: 'active'
+            }
+        });
+
+        if (!admission) {
+            return res.status(404).json({ error: 'Admisión activa no encontrada' });
+        }
+
+        admission.service = service || null;
+        await admission.save();
+
+        res.json({
+            success: true,
+            service: admission.service
+        });
+
+    } catch (error) {
+        console.error('Error actualizando servicio:', error);
+        res.status(500).json({ error: 'Error al actualizar servicio' });
     }
 };
 
@@ -465,7 +523,10 @@ exports.updatePrevision = async (req, res) => {
     try {
         const { id } = req.params;
         const { prevision } = req.body;
-        
+
+        console.log(`[updatePrevision] Actualizando previsión para paciente ID: ${id}`);
+        console.log(`[updatePrevision] Nueva previsión: "${prevision}"`);
+
         // Buscar paciente
         const patient = await Patient.findByPk(id);
         
@@ -473,9 +534,13 @@ exports.updatePrevision = async (req, res) => {
             return res.status(404).json({ error: 'Paciente no encontrado' });
         }
         
-        // Validar que la previsión sea una opción válida
+        // Validar que la previsión sea una opción válida o permitir valores personalizados
         const validOptions = [
             'Fonasa',
+            'Fonasa A',
+            'Fonasa B',
+            'Fonasa C',
+            'Fonasa D',
             'Isapre Banmédica',
             'Isapre Colmena',
             'Isapre Consalud',
@@ -484,25 +549,49 @@ exports.updatePrevision = async (req, res) => {
             'Isapre Vida Tres',
             'Isapre Esencial',
             'Particular',
+            'Sin previsión',
+            'Capredena',
+            'Dipreca',
             'Otro',
             null,
             ''
         ];
-        if (prevision && !validOptions.includes(prevision)) {
-            return res.status(400).json({ error: 'Previsión inválida' });
+
+        // Si no está en las opciones válidas pero es un string, aceptarlo como valor personalizado
+        // Solo rechazar si es un tipo de dato inválido
+        if (prevision && typeof prevision !== 'string') {
+            return res.status(400).json({ error: 'Previsión debe ser un texto' });
         }
         
+        // Guardar la previsión anterior para comparación
+        const previsionAnterior = patient.prevision;
+
         patient.prevision = prevision || null;
         await patient.save();
-        
-        res.json({ 
-            success: true, 
-            prevision: patient.prevision 
+
+        console.log(`[updatePrevision] Previsión anterior: "${previsionAnterior}"`);
+        console.log(`[updatePrevision] Previsión guardada: "${patient.prevision}"`);
+        console.log(`[updatePrevision] Paciente guardado exitosamente`);
+
+        res.json({
+            success: true,
+            prevision: patient.prevision,
+            message: `Previsión actualizada de "${previsionAnterior}" a "${patient.prevision}"`
         });
         
     } catch (error) {
-        console.error('Error actualizando previsión:', error);
-        res.status(500).json({ error: 'Error al actualizar previsión' });
+        console.error('[updatePrevision] Error completo:', error);
+        console.error('[updatePrevision] Error mensaje:', error.message);
+        console.error('[updatePrevision] Error stack:', error.stack);
+
+        // Enviar más detalles del error en desarrollo
+        const errorResponse = {
+            error: 'Error al actualizar previsión',
+            message: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        };
+
+        res.status(500).json(errorResponse);
     }
 };
 
@@ -825,20 +914,35 @@ exports.getObservationsByAdmission = async (req, res) => {
 exports.updatePatient = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, rut, age } = req.body;
-        
+        const { name, rut, age, service } = req.body;
+
         const patient = await Patient.findByPk(id);
-        
+
         if (!patient) {
             return res.status(404).json({ error: 'Paciente no encontrado' });
         }
-        
-        // Actualizar solo campos enviados
+
+        // Actualizar solo campos enviados del paciente
         if (name !== undefined) patient.name = name;
         if (rut !== undefined) patient.rut = rut;
         if (age !== undefined) patient.age = age;
-        
+
         await patient.save();
+
+        // Si se envió el campo service, actualizar la admisión activa
+        if (service !== undefined) {
+            const admission = await Admission.findOne({
+                where: {
+                    patient_id: id,
+                    status: 'active'
+                }
+            });
+
+            if (admission) {
+                admission.service = service;
+                await admission.save();
+            }
+        }
         
         res.json({
             success: true,
@@ -855,28 +959,32 @@ exports.updatePatient = async (req, res) => {
 exports.updateActiveAdmission = async (req, res) => {
     try {
         const { id } = req.params;
-        const { 
+        const {
             admission_date,
             diagnosis_code,
-            diagnosis_text
+            diagnosis_text,
+            service,
+            admitted_by
         } = req.body;
-        
+
         // Buscar admisión activa del paciente
         const admission = await Admission.findOne({
-            where: { 
+            where: {
                 patient_id: id,
                 status: 'active'
             }
         });
-        
+
         if (!admission) {
             return res.status(404).json({ error: 'Admisión activa no encontrada' });
         }
-        
+
         // Actualizar solo campos enviados
         if (admission_date !== undefined) admission.admission_date = admission_date;
         if (diagnosis_code !== undefined) admission.diagnosis_code = diagnosis_code;
         if (diagnosis_text !== undefined) admission.diagnosis_text = diagnosis_text;
+        if (service !== undefined) admission.service = service;
+        if (admitted_by !== undefined) admission.admitted_by = admitted_by;
         
         await admission.save();
         

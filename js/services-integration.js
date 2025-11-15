@@ -46,13 +46,12 @@
     }
   }
 
-  // Enriquecer los datos del formulario con servicio/unidad
+  // Enriquecer los datos del formulario con servicio
   function enrichFormDataWithService() {
     const serviceData = ServicesModule.getFormData();
 
-    // Crear campos hidden temporales para que ingreso.js los capture
+    // Crear campo hidden temporal para que ingreso.js lo capture
     let serviceHidden = document.getElementById('admissionServiceHidden');
-    let unitHidden = document.getElementById('admissionUnitHidden');
 
     if (!serviceHidden) {
       serviceHidden = document.createElement('input');
@@ -61,18 +60,10 @@
       document.getElementById('admissionForm').appendChild(serviceHidden);
     }
 
-    if (!unitHidden) {
-      unitHidden = document.createElement('input');
-      unitHidden.type = 'hidden';
-      unitHidden.id = 'admissionUnitHidden';
-      document.getElementById('admissionForm').appendChild(unitHidden);
-    }
-
     serviceHidden.value = serviceData.service || '';
-    unitHidden.value = serviceData.unit || '';
   }
 
-  // Interceptar apiRequest para agregar service/unit a los POST de patients
+  // Interceptar apiRequest para agregar service a los POST de patients
   if (typeof window.apiRequest !== 'undefined') {
     const originalApiRequest = window.apiRequest;
 
@@ -82,13 +73,11 @@
         try {
           const data = JSON.parse(options.body);
           const serviceData = {
-            service: document.getElementById('admissionServiceHidden')?.value || null,
-            unit: document.getElementById('admissionUnitHidden')?.value || null
+            service: document.getElementById('admissionServiceHidden')?.value || null
           };
 
           // Agregar a los datos
           data.service = serviceData.service;
-          data.unit = serviceData.unit;
 
           options.body = JSON.stringify(data);
         } catch (e) {

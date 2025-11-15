@@ -26,25 +26,9 @@ const Patient = sequelize.define('Patient', {
     },
     prevision: {
         type: DataTypes.STRING(50),
-        allowNull: true,
-        validate: {
-            isIn: {
-                args: [[
-                    'Fonasa',
-                    'Isapre Banmédica',
-                    'Isapre Colmena',
-                    'Isapre Consalud',
-                    'Isapre Cruz Blanca',
-                    'Isapre Nueva Masvida',
-                    'Isapre Vida Tres',
-                    'Isapre Esencial',
-                    'Particular',
-                    'Otro',
-                    null
-                ]],
-                msg: 'Previsión inválida. Debe ser una opción válida.'
-            }
-        }
+        allowNull: true
+        // Removida validación isIn para permitir valores personalizados
+        // La validación ahora se hace en el controlador si es necesaria
     }
 }, {
     tableName: 'patients',

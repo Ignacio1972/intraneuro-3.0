@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Dropdowns - INTRANEURO</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .test-section h2 {
+            color: #34495e;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-right: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Sistema de Dropdowns INTRANEURO v2.0</h1>
+
+        <!-- Test de Dropdown de Diagnóstico -->
+        <div class="test-section">
+            <h2>📋 Test de Dropdown de Diagnóstico</h2>
+            <div class="form-group">
+                <label>Diagnóstico de Ingreso:</label>
+                <div id="diagnosis-test-container"></div>
+            </div>
+            <div class="buttons">
+                <button onclick="getDiagnosisValue()">Obtener Valor</button>
+                <button onclick="setDiagnosisValue('Epilepsia')">Establecer 'Epilepsia'</button>
+                <button onclick="setDiagnosisValue('Diagnóstico personalizado')">Establecer Personalizado</button>
+                <button onclick="clearDiagnosis()">Limpiar</button>
+                <button onclick="validateDiagnosis()">Validar</button>
+            </div>
+            <div id="diagnosis-result" class="result"></div>
+        </div>
+
+        <!-- Test de Dropdown de Previsión -->
+        <div class="test-section">
+            <h2>🏥 Test de Dropdown de Previsión</h2>
+            <div class="form-group">
+                <label>Previsión del Paciente:</label>
+                <div id="prevision-test-container"></div>
+            </div>
+            <div class="buttons">
+                <button onclick="getPrevisionValue()">Obtener Valor</button>
+                <button onclick="setPrevisionValue('Fonasa A')">Establecer 'Fonasa A'</button>
+                <button onclick="setPrevisionValue('Isapre personalizada')">Establecer Personalizada</button>
+                <button onclick="clearPrevision()">Limpiar</button>
+                <button onclick="validatePrevision()">Validar</button>
+            </div>
+            <div id="prevision-result" class="result"></div>
+        </div>
+
+        <!-- Test de Múltiples Instancias -->
+        <div class="test-section">
+            <h2>🔄 Test de Múltiples Instancias</h2>
+            <div class="form-group">
+                <label>Diagnóstico Instancia 1:</label>
+                <div id="diagnosis-multi-1"></div>
+            </div>
+            <div class="form-group">
+                <label>Diagnóstico Instancia 2:</label>
+                <div id="diagnosis-multi-2"></div>
+            </div>
+            <div class="buttons">
+                <button onclick="testMultipleInstances()">Probar Independencia</button>
+            </div>
+            <div id="multiple-result" class="result"></div>
+        </div>
+
+        <!-- Estado del Sistema -->
+        <div class="test-section">
+            <h2>⚙️ Estado del Sistema</h2>
+            <div id="system-status"></div>
+        </div>
+    </div>
+
+    <!-- Cargar el sistema de dropdowns -->
+    <script src="js/modules/dropdown-system.js"></script>
+
+    <script>
+        // Variables para las instancias
+        let diagnosisDropdown = null;
+        let previsionDropdown = null;
+        let multiDropdown1 = null;
+        let multiDropdown2 = null;
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTests();
+        });
+
+        function initializeTests() {
+            const status = document.getElementById('system-status');
+
+            // Verificar que el sistema esté cargado
+            if (!window.DropdownSystem) {
+                status.innerHTML = '<span class="status error">❌ Error: DropdownSystem no está cargado</span>';
+                return;
+            }
+
+            status.innerHTML = '<span class="status success">✅ DropdownSystem v' +
+                              window.DropdownSystem.version + ' cargado correctamente</span>';
+
+            // Crear instancias de prueba
+            try {
+                // Diagnóstico
+                diagnosisDropdown = window.DropdownSystem.createDiagnosisDropdown({
+                    containerId: 'diagnosis-test-container',
+                    required: true,
+                    onChange: function(value) {
+                        document.getElementById('diagnosis-result').innerHTML =
+                            'Evento onChange disparado\nValor actual: ' + value;
+                    }
+                });
+
+                // Previsión
+                previsionDropdown = window.DropdownSystem.createPrevisionDropdown({
+                    containerId: 'prevision-test-container',
+                    required: false,
+                    onChange: function(value) {
+                        document.getElementById('prevision-result').innerHTML =
+                            'Evento onChange disparado\nValor actual: ' + value;
+                    }
+                });
+
+                // Múltiples instancias
+                multiDropdown1 = window.DropdownSystem.createDiagnosisDropdown({
+                    containerId: 'diagnosis-multi-1',
+                    required: true
+                });
+
+                multiDropdown2 = window.DropdownSystem.createDiagnosisDropdown({
+                    containerId: 'diagnosis-multi-2',
+                    required: true
+                });
+
+                status.innerHTML += '<br><span class="status success">✅ Todas las instancias creadas correctamente</span>';
+
+            } catch (error) {
+                status.innerHTML += '<br><span class="status error">❌ Error creando instancias: ' + error.message + '</span>';
+            }
+        }
+
+        // Funciones de prueba para diagnóstico
+        function getDiagnosisValue() {
+            if (!diagnosisDropdown) return;
+            const value = diagnosisDropdown.getValue();
+            document.getElementById('diagnosis-result').innerHTML =
+                'Valor obtenido: "' + value + '"\nTipo: ' + typeof value;
+        }
+
+        function setDiagnosisValue(value) {
+            if (!diagnosisDropdown) return;
+            diagnosisDropdown.setValue(value);
+            document.getElementById('diagnosis-result').innerHTML =
+                'Valor establecido a: "' + value + '"';
+        }
+
+        function clearDiagnosis() {
+            if (!diagnosisDropdown) return;
+            diagnosisDropdown.clear();
+            document.getElementById('diagnosis-result').innerHTML = 'Dropdown limpiado';
+        }
+
+        function validateDiagnosis() {
+            if (!diagnosisDropdown) return;
+            const isValid = diagnosisDropdown.validate();
+            document.getElementById('diagnosis-result').innerHTML =
+                'Validación: ' + (isValid ? '✅ VÁLIDO' : '❌ INVÁLIDO') +
+                '\nValor actual: "' + diagnosisDropdown.getValue() + '"';
+        }
+
+        // Funciones de prueba para previsión
+        function getPrevisionValue() {
+            if (!previsionDropdown) return;
+            const value = previsionDropdown.getValue();
+            document.getElementById('prevision-result').innerHTML =
+                'Valor obtenido: "' + value + '"\nTipo: ' + typeof value;
+        }
+
+        function setPrevisionValue(value) {
+            if (!previsionDropdown) return;
+            previsionDropdown.setValue(value);
+            document.getElementById('prevision-result').innerHTML =
+                'Valor establecido a: "' + value + '"';
+        }
+
+        function clearPrevision() {
+            if (!previsionDropdown) return;
+            previsionDropdown.clear();
+            document.getElementById('prevision-result').innerHTML = 'Dropdown limpiado';
+        }
+
+        function validatePrevision() {
+            if (!previsionDropdown) return;
+            const isValid = previsionDropdown.validate();
+            document.getElementById('prevision-result').innerHTML =
+                'Validación: ' + (isValid ? '✅ VÁLIDO' : '❌ INVÁLIDO') +
+                '\nValor actual: "' + previsionDropdown.getValue() + '"';
+        }
+
+        // Test de múltiples instancias
+        function testMultipleInstances() {
+            if (!multiDropdown1 || !multiDropdown2) return;
+
+            // Establecer valores diferentes
+            multiDropdown1.setValue('Epilepsia');
+            multiDropdown2.setValue('Migraña');
+
+            const value1 = multiDropdown1.getValue();
+            const value2 = multiDropdown2.getValue();
+
+            const result = document.getElementById('multiple-result');
+
+            if (value1 === 'Epilepsia' && value2 === 'Migraña') {
+                result.innerHTML = '✅ Test exitoso: Las instancias son independientes\n' +
+                                  'Instancia 1: "' + value1 + '"\n' +
+                                  'Instancia 2: "' + value2 + '"';
+            } else {
+                result.innerHTML = '❌ Test fallido: Las instancias no son independientes\n' +
+                                  'Instancia 1: "' + value1 + '"\n' +
+                                  'Instancia 2: "' + value2 + '"';
+            }
+        }
+    </script>
+</body>
+</html>

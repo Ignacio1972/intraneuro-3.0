@@ -1,7 +1,30 @@
 // data-catalogos.js - INTRANEURO Catálogos y Datos Estáticos
 
-// Mapping de códigos CIE-10 a texto descriptivo
+// Mapping de diagnósticos - Ahora incluye neurológicos
 const diagnosisMapping = {
+    // Diagnósticos neurológicos (texto directo)
+    'ACV Isquémico': 'ACV Isquémico',
+    'ACV Hemorrágico': 'ACV Hemorrágico',
+    'Epilepsia': 'Epilepsia',
+    'Crisis Convulsiva': 'Crisis Convulsiva',
+    'Cefalea': 'Cefalea',
+    'Migraña': 'Migraña',
+    'Demencia tipo Alzheimer': 'Demencia tipo Alzheimer',
+    'Demencia Vascular': 'Demencia Vascular',
+    'Enfermedad de Parkinson': 'Enfermedad de Parkinson',
+    'Esclerosis Múltiple': 'Esclerosis Múltiple',
+    'Neuropatía Periférica': 'Neuropatía Periférica',
+    'Síndrome de Guillain-Barré': 'Síndrome de Guillain-Barré',
+    'Meningitis': 'Meningitis',
+    'Encefalitis': 'Encefalitis',
+    'Tumor Cerebral': 'Tumor Cerebral',
+    'Traumatismo Craneoencefálico': 'Traumatismo Craneoencefálico',
+    'Hidrocefalia': 'Hidrocefalia',
+    'Vértigo': 'Vértigo',
+    'Miastenia Gravis': 'Miastenia Gravis',
+    'Esclerosis Lateral Amiotrófica': 'Esclerosis Lateral Amiotrófica',
+
+    // Códigos psiquiátricos antiguos (mantener por compatibilidad)
     'F32.1': 'Episodio depresivo moderado',
     'F41.1': 'Trastorno de ansiedad generalizada',
     'F20.0': 'Esquizofrenia paranoide',
@@ -11,7 +34,8 @@ const diagnosisMapping = {
     'F60.3': 'Trastorno límite de la personalidad',
     'F84.0': 'Autismo infantil',
     'F90.0': 'Trastorno por déficit de atención con hiperactividad',
-    'F50.0': 'Anorexia nerviosa'
+    'F50.0': 'Anorexia nerviosa',
+    'F00': 'Demencia en enfermedad de Alzheimer'
 };
 
 // Descripciones de la Escala de Rankin

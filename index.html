@@ -88,7 +88,7 @@
                     <select id="doctorFilter" onchange="filterByDoctor()" class="btn-tool filter-select">
                         <option value="">🔍 Todos los médicos</option>
                     </select>
-                    
+
                     <!-- Dropdown de exportación con selector de mes -->
                     <div class="export-controls" style="display: inline-block; position: relative;">
                         <button onclick="toggleExportMenu()" class="btn-tool">
@@ -247,8 +247,9 @@
                 </div>
                 <div class="form-group diagnosis-group">
                    
-                     <label>Diagnóstico de Ingreso</label>
-<input type="text" id="diagnosis" placeholder="Ingrese el diagnóstico..." required>
+                     <div id="diagnosis-container">
+                        <!-- El dropdown se insertará aquí dinámicamente -->
+                    </div>
                     </div>
                    <!-- CAMPO ALERGIAS TEMPORALMENTE DESHABILITADO - 08/08/2025
 <div class="form-group">
@@ -280,21 +281,34 @@
 
     <!-- JavaScript Files -->
      <script src="assets/libs/xlsx.full.min.js"></script>
+     <!-- Fuse.js desactivado - Usando dropdown simple -->
+     <!-- <script src="assets/libs/fuse.min.js"></script> -->
 
 <!-- Core y utilidades primero -->
+<!-- Configuración global de servicios - Debe cargarse primero -->
+<script src="js/services-config.js?v=1"></script>
 <script src="js/api.js?v=21"></script>
 <script src="js/validaciones.js?v=25"></script>
 <script src="js/data-catalogos.js?v=21"></script>
 <!-- Módulos de UI -->
 <script src="js/pacientes-ui.js?v=46"></script>
+<!-- Sistema Unificado de Dropdowns v2.0 - DEBE cargarse ANTES de ingreso.js -->
+<script src="js/modules/dropdown-system.js?v=2"></script>
+<!-- Script de debug para dropdowns -->
+<script src="js/debug-dropdowns.js"></script>
 <!-- Módulos principales -->
 <script src="js/auth.js?v=25"></script>
-<script src="js/ingreso.js?v=22"></script>
+<script src="js/ingreso.js?v=23"></script>
 <!-- Main DEBE ir antes de pacientes-refactored para declarar variables globales -->
 <script src="js/main.js?v=27"></script>
 <!-- Módulos refactorizados de pacientes - DESPUÉS de main.js -->
 <script src="js/modules/pacientes/pacientes-api.js?v=34"></script>
 <script src="js/modules/pacientes/pacientes-edit.js?v=27"></script>
+<!-- Sistema de edición refactorizado - SISTEMA COMPLETO -->
+<!-- IMPORTANTE: Se carga DESPUÉS de pacientes-edit.js para sobrescribir funciones -->
+<script src="js/modules/pacientes/pacientes-edit-refactored.js?v=3"></script>
+<!-- Sistema de edición de servicio hospitalario -->
+<script src="js/modules/pacientes/pacientes-service-edit.js?v=1"></script>
 <script src="js/modules/pacientes/pacientes-discharge.js?v=37"></script>
 <script src="js/pacientes-refactored.js?v=38"></script>
 <!-- Sistema SIMPLIFICADO de notas - Solo textareas -->
@@ -308,6 +322,9 @@
 
 <!-- PWA Service Worker -->
 <script src="js/sw-register.js"></script>
+
+<!-- Fix para edición de previsión - DESACTIVADO: Ahora incluido en pacientes-edit-refactored.js -->
+<!-- <script src="js/fix-prevision-edit.js?v=1"></script> -->
 
 <!-- Agregar antes del cierre de </body> en index.html -->
 <footer class="app-footer">

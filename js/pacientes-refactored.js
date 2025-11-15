@@ -12,9 +12,6 @@ let currentDoctorFilter = '';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Inicializando módulo de pacientes refactorizado...');
-    console.log('sortByColumn está disponible:', typeof window.sortByColumn);
-    
     // Solo cargar pacientes si estamos autenticados (main app visible)
     const mainApp = document.getElementById('mainApp');
     if (mainApp && mainApp.style.display !== 'none') {
@@ -63,10 +60,10 @@ function setupEventListeners() {
 }
 
 // Renderizar pacientes (función principal)
-async function renderPatients(skipAPILoad = false) {
+async function renderPatients(skipAPILoad = false, forceReload = false) {
     // Solo cargar desde API si no se indica lo contrario
     if (!skipAPILoad) {
-        await PacientesAPI.loadPatientsFromAPI();
+        await PacientesAPI.loadPatientsFromAPI(forceReload);
     }
     
     const container = document.getElementById('patientsContainer');
@@ -521,8 +518,6 @@ let sortDirection = 'asc';
 
 // Función para ordenar por columna (global para ser accesible desde HTML)
 window.sortByColumn = function(column) {
-    console.log('Ordenando por columna:', column);
-    
     // Si es la misma columna, cambiar dirección
     if (currentSortColumn === column) {
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -543,12 +538,11 @@ window.sortByColumn = function(column) {
             activePatients = activePatients.filter(p => p.admittedBy === currentDoctorFilter);
         }
     }
-    console.log('Pacientes activos antes de ordenar:', activePatients.length);
-    
+
     // Ordenar según la columna
     activePatients.sort((a, b) => {
         let valueA, valueB;
-        
+
         switch(column) {
             case 'name':
                 valueA = a.name.toLowerCase();
@@ -566,6 +560,16 @@ window.sortByColumn = function(column) {
                 // Ordenar camas numéricamente si es posible
                 valueA = parseInt(a.bed) || a.bed || '';
                 valueB = parseInt(b.bed) || b.bed || '';
+                break;
+            case 'service':
+                // Ordenar por servicio (los pacientes sin servicio al final)
+                valueA = (a.service || 'zzz').toLowerCase();
+                valueB = (b.service || 'zzz').toLowerCase();
+                break;
+            case 'diagnosis':
+                // Ordenar por diagnóstico
+                valueA = (a.diagnosis || '').toLowerCase();
+                valueB = (b.diagnosis || '').toLowerCase();
                 break;
             case 'days':
                 valueA = a.daysInHospital || 0;
@@ -692,7 +696,8 @@ window.editPatientName = PacientesEdit.editPatientName;
 window.editPatientAge = PacientesEdit.editPatientAge;
 window.editPatientRut = PacientesEdit.editPatientRut;
 window.editPatientBed = PacientesEdit.editPatientBed;
-window.editPatientPrevision = PacientesEdit.editPatientPrevision;
+// window.editPatientPrevision = PacientesEdit.editPatientPrevision; // Comentado: Usar la versión con DropdownSystem
+window.editPatientPrevision = PacientesEdit.editPatientPrevision; // Mantenemos la función básica
 window.editAdmissionDate = PacientesEdit.editAdmissionDate;
 window.editDiagnosis = PacientesEdit.editDiagnosis;
 window.editDiagnosisDetails = PacientesEdit.editDiagnosisDetails;
