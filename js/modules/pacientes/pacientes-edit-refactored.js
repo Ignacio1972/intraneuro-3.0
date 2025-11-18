@@ -139,7 +139,7 @@ const FIELD_CONFIGS = {
     // Campo: Médico tratante (segundo grupo - fase 2)
     admittedBy: {
         label: 'Médico Tratante',
-        apiField: 'admitted_by',
+        apiField: 'admittedBy',  // CORREGIDO: usar camelCase para coincidir con objeto patient
         inputType: 'text',
         placeholder: 'Ingrese el nombre del médico tratante',
 
@@ -149,7 +149,7 @@ const FIELD_CONFIGS = {
         // API
         apiEndpoint: (id) => `/patients/${id}/admission`,
         apiMethod: 'PUT',
-        apiPayload: (value) => ({ admitted_by: value || null }),
+        apiPayload: (value) => ({ admitted_by: value || null }),  // API usa snake_case
 
         // UI
         updateElement: (patientId, value) => {
@@ -165,7 +165,7 @@ const FIELD_CONFIGS = {
     // Campo: Descripción del diagnóstico (segundo grupo - fase 2)
     diagnosisDetails: {
         label: 'Descripción del Diagnóstico',
-        apiField: 'diagnosis_details',
+        apiField: 'diagnosisDetails',  // CORREGIDO: usar camelCase para coincidir con objeto patient
         inputType: 'text',
         placeholder: 'Ingrese la descripción del diagnóstico',
 
@@ -175,7 +175,7 @@ const FIELD_CONFIGS = {
         // API
         apiEndpoint: (id) => `/patients/${id}/admission`,
         apiMethod: 'PUT',
-        apiPayload: (value) => ({ diagnosis_details: value || null }),
+        apiPayload: (value) => ({ diagnosis_details: value || null }),  // API usa snake_case
 
         // UI
         updateElement: (patientId, value) => {
@@ -279,7 +279,7 @@ const FIELD_CONFIGS = {
     // Campo: Fecha de Ingreso
     admissionDate: {
         label: 'Fecha de Ingreso',
-        apiField: 'admission_date',
+        apiField: 'admissionDate',  // CORREGIDO: usar camelCase para coincidir con objeto patient
         inputType: 'date',
         placeholder: 'DD/MM/YYYY',
 
@@ -307,7 +307,7 @@ const FIELD_CONFIGS = {
         // API
         apiEndpoint: (id) => `/patients/${id}/admission`,
         apiMethod: 'PUT',
-        apiPayload: (value) => ({ admission_date: value }),
+        apiPayload: (value) => ({ admission_date: value }),  // API usa snake_case
 
         // UI
         updateElement: (patientId, value) => {
@@ -407,17 +407,19 @@ async function editPatientField(event, patientId, fieldName) {
             return;
         }
 
-        // Transformar valor si es necesario
-        if (config.transformer) {
-            newValue = config.transformer(newValue);
-            console.log(`[EditField] Valor transformado: ${newValue}`);
-        }
-
-        // Validar
+        // IMPORTANTE: Validar ANTES de transformar
+        // El validador espera el formato original (ej: DD/MM/YYYY)
+        // El transformer convierte al formato de la API (ej: YYYY-MM-DD)
         if (config.validator && !config.validator(newValue)) {
             console.log(`[EditField] Validación fallida para: ${newValue}`);
             showToast(config.validatorMessage || `${config.label} inválido`, 'error');
             return;
+        }
+
+        // Transformar valor después de validar
+        if (config.transformer) {
+            newValue = config.transformer(newValue);
+            console.log(`[EditField] Valor transformado: ${newValue}`);
         }
 
         // Verificar si hay cambios reales
@@ -598,15 +600,98 @@ async function showDropdownModal(patient, config, currentValue, displayValue) {
     });
 }
 
-// Helper para selector de fechas con prompt
+// Helper para selector de fechas (calendario nativo)
 async function showDateDialog(patient, config, currentValue, displayValue) {
-    const message = `Editar ${config.label}:\n\n` +
-                   `${config.label} actual: ${displayValue}\n\n` +
-                   `Ingrese la nueva fecha en formato DD/MM/YYYY:`;
+    return new Promise((resolve) => {
+        const modalId = `edit-${config.apiField}-modal`;
 
-    const promptValue = config.formatPrompt ? config.formatPrompt(currentValue) : currentValue;
+        // Remover modal existente si hay uno
+        const existing = document.getElementById(modalId);
+        if (existing) existing.remove();
 
-    return prompt(message, promptValue);
+        // Convertir valor actual a formato YYYY-MM-DD
+        let dateValue = '';
+        if (currentValue) {
+            if (currentValue.includes('-')) {
+                dateValue = currentValue;
+            } else if (currentValue.includes('/')) {
+                const [day, month, year] = currentValue.split('/');
+                dateValue = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+        }
+
+        // Crear modal
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal active';
+        modal.style.zIndex = '10000';
+
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 400px; padding: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
+                    📅 ${config.label}
+                </h3>
+                <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 13px;">
+                    Actual: <strong>${displayValue}</strong>
+                </p>
+                <div style="margin-bottom: 1.5rem;">
+                    <input
+                        type="date"
+                        id="${modalId}-date-input"
+                        value="${dateValue}"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 15px; font-family: inherit;"
+                    />
+                </div>
+                <div class="form-actions" style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" id="${modalId}-cancel-btn">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="${modalId}-save-btn">
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const dateInput = document.getElementById(`${modalId}-date-input`);
+
+        // Event listener para cancelar
+        document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => {
+            modal.remove();
+            resolve(null);
+        });
+
+        // Event listener para guardar
+        document.getElementById(`${modalId}-save-btn`).addEventListener('click', () => {
+            const selectedDate = dateInput.value;
+            if (!selectedDate) {
+                alert('Por favor seleccione una fecha');
+                return;
+            }
+
+            // Convertir YYYY-MM-DD a DD/MM/YYYY
+            const [year, month, day] = selectedDate.split('-');
+            const formattedDate = `${day}/${month}/${year}`;
+
+            modal.remove();
+            resolve(formattedDate);
+        });
+
+        // Permitir cerrar con ESC
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', handleEscape);
+                resolve(null);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        // Focus en el input
+        setTimeout(() => dateInput.focus(), 100);
+    });
 }
 
 // ==========================================
@@ -667,6 +752,11 @@ async function editAdmissionDate(event, patientId) {
     return editPatientField(event, patientId, 'admissionDate');
 }
 
+// Wrapper para Descripción del Diagnóstico - REEMPLAZA editDiagnosisDetails()
+async function editDiagnosisDetails(event, patientId) {
+    return editPatientField(event, patientId, 'diagnosisDetails');
+}
+
 // ==========================================
 // API HELPERS (si PacientesAPI no está disponible)
 // ==========================================
@@ -713,11 +803,13 @@ if (typeof window !== 'undefined') {
     window.editDiagnosis = editDiagnosis;
     window.editPatientDiagnosis = editPatientDiagnosis;
     window.editAdmissionDate = editAdmissionDate;
+    window.editDiagnosisDetails = editDiagnosisDetails;  // REFACTOR #3: Agregado para compatibilidad
 
     console.log('[PacientesEditRefactored] ✅ Funciones del sistema original sobrescritas con versiones refactorizadas');
     console.log('[PacientesEditRefactored] - editPatientPrevision (reemplaza fix-prevision-edit.js)');
     console.log('[PacientesEditRefactored] - editDiagnosis / editPatientDiagnosis');
     console.log('[PacientesEditRefactored] - editAdmissionDate');
+    console.log('[PacientesEditRefactored] - editDiagnosisDetails (REFACTOR #3)');
 }
 
 // Exportar módulo
@@ -743,7 +835,8 @@ const PacientesEditRefactored = {
     editPatientPrevision,
     editDiagnosis,
     editPatientDiagnosis,
-    editAdmissionDate
+    editAdmissionDate,
+    editDiagnosisDetails  // REFACTOR #3: Agregado
 };
 
 // Hacer el módulo globalmente accesible

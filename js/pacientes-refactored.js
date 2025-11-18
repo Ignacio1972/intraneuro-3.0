@@ -167,12 +167,32 @@ function openPatientModal(patientId) {
     // Abrir modal
     openModal('patientModal');
 
-    // Cargar las notas simples después de abrir el modal
-    if (typeof loadSimpleNotes === 'function') {
-        setTimeout(() => {
-            loadSimpleNotes(patientId);
-        }, 100); // Pequeño delay para asegurar que el DOM esté listo
-    }
+    // Inicializar el Chat Clínico después de abrir el modal
+    setTimeout(() => {
+        const chatContainer = document.getElementById(`clinical-chat-container-${patientId}`);
+        if (chatContainer && window.ClinicalChat) {
+            try {
+                // Obtener el admissionId del paciente (puede estar en admission.id o directamente en patient.admissionId)
+                const admissionId = patient.admission?.id || patient.admissionId || null;
+
+                // Inicializar el chat
+                const clinicalChat = new ClinicalChat(patientId, admissionId);
+                clinicalChat.init(chatContainer);
+
+                console.log(`✅ Chat clínico inicializado para paciente ${patientId}`);
+            } catch (error) {
+                console.error('Error inicializando chat clínico:', error);
+                chatContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        <p>⚠️ Error al cargar el sistema de seguimiento</p>
+                        <small style="color: #6c757d;">${error.message}</small>
+                    </div>
+                `;
+            }
+        } else {
+            console.warn('ClinicalChat no está disponible o contenedor no encontrado');
+        }
+    }, 200); // Delay para asegurar que el DOM esté listo
 
     // Agregar al historial para interceptar botón back
     history.pushState({patientModal: true, patientId: patientId}, '', '#patient-' + patientId);
@@ -698,7 +718,7 @@ window.editPatientRut = PacientesEdit.editPatientRut;
 window.editPatientBed = PacientesEdit.editPatientBed;
 // window.editPatientPrevision = PacientesEdit.editPatientPrevision; // Comentado: Usar la versión con DropdownSystem
 window.editPatientPrevision = PacientesEdit.editPatientPrevision; // Mantenemos la función básica
-window.editAdmissionDate = PacientesEdit.editAdmissionDate;
+// window.editAdmissionDate = PacientesEdit.editAdmissionDate; // Comentado: Usar la versión refactorizada con Flatpickr
 window.editDiagnosis = PacientesEdit.editDiagnosis;
 window.editDiagnosisDetails = PacientesEdit.editDiagnosisDetails;
 window.editAdmittedBy = PacientesEdit.editAdmittedBy;

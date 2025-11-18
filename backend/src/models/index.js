@@ -8,6 +8,7 @@ const Observation = require('./observation.model');
 const PendingTask = require('./pending-task.model');  // Nombre correcto del modelo
 const TimelineEvent = require('./timeline-event.model'); // Agregar este modelo si existe
 const Diagnosis = require('./diagnosis.model')(sequelize); // Nuevo: Catálogo de diagnósticos
+const AudioNote = require('./audio-note.model'); // Nuevo: Sistema de notas de audio
 
 // Configurar todas las asociaciones
 const setupAssociations = () => {
@@ -56,6 +57,17 @@ const setupAssociations = () => {
             as: 'admission'
         });
     }
+
+    // Asociaciones de Admission con AudioNote
+    Admission.hasMany(AudioNote, {
+        foreignKey: 'admission_id',
+        as: 'audioNotes',
+        onDelete: 'CASCADE'
+    });
+    AudioNote.belongsTo(Admission, {
+        foreignKey: 'admission_id',
+        as: 'admission'
+    });
 };
 
 // Sincronizar modelos con la base de datos
@@ -105,6 +117,7 @@ module.exports = {
     PendingTask,    // Cambiar de Task a PendingTask
     TimelineEvent,  // Agregar si existe
     Diagnosis,      // Nuevo: Catálogo de diagnósticos
+    AudioNote,      // Nuevo: Sistema de notas de audio
     setupAssociations,
     syncDatabase,
     testConnection  // Función helper útil

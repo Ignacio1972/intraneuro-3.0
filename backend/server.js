@@ -15,6 +15,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 const { syncDatabase } = require('./src/models');
 
 const app = express();
@@ -35,6 +36,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Logging
 app.use(morgan('combined'));
+
+// Servir archivos estáticos de audio
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+    maxAge: '1d', // Cache por 1 día
+    etag: true,
+    lastModified: true
+}));
 
 // Rutas
 app.use('/api', require('./src/routes'));

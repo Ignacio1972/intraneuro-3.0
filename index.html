@@ -27,7 +27,10 @@
 <!-- <link rel="stylesheet" href="css/clinical-chat.css?v=1"> -->
 <!-- Sistema de Tareas con Checkboxes y Audio -->
 <link rel="stylesheet" href="css/task-manager.css?v=1">
-    
+
+    <!-- Flatpickr - Calendario visual -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -288,6 +291,23 @@
      <!-- Fuse.js desactivado - Usando dropdown simple -->
      <!-- <script src="assets/libs/fuse.min.js"></script> -->
 
+     <!-- Flatpickr - Calendario visual -->
+     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+     <script>
+         // Verificar que Flatpickr se cargó correctamente
+         if (typeof flatpickr !== 'undefined') {
+             console.log('✅ Flatpickr cargado correctamente');
+             // Configurar español por defecto
+             if (window.flatpickr && window.flatpickr.l10ns && window.flatpickr.l10ns.es) {
+                 flatpickr.localize(flatpickr.l10ns.es);
+                 console.log('✅ Flatpickr configurado en español');
+             }
+         } else {
+             console.error('❌ Error: Flatpickr no se cargó correctamente');
+         }
+     </script>
+
 <!-- Core y utilidades primero -->
 <!-- Configuración global de servicios - Debe cargarse primero -->
 <script src="js/services-config.js?v=1"></script>
@@ -295,7 +315,7 @@
 <script src="js/validaciones.js?v=25"></script>
 <script src="js/data-catalogos.js?v=21"></script>
 <!-- Módulos de UI -->
-<script src="js/pacientes-ui.js?v=46"></script>
+<script src="js/pacientes-ui.js?v=47"></script>
 <!-- Sistema Unificado de Dropdowns v2.0 - DEBE cargarse ANTES de ingreso.js -->
 <script src="js/modules/dropdown-system.js?v=2"></script>
 <!-- Script de debug para dropdowns -->
@@ -310,7 +330,7 @@
 <script src="js/modules/pacientes/pacientes-edit.js?v=27"></script>
 <!-- Sistema de edición refactorizado - SISTEMA COMPLETO -->
 <!-- IMPORTANTE: Se carga DESPUÉS de pacientes-edit.js para sobrescribir funciones -->
-<script src="js/modules/pacientes/pacientes-edit-refactored.js?v=3"></script>
+<script src="js/modules/pacientes/pacientes-edit-refactored.js?v=4"></script>
 <!-- Sistema de edición de servicio hospitalario -->
 <script src="js/modules/pacientes/pacientes-service-edit.js?v=1"></script>
 <script src="js/modules/pacientes/pacientes-discharge.js?v=37"></script>

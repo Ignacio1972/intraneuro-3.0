@@ -288,58 +288,40 @@ function renderAdmissionData(patient) {
     
     return `
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientField(event, ${patient.id}, 'name')"
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
-                      title="Editar nombre (Sistema Refactorizado)">✏️</span>
-                Nombre:
-            </span>
-            <span class="info-value" id="name-${patient.id}">${patient.name}</span>
+            <span class="info-label">Nombre:</span>
+            <span class="info-value" id="name-${patient.id}"
+                  onclick="editPatientField(event, ${patient.id}, 'name')"
+                  style="cursor: pointer;">${patient.name}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientField(event, ${patient.id}, 'age')"
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
-                      title="Editar edad (Sistema Refactorizado)">✏️</span>
-                Edad:
-            </span>
-            <span class="info-value" id="age-${patient.id}">${patient.age} años</span>
+            <span class="info-label">Edad:</span>
+            <span class="info-value" id="age-${patient.id}"
+                  onclick="editPatientField(event, ${patient.id}, 'age')"
+                  style="cursor: pointer;">${patient.age} años</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientField(event, ${patient.id}, 'rut')"
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
-                      title="Editar RUT (Sistema Refactorizado)">✏️</span>
-                RUT:
-            </span>
-            <span class="info-value" id="rut-${patient.id}">${patient.rut || 'Sin RUT'}</span>
+            <span class="info-label">RUT:</span>
+            <span class="info-value" id="rut-${patient.id}"
+                  onclick="editPatientField(event, ${patient.id}, 'rut')"
+                  style="cursor: pointer;">${patient.rut || 'Sin RUT'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientPrevision(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar previsión">✏️</span>
-                Previsión:
-            </span>
-            <span class="info-value" id="prevision-${patient.id}">${patient.prevision || 'No especificada'}</span>
+            <span class="info-label">Previsión:</span>
+            <span class="info-value" id="prevision-${patient.id}"
+                  onclick="editPatientPrevision(event, ${patient.id})"
+                  style="cursor: pointer;">${patient.prevision || 'No especificada'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientField(event, ${patient.id}, 'bed')"
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
-                      title="Editar cama (Sistema Refactorizado)">✏️</span>
-                Cama:
-            </span>
-            <span class="info-value" id="bed-${patient.id}">${patient.bed || 'Sin asignar'}</span>
+            <span class="info-label">Cama:</span>
+            <span class="info-value" id="bed-${patient.id}"
+                  onclick="editPatientField(event, ${patient.id}, 'bed')"
+                  style="cursor: pointer;">${patient.bed || 'Sin asignar'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientService(event, ${patient.id})"
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
-                      title="Editar servicio hospitalario">✏️</span>
-                Servicio:
-            </span>
-            <span class="info-value" id="service-${patient.id}">
+            <span class="info-label">Servicio:</span>
+            <span class="info-value" id="service-${patient.id}"
+                  onclick="editPatientService(event, ${patient.id})"
+                  style="cursor: pointer;">
                 ${patient.service ? `
                     <span style="
                         display: inline-flex;
@@ -359,40 +341,28 @@ function renderAdmissionData(patient) {
             </span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editAdmissionDate(event, ${patient.id})"
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;"
-                      title="Editar fecha de ingreso">✏️</span>
-                Fecha Ingreso:
-            </span>
-            <span class="info-value" id="admission-date-${patient.id}">${formatDate(patient.admissionDate)}</span>
+            <span class="info-label">Fecha Ingreso:</span>
+            <span class="info-value" id="admission-date-${patient.id}"
+                  onclick="editAdmissionDate(event, ${patient.id})"
+                  style="cursor: pointer;">${formatDate(patient.admissionDate)}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editPatientDiagnosis(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar diagnóstico">✏️</span>
-                Diagnóstico:
-            </span>
-            <span class="info-value" id="diagnosis-${patient.id}">${diagnosisText}</span>
+            <span class="info-label">Diagnóstico:</span>
+            <span class="info-value" id="diagnosis-${patient.id}"
+                  onclick="editPatientDiagnosis(event, ${patient.id})"
+                  style="cursor: pointer;">${diagnosisText}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editDiagnosisDetails(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar descripción">✏️</span>
-                Descripción:
-            </span>
-            <span class="info-value" id="diagnosis-details-${patient.id}">${patient.diagnosisDetails || ''}</span>
+            <span class="info-label">Descripción:</span>
+            <span class="info-value" id="diagnosis-details-${patient.id}"
+                  onclick="editDiagnosisDetails(event, ${patient.id})"
+                  style="cursor: pointer;">${patient.diagnosisDetails || ''}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">
-                <span onclick="editAdmittedBy(event, ${patient.id})" 
-                      style="cursor: pointer; margin-right: 5px; color: var(--primary-color); font-size: 0.9em;" 
-                      title="Editar médico tratante">✏️</span>
-                Médico Tratante:
-            </span>
-            <span class="info-value" id="admitted-by-${patient.id}">${patient.admittedBy}</span>
+            <span class="info-label">Médico Tratante:</span>
+            <span class="info-value" id="admitted-by-${patient.id}"
+                  onclick="editAdmittedBy(event, ${patient.id})"
+                  style="cursor: pointer;">${patient.admittedBy}</span>
         </div>
 
         <!-- SECCIÓN: Sistema de Notas Simples -->

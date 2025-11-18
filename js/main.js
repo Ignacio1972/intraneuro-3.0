@@ -238,6 +238,11 @@ function closeModal(modalId) {
                             setTimeout(() => {
                                 modal.style.display = 'none';
                             }, 300);
+
+                            // Limpiar chat del paciente (detiene audio, grabación, libera recursos)
+                            if (typeof ClinicalChatRegistry !== 'undefined' && patientId) {
+                                ClinicalChatRegistry.destroy(patientId);
+                            }
                         }
                     }, 800);
                 }).catch((error) => {
@@ -263,6 +268,11 @@ function closeModal(modalId) {
         // Limpiar historial cuando se cierra modal de paciente normalmente
         if (modalId === 'patientModal') {
             history.replaceState(null, '', window.location.pathname);
+
+            // Limpiar chat del paciente (detiene audio, grabación, libera recursos)
+            if (typeof ClinicalChatRegistry !== 'undefined' && currentPatientId) {
+                ClinicalChatRegistry.destroy(currentPatientId);
+            }
         }
     }
 }
