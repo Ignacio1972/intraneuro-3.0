@@ -1,0 +1,453 @@
+/* task-manager.css - Estilos del Sistema de Tareas */
+/* INTRANEURO - Sistema de Gestión Hospitalaria */
+
+/* ========================================
+   CONTENEDOR PRINCIPAL
+   ======================================== */
+.task-manager-container {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.task-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.task-manager-header h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-count-badge {
+    /* Sin background, mismo estilo que el título */
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    margin-right: 4px;
+}
+
+.btn-new-task {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.btn-new-task:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-new-task:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   LISTA DE TAREAS
+   ======================================== */
+.task-list-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Scrollbar personalizado */
+.task-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.task-list-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.task-list-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.task-list-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ========================================
+   ITEM DE TAREA
+   ======================================== */
+.task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.task-item:hover {
+    background: #f1f5f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.task-item.task-completed {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+}
+
+.task-item.task-completed:hover {
+    background: #dcedc8;
+}
+
+/* Checkbox */
+.task-checkbox {
+    font-size: 1.5em;
+    cursor: pointer;
+    user-select: none;
+    color: #cbd5e1;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.task-checkbox:hover {
+    color: #94a3b8;
+    transform: scale(1.1);
+}
+
+.task-completed .task-checkbox {
+    color: #22c55e;
+}
+
+.task-completed .task-checkbox:hover {
+    color: #16a34a;
+}
+
+/* Contenido */
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-text {
+    font-size: 1em;
+    color: #1f2937;
+    font-weight: 500;
+    margin-bottom: 6px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.task-completed .task-text {
+    color: #059669;
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+.task-meta {
+    font-size: 0.85em;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.task-completed-info {
+    font-size: 0.85em;
+    color: #059669;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* Acciones */
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* ========================================
+   BOTONES DE ACCIÓN
+   ======================================== */
+.task-audio-record-btn,
+.task-audio-play-btn,
+.task-audio-delete-btn,
+.task-delete-btn {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+/* Botón grabar audio */
+.task-audio-record-btn {
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.task-audio-record-btn:hover {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Botón reproducir audio */
+.task-audio-play-btn {
+    color: #10b981;
+    border-color: #10b981;
+}
+
+.task-audio-play-btn:hover {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+/* Botón eliminar audio */
+.task-audio-delete-btn {
+    color: #f59e0b;
+    border-color: #f59e0b;
+    padding: 6px 8px;
+}
+
+.task-audio-delete-btn:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+/* Botón eliminar tarea */
+.task-delete-btn {
+    color: #ef4444;
+    border-color: #ef4444;
+    padding: 6px 8px;
+}
+
+.task-delete-btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* ========================================
+   ESTADO VACÍO
+   ======================================== */
+.task-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+}
+
+.task-empty-state p:first-child {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.task-empty-state p:nth-child(2) {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #64748b;
+}
+
+.task-empty-state p:last-child {
+    font-size: 0.9em;
+}
+
+/* ========================================
+   MODAL DE NUEVA TAREA
+   ======================================== */
+#newTaskModal .modal-content {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#newTaskModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+#newTaskModal .modal-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+#newTaskModal .close-modal {
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+#newTaskModal .close-modal:hover {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+#newTaskModal .modal-body {
+    padding: 20px;
+}
+
+#newTaskModal .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* ========================================
+   SISTEMA DE GRABACIÓN DE AUDIO
+   ======================================== */
+.task-audio-recorder {
+    margin-top: 10px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.task-audio-recorder.recording {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.task-recording-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+
+.task-recording-time {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ef4444;
+    font-family: monospace;
+}
+
+.task-audio-player {
+    margin-top: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+}
+
+.task-audio-player audio {
+    width: 100%;
+    height: 35px;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .task-manager-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .btn-new-task {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .task-item {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .task-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .task-checkbox {
+        font-size: 1.3em;
+    }
+}
+
+/* ========================================
+   ANIMACIONES
+   ======================================== */
+@keyframes taskAdded {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.task-item.task-new {
+    animation: taskAdded 0.3s ease-out;
+}
+
+/* ========================================
+   UTILIDADES
+   ======================================== */
+.task-loading {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+}
+
+.task-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 0.9em;
+}

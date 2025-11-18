@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const patientsController = require('../controllers/patients.controller');
 const authMiddleware = require('../middleware/auth.middleware');
+const { uploadTaskAudio, validateTaskAudioUpload, handleMulterError } = require('../middleware/task-audio-upload.middleware');
 
 // Ruta pública para compartir fichas (SIN autenticación)
 router.get('/public/:id', patientsController.getPublicPatient);
@@ -29,6 +30,44 @@ router.put('/:id/service', authMiddleware, patientsController.updateService);
 router.put('/:id/prevision', authMiddleware, patientsController.updatePrevision);
 router.put('/:id/admittedBy', authMiddleware, patientsController.updateAdmittedBy);
 router.put('/:id/diagnosis-details', authMiddleware, patientsController.updateDiagnosisDetails);
+
+// Ruta para upload de audios de tareas
+router.post('/upload-task-audio', authMiddleware, uploadTaskAudio, validateTaskAudioUpload, handleMulterError, (req, res) => {
+    try {
+        const { patientId, taskId, duration } = req.body;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No se recibió archivo'
+            });
+        }
+
+        // Construir URL relativa del archivo
+        const fileUrl = `/uploads/tasks/${file.filename}`;
+
+        console.log(`[TaskAudio] Audio subido: ${fileUrl} (${duration}s, ${(file.size / 1024).toFixed(2)}KB)`);
+
+        res.json({
+            success: true,
+            url: fileUrl,
+            filename: file.filename,
+            size: file.size,
+            duration: duration,
+            patientId: patientId,
+            taskId: taskId
+        });
+
+    } catch (error) {
+        console.error('[TaskAudio] Error en upload:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al procesar audio'
+        });
+    }
+});
+
 router.put('/:id', authMiddleware, patientsController.updatePatient);
 router.delete('/:id', authMiddleware, patientsController.deletePatient);
 router.get('/:id', authMiddleware, patientsController.getPatientById); // Esta DEBE ir al final

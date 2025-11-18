@@ -273,10 +273,17 @@ function renderAdmissionData(patient) {
         Interconsulta: { label: 'Interconsulta', color: '#16a34a', icon: '📋' }
     };
 
-    // Cargar observaciones y tareas al abrir el modal
+    // Cargar notas simples y sistema de tareas al abrir el modal
     setTimeout(() => {
-        loadObservationHistory(patient.id);
-        loadTaskHistory(patient.id);
+        // Cargar historia clínica
+        if (typeof loadSimpleNotes === 'function') {
+            loadSimpleNotes(patient.id);
+        }
+
+        // Inicializar sistema de tareas
+        if (typeof initTaskManager === 'function') {
+            initTaskManager(patient.id);
+        }
     }, 100);
     
     return `
@@ -387,13 +394,13 @@ function renderAdmissionData(patient) {
             </span>
             <span class="info-value" id="admitted-by-${patient.id}">${patient.admittedBy}</span>
         </div>
-        
-        <!-- NUEVA SECCIÓN: Sistema de Notas tipo Chat -->
+
+        <!-- SECCIÓN: Sistema de Notas Simples -->
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--border-color);">
             <h3 style="font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem;">
                 📝 Seguimiento del Paciente
             </h3>
-            
+
             <div class="simple-notes-container">
                 <!-- Historia Clínica - TEXTAREA SIMPLE -->
                 <div class="note-section">
@@ -407,24 +414,31 @@ function renderAdmissionData(patient) {
                     >${patient.observations || ''}</textarea>
                 </div>
 
-                <!-- Tareas Pendientes - TEXTAREA SIMPLE -->
-                <div class="note-section" style="margin-top: 15px;">
-                    <label><strong>Tareas Pendientes:</strong></label>
-                    <textarea
-                        id="tareas-${patient.id}"
-                        class="note-textarea"
-                        rows="5"
-                        placeholder="Escribe las tareas pendientes aquí..."
-                        onblur="saveSimpleNote(${patient.id}, 'tareas')"
-                    >${patient.pendingTasks || ''}</textarea>
-                </div>
-
-                <!-- Mensaje de estado -->
+                <!-- Mensaje de estado Historia Clínica -->
                 <div id="save-status-${patient.id}" style="margin-top: 10px; text-align: center; color: green; display: none;">
                     ✓ Guardado automáticamente
                 </div>
             </div>
-            
+
+            <!-- NUEVO SISTEMA: Tareas Pendientes con Checkboxes y Audio -->
+            <div class="task-manager-container" style="margin-top: 20px;">
+                <div class="task-manager-header">
+                    <h3>
+                        <span class="task-count-badge" id="task-count-${patient.id}">0</span>
+                        Tareas Pendientes
+                    </h3>
+                    <button class="btn-new-task" onclick="showNewTaskModal(${patient.id})">
+                        ➕ Nueva Tarea
+                    </button>
+                </div>
+                <div class="task-list-container" id="task-list-${patient.id}">
+                    <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                        <p style="font-size: 2em; margin-bottom: 10px;">📋</p>
+                        <p style="font-size: 1.1em; font-weight: 500; margin-bottom: 5px;">Cargando tareas...</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Campos ocultos para mantener compatibilidad -->
             <input type="hidden" id="patientObservations" value="${patient.observations || ''}">
             <input type="hidden" id="patientPendingTasks" value="${patient.pendingTasks || ''}">
