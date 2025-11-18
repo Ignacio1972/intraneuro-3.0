@@ -757,3 +757,326 @@ input:checked + .slider:before {
     background-color: #e0a800;
     border-color: #e0a800;
 }
+
+/* ===================================================================
+   MODAL MODULAR - Sistema de Tabs (v3.0.0)
+   ================================================================ */
+
+/* Patient Header */
+.patient-header {
+    padding: 2rem 2rem 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.patient-header h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.patient-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+
+.patient-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Tabs Navigation */
+.modal-tabs {
+    display: flex;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    position: relative;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+}
+
+.tab-btn.active {
+    background-color: white;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Tab Contents */
+.tab-content {
+    display: none;
+    padding: 2rem;
+    min-height: 400px;
+    animation: fadeInTab 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeInTab {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Component Header Styles */
+.component-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.component-header h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.component-header .subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Discharge Component Specific Styles */
+.discharge-form-content {
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-group label.required::after {
+    content: ' *';
+    color: #dc3545;
+}
+
+.form-group input[type="date"],
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-hint {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* Discharged Info Styles */
+.discharged-info {
+    padding: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.alert strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1.05rem;
+}
+
+.alert p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.info-row .info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.info-row .info-value {
+    color: var(--text-primary);
+    font-size: 1rem;
+    text-align: right;
+}
+
+.discharged-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Deceased Mode (formulario de fallecimiento) */
+.discharge-form-content.deceased-mode {
+    background-color: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 2px solid #ffc107;
+}
+
+/* Responsive - Tabs */
+@media (max-width: 768px) {
+    .patient-header {
+        padding: 1.5rem 1rem 0.75rem 1rem;
+    }
+
+    .patient-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .patient-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .modal-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        flex: 0 0 auto;
+        padding: 0.875rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .tab-content {
+        padding: 1.5rem 1rem;
+        min-height: 300px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}
