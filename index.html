@@ -323,6 +323,16 @@
 <!-- Módulos principales -->
 <script src="js/auth.js?v=25"></script>
 <script src="js/ingreso.js?v=23"></script>
+
+<!-- ===== ARQUITECTURA MODULAR v3.0 - Sistema de Componentes ===== -->
+<!-- Base component (clase abstracta) - DEBE cargarse primero -->
+<script src="js/modal-components/base-component.js?v=1"></script>
+<!-- Componentes específicos -->
+<script src="js/modal-components/discharge-component.js?v=1"></script>
+<!-- Orquestador del modal - usa los componentes -->
+<script src="js/modal-orchestrator.js?v=1"></script>
+<!-- ============================================================== -->
+
 <!-- Main DEBE ir antes de pacientes-refactored para declarar variables globales -->
 <script src="js/main.js?v=27"></script>
 <!-- Módulos refactorizados de pacientes - DESPUÉS de main.js -->
