@@ -366,11 +366,11 @@ function renderAdmissionData(patient) {
         </div>
 
         <!-- SECCIÓN: Sistema de Notas Simples -->
-        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--border-color);">
+        <div class="modal-section" style="border-top: 2px solid var(--border-color);">
+            <h2>HISTORIA CLÍNICA</h2>
             <div class="simple-notes-container">
                 <!-- Historia Clínica - TEXTAREA SIMPLE -->
                 <div class="note-section">
-                    <label><strong>Historia Clínica:</strong></label>
                     <textarea
                         id="historia-${patient.id}"
                         class="note-textarea"
@@ -386,13 +386,16 @@ function renderAdmissionData(patient) {
                 </div>
             </div>
 
-            <!-- NUEVO SISTEMA: Tareas Pendientes con Checkboxes y Audio -->
-            <div class="task-manager-container" style="margin-top: 20px;">
-                <div class="task-manager-header">
-                    <h3>
-                        <span class="task-count-badge" id="task-count-${patient.id}">0</span>
-                        Tareas Pendientes
-                    </h3>
+        </div>
+
+        <!-- NUEVO SISTEMA: Tareas Pendientes con Checkboxes y Audio -->
+        <div class="modal-section" style="border-top: 2px solid var(--border-color);">
+            <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color);">
+                <span class="task-count-badge" id="task-count-${patient.id}">0</span>
+                TAREAS PENDIENTES
+            </h2>
+            <div class="task-manager-container" style="padding: 0;">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
                     <button class="btn-new-task" onclick="showNewTaskModal(${patient.id})">
                         ➕ Nueva Tarea
                     </button>

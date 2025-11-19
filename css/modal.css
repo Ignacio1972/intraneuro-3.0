@@ -106,8 +106,8 @@
 
 /* Patient Modal */
 .patient-modal-content {
-    width: 95%;
-    max-width: min(1000px, 100vw);
+    width: 50%;
+    max-width: 700px;
     padding: 0;
 }
 
@@ -641,11 +641,11 @@
     padding: 0.5rem 0;
 }
 
-/* Responsive para modal más ancho */
+/* Responsive para modal optimizado */
 @media (max-width: 1300px) {
     .patient-modal-content {
-        width: 95%;
-        max-width: 1200px;
+        width: 60%;
+        max-width: 750px;
     }
 }
 
