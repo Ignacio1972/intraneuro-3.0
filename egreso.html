@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egreso de Paciente - IntraNeuro</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/egreso.css?v=1">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header - Igual que index.html -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="assets/img/logo.png" alt="INTRANEURO" class="header-logo">
+                <span class="clinic-name">INTRANEURO</span>
+            </div>
+            <div class="user-section">
+                <span id="currentUser">Sistema de Egreso</span>
+                <button id="logoutBtn" class="btn-logout" onclick="window.location.href='index.html'">
+                    ← Volver al Dashboard
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="egreso-container">
+            <!-- Header -->
+            <div class="egreso-header">
+                <h1>🏥 Egreso de Paciente</h1>
+                <div id="patient-header-info" class="patient-info">
+                    Cargando información del paciente...
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="egreso-body">
+                <!-- Loading State -->
+                <div id="loading-state" class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando datos del paciente...</p>
+                </div>
+
+                <!-- Error State -->
+                <div id="error-state" class="error-state" style="display: none;">
+                    <div class="error-icon">⚠️</div>
+                    <h2>Error al cargar paciente</h2>
+                    <p id="error-message">No se pudo cargar la información del paciente.</p>
+                    <a href="index.html" class="back-link">
+                        ← Volver al Dashboard
+                    </a>
+                </div>
+
+                <!-- Discharge Component Container -->
+                <div id="discharge-container" style="display: none;">
+                    <!-- DischargeComponent se renderiza aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+    <!-- API para DischargeComponent -->
+    <script>
+        // PacientesAPI global (simplificado para esta página)
+        const PacientesAPI = {
+            async toggleScheduledDischargeAPI(patientId, value) {
+                try {
+                    const response = await apiRequest(`/patients/${patientId}/scheduled-discharge`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ scheduledDischarge: value })
+                    });
+                    return response;
+                } catch (error) {
+                    console.error('[PacientesAPI] Error toggle alta programada:', error);
+                    throw error;
+                }
+            },
+
+            async processDischargeAPI(patientId, dischargeData) {
+                try {
+                    const response = await apiRequest(`/patients/${patientId}/discharge`, {
+                        method: 'POST',
+                        body: JSON.stringify(dischargeData)
+                    });
+                    return response;
+                } catch (error) {
+                    console.error('[PacientesAPI] Error procesando egreso:', error);
+                    throw error;
+                }
+            }
+        };
+
+        // Toast global
+        window.showToast = function(message, type = 'success') {
+            alert(`[${type.toUpperCase()}] ${message}`);
+        };
+    </script>
+
+    <!-- Componentes Modulares -->
+    <script src="js/modal-components/base-component.js"></script>
+    <script src="js/modal-components/discharge-component.js"></script>
+
+    <!-- App Logic -->
+    <script>
+        // Estado global
+        let currentPatient = null;
+        let dischargeComponent = null;
+
+        /**
+         * Obtener patientId de la URL
+         */
+        function getPatientIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('patientId');
+        }
+
+        /**
+         * Cargar datos del paciente desde el backend
+         */
+        async function loadPatient(patientId) {
+            try {
+                console.log(`[Egreso] Cargando paciente ${patientId}...`);
+
+                const response = await apiRequest(`/patients/${patientId}`);
+
+                if (!response || !response.id) {
+                    throw new Error('Paciente no encontrado');
+                }
+
+                currentPatient = response;
+                console.log('[Egreso] Paciente cargado:', currentPatient);
+
+                return currentPatient;
+
+            } catch (error) {
+                console.error('[Egreso] Error cargando paciente:', error);
+                throw error;
+            }
+        }
+
+        /**
+         * Renderizar DischargeComponent
+         */
+        function renderDischargeComponent() {
+            // Ocultar loading
+            document.getElementById('loading-state').style.display = 'none';
+
+            // Mostrar container
+            const container = document.getElementById('discharge-container');
+            container.style.display = 'block';
+
+            // Actualizar header
+            const headerInfo = document.getElementById('patient-header-info');
+            headerInfo.innerHTML = `
+                <strong>${currentPatient.name}</strong> •
+                Cama ${currentPatient.bed || 'N/A'} •
+                RUT: ${currentPatient.rut || 'N/A'}
+            `;
+
+            // Crear instancia del componente
+            dischargeComponent = new DischargeComponent('discharge-container', currentPatient);
+
+            // Renderizar
+            dischargeComponent.mount();
+        }
+
+        /**
+         * Mostrar error
+         */
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        /**
+         * Inicialización
+         */
+        async function init() {
+            // Verificar autenticación
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Obtener patientId de URL
+            const patientId = getPatientIdFromURL();
+
+            if (!patientId) {
+                showError('ID de paciente no especificado en la URL.');
+                return;
+            }
+
+            try {
+                // Cargar paciente
+                await loadPatient(patientId);
+
+                // Renderizar componente
+                renderDischargeComponent();
+
+            } catch (error) {
+                showError(error.message || 'Error al cargar el paciente.');
+            }
+        }
+
+        // Event listener: paciente egresado
+        document.addEventListener('patient:discharged', (event) => {
+            console.log('[Egreso] Paciente egresado:', event.detail);
+
+            // Mostrar confirmación
+            setTimeout(() => {
+                alert('✅ Paciente egresado correctamente');
+
+                // Redirect a dashboard
+                window.location.href = 'index.html';
+            }, 500);
+        });
+
+        // Iniciar al cargar la página
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
