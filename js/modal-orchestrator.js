@@ -16,14 +16,13 @@ class PatientModalOrchestrator {
 
         this.components = {};
         this.currentPatient = null;
-        this.activeTab = 'discharge'; // Empezamos con discharge como default
+        this.activeTab = 'notes'; // Default: tab de notas (más usado)
 
         // Registro de componentes disponibles (lazy loaded)
-        // Solo agregamos los componentes que ya existen
         this.componentRegistry = {
             // 'admission': AdmissionComponent,  // TODO: Fase 2.4
-            'discharge': DischargeComponent,     // Fase 2.1
-            // 'notes': NotesComponent,          // TODO: Fase 2.2
+            'discharge': DischargeComponent,     // ✅ Fase 2.1
+            'notes': NotesComponent,             // ✅ Fase 2.2
             // 'tasks': TasksComponent,          // TODO: Fase 2.3
             // 'chat': ChatComponent             // TODO: Fase 2.5
         };
@@ -329,7 +328,22 @@ class PatientModalOrchestrator {
 const patientModal = new PatientModalOrchestrator();
 
 // Exportar funciones globales para compatibilidad con código existente
+// NOTA: Estas pueden ser sobrescritas por el sistema legacy
 window.openPatientModal = (id) => patientModal.open(id);
 window.closePatientModal = () => patientModal.close();
 
+// Exportar versiones específicas para testing (NO serán sobrescritas)
+window.openPatientModalModular = (id) => {
+    console.log('🔷 [MODULAR] Abriendo modal con sistema modular...');
+    return patientModal.open(id);
+};
+window.closePatientModalModular = () => {
+    console.log('🔷 [MODULAR] Cerrando modal con sistema modular...');
+    return patientModal.close();
+};
+
+// Exportar instancia para debugging
+window.patientModalOrchestrator = patientModal;
+
 console.log('[ModalOrchestrator] Global API exported');
+console.log('[ModalOrchestrator] 🔷 Use openPatientModalModular(id) para testing del sistema modular');
