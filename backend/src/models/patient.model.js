@@ -29,6 +29,11 @@ const Patient = sequelize.define('Patient', {
         allowNull: true
         // Removida validación isIn para permitir valores personalizados
         // La validación ahora se hace en el controlador si es necesaria
+    },
+    voice_notes: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: []
     }
 }, {
     tableName: 'patients',

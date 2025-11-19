@@ -85,7 +85,7 @@ function createTask(text, patientId) {
     };
 
     // Agregar a la lista de tareas
-    window.taskManagerState.tasks.unshift(newTask); // Agregar al inicio
+    window.taskManagerState.tasks.push(newTask); // Agregar al final (cronología ascendente)
 
     console.log(`[TaskManager] Tarea creada:`, newTask);
 
@@ -266,15 +266,9 @@ function renderTaskList(patientId) {
 
     const tasks = window.taskManagerState.tasks;
 
-    // Si no hay tareas, mostrar mensaje vacío
+    // Si no hay tareas, dejar vacío (no mostrar mensaje)
     if (tasks.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
-                <p style="font-size: 2em; margin-bottom: 10px;">📋</p>
-                <p style="font-size: 1.1em; font-weight: 500; margin-bottom: 5px;">No hay tareas pendientes</p>
-                <p style="font-size: 0.9em;">Crea una nueva tarea usando el botón superior</p>
-            </div>
-        `;
+        container.innerHTML = '';
         return;
     }
 
@@ -311,10 +305,12 @@ function renderTaskItem(task, patientId) {
 
     // Renderizar audio si existe
     const audioSection = task.audioNote
-        ? `<button class="task-audio-play-btn"
+        ? `<button id="play-btn-${task.id}"
+                   class="task-audio-play-btn"
                    onclick="playTaskAudio('${task.id}')"
-                   title="Reproducir nota de voz">
-                ▶️ ${formatDuration(task.audioNote.duration)}
+                   title="Reproducir nota de voz"
+                   style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 14px;">►</span> ${formatDuration(task.audioNote.duration)}
            </button>
            <button class="task-audio-delete-btn"
                    onclick="deleteTaskAudio('${task.id}', ${patientId})"
@@ -361,28 +357,25 @@ function renderTaskItem(task, patientId) {
 function showNewTaskModal(patientId) {
     const modalHtml = `
         <div id="newTaskModal" class="modal active" style="z-index: 10000;">
-            <div class="modal-content" style="max-width: 500px;">
-                <div class="modal-header">
-                    <h3>Nueva Tarea Pendiente</h3>
-                    <button class="close-modal" onclick="closeNewTaskModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <label for="newTaskText" style="display: block; margin-bottom: 8px; font-weight: 500;">
-                        Descripción de la tarea:
-                    </label>
-                    <textarea
-                        id="newTaskText"
-                        rows="4"
-                        placeholder="Ej: Ajustar dosis de medicamento según evolución"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 14px;"
-                        autofocus
-                    ></textarea>
-                </div>
-                <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button onclick="closeNewTaskModal()" class="btn btn-secondary">
+            <div class="modal-content" style="max-width: 700px !important; width: 90% !important; padding: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
+                    Nueva Tarea Pendiente
+                </h3>
+                <label for="newTaskText" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); font-size: 14px;">
+                    Descripción de la tarea:
+                </label>
+                <textarea
+                    id="newTaskText"
+                    rows="4"
+                    placeholder="Ej: Ajustar dosis de medicamento según evolución"
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 14px; margin-bottom: 1.5rem;"
+                    autofocus
+                ></textarea>
+                <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="closeNewTaskModal()" class="btn btn-secondary">
                         Cancelar
                     </button>
-                    <button onclick="confirmCreateTask(${patientId})" class="btn btn-primary">
+                    <button type="button" onclick="confirmCreateTask(${patientId})" class="btn btn-primary">
                         Crear Tarea
                     </button>
                 </div>

@@ -284,6 +284,11 @@ function renderAdmissionData(patient) {
         if (typeof initTaskManager === 'function') {
             initTaskManager(patient.id);
         }
+
+        // Inicializar sistema de notas de voz
+        if (typeof initPatientVoiceNotes === 'function') {
+            initPatientVoiceNotes(patient.id);
+        }
     }, 100);
     
     return `
@@ -366,8 +371,8 @@ function renderAdmissionData(patient) {
         </div>
 
         <!-- SECCIÓN: Sistema de Notas Simples -->
-        <div class="modal-section" style="border-top: 2px solid var(--border-color);">
-            <h2>HISTORIA CLÍNICA</h2>
+        <div style="border-top: 2px solid var(--border-color); padding-top: 2rem;">
+            <h2 style="font-size: 1.2rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color);">HISTORIA CLÍNICA</h2>
             <div class="simple-notes-container">
                 <!-- Historia Clínica - TEXTAREA SIMPLE -->
                 <div class="note-section">
@@ -388,16 +393,30 @@ function renderAdmissionData(patient) {
 
         </div>
 
+        <!-- NOTAS DE VOZ -->
+        <div style="border-top: 2px solid var(--border-color); padding-top: 2rem;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem;">
+                <button class="btn-new-voice-note" onclick="startRecordingVoiceNote(${patient.id})">
+                    <img src="assets/icons/mic-microphone-icon.svg" alt="Micrófono" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+                    Nota de voz
+                </button>
+            </div>
+
+            <!-- Indicador de grabación -->
+            <div id="voice-notes-recording-${patient.id}" style="display: none; margin-bottom: 15px;"></div>
+
+            <!-- Lista de notas de voz -->
+            <div class="voice-notes-list-container" id="voice-notes-list-${patient.id}">
+                <!-- Las notas se cargan dinámicamente aquí -->
+            </div>
+        </div>
+
         <!-- NUEVO SISTEMA: Tareas Pendientes con Checkboxes y Audio -->
-        <div class="modal-section" style="border-top: 2px solid var(--border-color);">
-            <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color);">
-                <span class="task-count-badge" id="task-count-${patient.id}">0</span>
-                TAREAS PENDIENTES
-            </h2>
+        <div style="border-top: 2px solid var(--border-color); padding-top: 2rem;">
             <div class="task-manager-container" style="padding: 0;">
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem;">
                     <button class="btn-new-task" onclick="showNewTaskModal(${patient.id})">
-                        ➕ Nueva Tarea
+                        <span style="color: white; font-weight: bold;">+</span> Nueva Tarea
                     </button>
                 </div>
                 <div class="task-list-container" id="task-list-${patient.id}">
@@ -411,32 +430,6 @@ function renderAdmissionData(patient) {
             <!-- Campos ocultos para mantener compatibilidad -->
             <input type="hidden" id="patientObservations" value="${patient.observations || ''}">
             <input type="hidden" id="patientPendingTasks" value="${patient.pendingTasks || ''}">
-        </div>
-
-        <!-- BOTÓN: Egresar Paciente -->
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--border-color); text-align: center;">
-            <button
-                onclick="goToDischarge(${patient.id})"
-                style="
-                    padding: 15px 40px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: white;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border: none;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-                "
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';"
-            >
-                🏥 Egresar Paciente
-            </button>
-            <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                Procesar el egreso definitivo del paciente
-            </p>
         </div>
     `;
 }
@@ -656,6 +649,12 @@ if (typeof window.editPatientService === 'undefined') {
  */
 function goToDischarge(patientId) {
     console.log(`[UI] Navegando a egreso para paciente ${patientId}`);
+
+    // Confirmación antes de egresar
+    if (!confirm('¿Está seguro que quiere egresar al paciente?')) {
+        console.log('[UI] Egreso cancelado por el usuario');
+        return;
+    }
 
     // Cerrar modal antes de navegar
     if (typeof closeModal === 'function') {

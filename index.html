@@ -27,6 +27,8 @@
 <!-- <link rel="stylesheet" href="css/clinical-chat.css?v=1"> -->
 <!-- Sistema de Tareas con Checkboxes y Audio -->
 <link rel="stylesheet" href="css/task-manager.css?v=1">
+<!-- Sistema de Notas de Voz para Pacientes -->
+<link rel="stylesheet" href="css/voice-notes.css?v=1">
 
     <!-- Flatpickr - Calendario visual -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -194,7 +196,12 @@
             <span class="close">&times;</span>
             <!-- Admission Data -->
             <div class="modal-section admission-section">
-                <h2>DATOS DE INGRESO</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h2 style="margin: 0;">DATOS DE INGRESO</h2>
+                    <button id="dischargeBtn" class="btn-logout">
+                        Egresar Paciente
+                    </button>
+                </div>
                 <div id="admissionData"></div>
             </div>
         </div>
@@ -336,6 +343,8 @@
 <!-- Sistema de Tareas con Checkboxes y Audio -->
 <script src="js/modules/task-manager.js?v=1"></script>
 <script src="js/modules/task-audio.js?v=1"></script>
+<!-- Sistema de Notas de Voz para Pacientes -->
+<script src="js/modules/patient-voice-notes.js?v=1"></script>
 <!-- Sistema de Chat Clínico tipo WhatsApp - DESACTIVADO (ahora usando sistema simple de textboxes) -->
 <!-- <script src="js/modules/clinical-chat.js?v=1"></script> -->
 <!-- Archivo principal de pacientes - comentado para evitar conflictos con pacientes-refactored.js -->

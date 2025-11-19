@@ -1095,3 +1095,172 @@ exports.deletePatient = async (req, res) => {
         res.status(500).json({ error: 'Error al eliminar paciente' });
     }
 };
+
+// ========================================
+// NOTAS DE VOZ PARA PACIENTES
+// ========================================
+
+/**
+ * Obtener notas de voz de un paciente
+ * GET /api/patients/:id/voice-notes
+ */
+exports.getPatientVoiceNotes = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const patient = await Patient.findByPk(id, {
+            attributes: ['id', 'name', 'voice_notes']
+        });
+
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                error: 'Paciente no encontrado'
+            });
+        }
+
+        const voiceNotes = patient.voice_notes || [];
+
+        console.log(`[VoiceNotes] Paciente ${id}: ${voiceNotes.length} notas`);
+
+        res.json({
+            success: true,
+            voiceNotes: voiceNotes
+        });
+
+    } catch (error) {
+        console.error('[VoiceNotes] Error obteniendo notas:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al obtener notas de voz'
+        });
+    }
+};
+
+/**
+ * Subir nota de voz de un paciente
+ * POST /api/patients/upload-voice-note
+ */
+exports.uploadPatientVoiceNote = async (req, res) => {
+    try {
+        const { patientId, duration, createdBy } = req.body;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No se recibió archivo'
+            });
+        }
+
+        // Buscar paciente
+        const patient = await Patient.findByPk(patientId);
+
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                error: 'Paciente no encontrado'
+            });
+        }
+
+        // Construir URL relativa del archivo
+        const fileUrl = `/uploads/voice-notes/${file.filename}`;
+
+        // Crear nueva nota de voz
+        const newNote = {
+            id: `vn_${Date.now()}`,
+            url: fileUrl,
+            duration: parseInt(duration),
+            createdAt: new Date().toISOString(),
+            createdBy: createdBy
+        };
+
+        // Obtener notas existentes
+        const currentNotes = patient.voice_notes || [];
+
+        // Agregar nueva nota al inicio
+        const updatedNotes = [newNote, ...currentNotes];
+
+        // Actualizar paciente
+        await patient.update({
+            voice_notes: updatedNotes
+        });
+
+        console.log(`[VoiceNotes] ✓ Audio subido: ${fileUrl} (${duration}s, ${(file.size / 1024).toFixed(2)}KB) - Paciente ${patientId}`);
+
+        res.json({
+            success: true,
+            note: newNote,
+            url: fileUrl,
+            filename: file.filename,
+            size: file.size,
+            duration: duration
+        });
+
+    } catch (error) {
+        console.error('[VoiceNotes] Error subiendo nota:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al guardar nota de voz'
+        });
+    }
+};
+
+/**
+ * Eliminar nota de voz de un paciente
+ * DELETE /api/patients/:id/voice-notes/:noteId
+ */
+exports.deletePatientVoiceNote = async (req, res) => {
+    try {
+        const { id, noteId } = req.params;
+
+        const patient = await Patient.findByPk(id);
+
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                error: 'Paciente no encontrado'
+            });
+        }
+
+        const currentNotes = patient.voice_notes || [];
+
+        // Filtrar para eliminar la nota
+        const updatedNotes = currentNotes.filter(note => note.id !== noteId);
+
+        if (currentNotes.length === updatedNotes.length) {
+            return res.status(404).json({
+                success: false,
+                error: 'Nota de voz no encontrada'
+            });
+        }
+
+        // Actualizar paciente
+        await patient.update({
+            voice_notes: updatedNotes
+        });
+
+        console.log(`[VoiceNotes] ✓ Nota ${noteId} eliminada del paciente ${id}`);
+
+        res.json({
+            success: true,
+            message: 'Nota de voz eliminada correctamente'
+        });
+
+        // TODO: Eliminar archivo físico del servidor si es necesario
+        // const fs = require('fs');
+        // const path = require('path');
+        // const noteToDelete = currentNotes.find(note => note.id === noteId);
+        // if (noteToDelete && noteToDelete.url) {
+        //     const filePath = path.join(__dirname, '../../..', noteToDelete.url);
+        //     fs.unlinkSync(filePath);
+        // }
+
+    } catch (error) {
+        console.error('[VoiceNotes] Error eliminando nota:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al eliminar nota de voz'
+        });
+    }
+};

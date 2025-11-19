@@ -10,7 +10,8 @@ window.taskAudioState = {
     audioChunks: [],
     recordingStartTime: null,
     recordingInterval: null,
-    currentAudio: null  // Para controlar reproducción
+    currentAudio: null,  // Para controlar reproducción
+    currentPlayingTaskId: null  // Para saber qué tarea está reproduciendo
 };
 
 // ========================================
@@ -167,26 +168,76 @@ function playTaskAudio(taskId) {
         return;
     }
 
+    // Si ya hay un audio reproduciéndose para esta tarea, pausarlo
+    if (window.taskAudioState.currentAudio && window.taskAudioState.currentPlayingTaskId === taskId) {
+        if (!window.taskAudioState.currentAudio.paused) {
+            window.taskAudioState.currentAudio.pause();
+            updatePlayButton(taskId, false);
+            return;
+        } else {
+            // Reanudar audio pausado
+            window.taskAudioState.currentAudio.play();
+            updatePlayButton(taskId, true);
+            return;
+        }
+    }
+
     console.log(`[TaskAudio] Reproduciendo audio: ${task.audioNote.url}`);
 
     // Detener audio previo si existe
     if (window.taskAudioState.currentAudio) {
+        const prevTaskId = window.taskAudioState.currentPlayingTaskId;
         window.taskAudioState.currentAudio.pause();
+        if (prevTaskId) {
+            updatePlayButton(prevTaskId, false);
+        }
     }
 
     // Crear nuevo elemento de audio
     const audio = new Audio(task.audioNote.url);
     window.taskAudioState.currentAudio = audio;
+    window.taskAudioState.currentPlayingTaskId = taskId;
+
+    // Actualizar botón a pause
+    updatePlayButton(taskId, true);
 
     // Reproducir
     audio.play().catch(error => {
         console.error('[TaskAudio] Error al reproducir audio:', error);
         showToast('Error al reproducir audio', 'error');
+        updatePlayButton(taskId, false);
     });
 
     audio.onended = () => {
         console.log('[TaskAudio] Reproducción finalizada');
+        updatePlayButton(taskId, false);
+        window.taskAudioState.currentPlayingTaskId = null;
     };
+
+    audio.onpause = () => {
+        if (audio.currentTime === audio.duration || audio.currentTime === 0) {
+            updatePlayButton(taskId, false);
+        }
+    };
+}
+
+/**
+ * Actualizar botón de play/pause
+ */
+function updatePlayButton(taskId, isPlaying) {
+    const button = document.getElementById(`play-btn-${taskId}`);
+    if (!button) return;
+
+    const task = window.taskManagerState.tasks.find(t => t.id === taskId);
+    if (!task || !task.audioNote) return;
+
+    if (isPlaying) {
+        button.innerHTML = `<span style="font-size: 14px;">⏸</span> ${formatDuration(task.audioNote.duration)}`;
+        button.title = 'Pausar nota de voz';
+    } else {
+        button.innerHTML = `<span style="font-size: 14px;">►</span> ${formatDuration(task.audioNote.duration)}`;
+        button.title = 'Reproducir nota de voz';
+    }
 }
 
 /**
@@ -369,5 +420,6 @@ window.playTaskAudio = playTaskAudio;
 window.pauseTaskAudio = pauseTaskAudio;
 window.deleteTaskAudio = deleteTaskAudio;
 window.uploadTaskAudio = uploadTaskAudio;
+window.updatePlayButton = updatePlayButton;
 
 console.log('[TaskAudio] ✓ Módulo cargado');

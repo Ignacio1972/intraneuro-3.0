@@ -1,15 +1,66 @@
 # INTRANEURO - Sistema de Gestión Hospitalaria
 
+## ⚠️ 🚨 REGLA CRÍTICA - LEER PRIMERO 🚨 ⚠️
+
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║  ❌ NUNCA TOCAR PRODUCCIÓN: https://intraneurodavila.com        ║
+║  ❌ NUNCA MODIFICAR: /var/www/intraneuro/                       ║
+║  ❌ NUNCA REINICIAR: pm2 restart intraneuro-api                 ║
+║                                                                   ║
+║  ✅ SOLO TRABAJAR EN DEV: https://dev.intraneurodavila.com      ║
+║  ✅ SOLO MODIFICAR: /var/www/intraneuro-dev/                    ║
+║  ✅ SOLO REINICIAR: pm2 restart intraneuro-api-dev              ║
+║                                                                   ║
+║  TODOS LOS CAMBIOS, PRUEBAS Y DESARROLLO SE HACEN EN DEV        ║
+║  PRODUCCIÓN ES INTOCABLE - SISTEMA EN USO ACTIVO 24/7           ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
+
+**ANTES DE CUALQUIER CAMBIO:**
+1. ✅ Verificar que estás en `/var/www/intraneuro-dev/`
+2. ✅ Verificar que modificas archivos de DEV
+3. ✅ Reiniciar solo `intraneuro-api-dev`
+4. ✅ Probar en `https://dev.intraneurodavila.com`
+
+**NUNCA:**
+- ❌ Copiar archivos de DEV → Producción sin autorización explícita
+- ❌ Hacer cambios directos en producción
+- ❌ Reiniciar el backend de producción sin autorización
+
+---
+
 ## 🏥 Descripción
 Sistema web completo para gestión de pacientes en clínica psiquiátrica. Incluye control de admisiones, observaciones médicas, asignación de camas, tareas pendientes y reportes estadísticos.
 
-**URL Producción**: https://intraneurodavila.com
+**URL Producción**: https://intraneurodavila.com (⚠️ NO TOCAR)
+**URL Desarrollo**: https://dev.intraneurodavila.com (✅ USAR AQUÍ)
 **Repositorio**: https://github.com/Ignacio1972/intraneuro-3.0
 **Stack**: Node.js + Express + PostgreSQL + Nginx + PM2
 
 ---
 
 ## 🖥️ Infraestructura
+
+### ⚠️ Ambientes de Trabajo
+
+**PRODUCCIÓN (❌ NO TOCAR):**
+```
+URL:       https://intraneurodavila.com
+Path:      /var/www/intraneuro/
+Backend:   pm2 process "intraneuro-api" (puerto 3000)
+Estado:    EN USO ACTIVO 24/7 - NO MODIFICAR
+```
+
+**DESARROLLO (✅ USAR SIEMPRE):**
+```
+URL:       https://dev.intraneurodavila.com
+Path:      /var/www/intraneuro-dev/
+Backend:   pm2 process "intraneuro-api-dev" (puerto 3001)
+Estado:    Ambiente para pruebas y desarrollo
+```
 
 ### Servidor de Producción
 ```

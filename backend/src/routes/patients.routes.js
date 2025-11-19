@@ -2,6 +2,7 @@ const router = require('express').Router();
 const patientsController = require('../controllers/patients.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 const { uploadTaskAudio, validateTaskAudioUpload, handleMulterError } = require('../middleware/task-audio-upload.middleware');
+const { uploadVoiceNote, validateVoiceNoteUpload, handleMulterError: handleVoiceNoteError } = require('../middleware/voice-note-upload.middleware');
 
 // Ruta pública para compartir fichas (SIN autenticación)
 router.get('/public/:id', patientsController.getPublicPatient);
@@ -19,6 +20,8 @@ router.put('/admission/:admissionId', authMiddleware, patientsController.updateA
 
 // Rutas existentes por patientId
 router.get('/:id/history', authMiddleware, patientsController.getPatientHistory);
+router.get('/:id/voice-notes', authMiddleware, patientsController.getPatientVoiceNotes);
+router.delete('/:id/voice-notes/:noteId', authMiddleware, patientsController.deletePatientVoiceNote);
 router.get('/:id/admission/observations', authMiddleware, patientsController.getObservations);
 router.post('/:id/admission/observations', authMiddleware, patientsController.createObservation);
 router.get('/:id/admission/tasks', authMiddleware, patientsController.getAdmissionTasks);
@@ -67,6 +70,9 @@ router.post('/upload-task-audio', authMiddleware, uploadTaskAudio, validateTaskA
         });
     }
 });
+
+// Ruta para upload de notas de voz (debe estar ANTES de /:id genérico)
+router.post('/upload-voice-note', authMiddleware, uploadVoiceNote, validateVoiceNoteUpload, handleVoiceNoteError, patientsController.uploadPatientVoiceNote);
 
 router.put('/:id', authMiddleware, patientsController.updatePatient);
 router.delete('/:id', authMiddleware, patientsController.deletePatient);

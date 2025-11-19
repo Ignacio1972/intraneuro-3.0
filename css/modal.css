@@ -24,7 +24,7 @@
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
-    max-width: 65%;
+    max-width: 800px;
     max-height: 90vh;
     overflow-y: auto;
     animation: slideIn 0.3s ease;
@@ -367,6 +367,18 @@
         padding: 1.5rem !important;
         padding-right: 1.5rem !important; /* Asegurar padding derecho completo */
         overflow-x: hidden;
+
+    /* Botón de egreso en mobile - stack vertical */
+    .modal-section h2 {
+        margin-bottom: 0.5rem !important;
+    }
+
+    #dischargeBtn {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.9rem !important;
+    }
         word-wrap: break-word;
         width: 100%;
         max-width: 100%;
@@ -392,7 +404,6 @@
         border-right: none !important;
         border-bottom: 2px solid var(--border-color);
         margin-bottom: 1rem;
-        padding-top: 0.5rem !important; /* Evitar que el título se corte */
     }
     
     .discharge-section {

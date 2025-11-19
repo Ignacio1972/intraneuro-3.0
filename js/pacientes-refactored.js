@@ -148,13 +148,19 @@ function addPatientClickHandlers() {
 function openPatientModal(patientId) {
     const patient = patients.find(p => p.id === patientId);
     if (!patient) return;
-    
+
     // Establecer el paciente actual
     currentPatientId = patientId;
-    
+
     // Llenar datos de admisión
     const admissionData = document.getElementById('admissionData');
     admissionData.innerHTML = renderAdmissionData(patient);
+
+    // Configurar botón de egreso
+    const dischargeBtn = document.getElementById('dischargeBtn');
+    if (dischargeBtn) {
+        dischargeBtn.onclick = () => goToDischarge(patientId);
+    }
 
     // Abrir modal
     openModal('patientModal');
