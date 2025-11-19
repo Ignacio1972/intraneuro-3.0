@@ -192,21 +192,13 @@
     <div id="patientModal" class="modal">
         <div class="modal-content patient-modal-content">
             <span class="close">&times;</span>
-            <div class="patient-modal-split">
-                <!-- Admission Data -->
-                <div class="modal-section admission-section">
-                    <h2>DATOS DE INGRESO</h2>
-                    <div id="admissionData"></div>
-                </div>
-                <!-- Discharge Data -->
-                <div class="modal-section discharge-section">
-                    <h2>DATOS DE EGRESO</h2>
-                    <div id="dischargeData"></div>
-                </div>
+            <!-- Admission Data -->
+            <div class="modal-section admission-section">
+                <h2>DATOS DE INGRESO</h2>
+                <div id="admissionData"></div>
             </div>
-        
         </div>
-        </div>
+    </div>
 
     <!-- Share Modal -->
     <div id="shareModal" class="modal">
@@ -323,6 +315,12 @@
 <!-- Módulos principales -->
 <script src="js/auth.js?v=25"></script>
 <script src="js/ingreso.js?v=23"></script>
+
+<!-- ===== Sistema modular de componentes desactivado ===== -->
+<!-- Los componentes base-component.js y discharge-component.js -->
+<!-- solo se usan en egreso.html, no en el dashboard principal -->
+<!-- El modal-orchestrator.js fue cancelado en el pivote de arquitectura -->
+
 <!-- Main DEBE ir antes de pacientes-refactored para declarar variables globales -->
 <script src="js/main.js?v=27"></script>
 <!-- Módulos refactorizados de pacientes - DESPUÉS de main.js -->

@@ -155,15 +155,7 @@ function openPatientModal(patientId) {
     // Llenar datos de admisión
     const admissionData = document.getElementById('admissionData');
     admissionData.innerHTML = renderAdmissionData(patient);
-    
-    // Llenar datos de egreso
-    const dischargeData = document.getElementById('dischargeData');
-    if (patient.dischargeDate) {
-        dischargeData.innerHTML = PacientesDischarge.renderDischargedData(patient);
-    } else {
-        dischargeData.innerHTML = PacientesDischarge.renderDischargeForm(patientId, patient);
-    }
-    
+
     // Abrir modal
     openModal('patientModal');
 

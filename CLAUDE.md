@@ -455,6 +455,8 @@ df -h /var/www/intraneuro
 
 2. **Gestión de Pacientes** ✨ REFACTORIZADO
    - CRUD completo de pacientes
+   - **Modal simplificado** - Solo datos de ingreso, historia clínica y tareas
+   - **Página dedicada de egreso** (egreso.html) - Separada del modal principal
    - **Sistema de edición unificado** (edit-refactored.js)
    - Edición inline de todos los campos
    - Búsqueda por nombre, RUT, cama
@@ -483,7 +485,17 @@ df -h /var/www/intraneuro
    - Asignación a admisiones
    - Estados y seguimiento
 
-6. **Dashboard y Reportes**
+6. **Egresos** ✨ NUEVO - Página Dedicada
+   - **Página independiente** (egreso.html) separada del modal de paciente
+   - Formulario completo de egreso con validaciones
+   - Toggle de alta programada
+   - Registro de fallecimientos
+   - Detalles y observaciones de egreso
+   - Confirmación antes de procesar
+   - **Arquitectura modular** con DischargeComponent
+   - Navegación directa desde botón en modal de paciente
+
+7. **Dashboard y Reportes**
    - Estadísticas en tiempo real
    - Ocupación de camas
    - Pacientes activos
@@ -500,6 +512,76 @@ df -h /var/www/intraneuro
    - Catálogo de diagnósticos psiquiátricos
    - Búsqueda y autocompletado
    - Integración con sistema de pacientes
+
+---
+
+## 🏗️ Arquitectura del Modal de Paciente (Noviembre 2025)
+
+### Decisión de Diseño: Modal Simple + Página de Egreso Dedicada
+
+**Contexto:**
+Se decidió separar la funcionalidad de egreso del modal principal del paciente para mejorar la UX y simplificar la arquitectura.
+
+**Antes (Sistema Modal Dual):**
+```
+Modal de Paciente
+├── Sección Izquierda: Datos de Ingreso
+└── Sección Derecha: Formulario de Egreso ❌
+```
+- Modal con dos secciones (split layout)
+- Formulario de egreso dentro del modal
+- Interfaz saturada y confusa
+
+**Después (Sistema Actual - Modal Simple + Página Dedicada):**
+```
+Modal de Paciente (index.html)
+└── Datos de Ingreso
+    ├── Información del paciente
+    ├── Historia clínica
+    ├── Tareas pendientes
+    └── Botón "Egresar Paciente" → egreso.html
+
+Página de Egreso (egreso.html)
+└── DischargeComponent
+    ├── Formulario completo de egreso
+    ├── Toggle alta programada
+    ├── Validaciones
+    └── Confirmación
+```
+
+**Ventajas de la nueva arquitectura:**
+1. ✅ **Separación de responsabilidades** - Modal enfocado solo en consulta/edición
+2. ✅ **Mejor UX** - Flujo claro y dedicado para egresos
+3. ✅ **Código más limpio** - No mezclar lógica de ingreso con egreso
+4. ✅ **Escalabilidad** - Fácil agregar más campos al egreso sin saturar el modal
+5. ✅ **Validaciones robustas** - Página dedicada permite validaciones complejas
+
+**Flujo de Egreso:**
+```
+1. Usuario abre modal de paciente (clic en tarjeta)
+2. Ve datos de ingreso, historia clínica, tareas
+3. Clic en botón "🏥 Egresar Paciente"
+4. Navega a egreso.html?patientId=123
+5. Completa formulario de egreso
+6. Confirmación → Egreso procesado
+7. Redirect automático a dashboard
+```
+
+**Archivos clave:**
+- `index.html` - Modal simplificado (solo sección de admisión)
+- `egreso.html` - Página dedicada de egreso
+- `js/pacientes-ui.js` - Renderiza modal y botón de navegación (goToDischarge)
+- `js/modal-components/discharge-component.js` - Componente modular de egreso
+- `js/modal-components/base-component.js` - Clase base para componentes
+- `js/modules/pacientes/pacientes-discharge.js` - API de egresos
+
+**Archivos deprecados (no usar):**
+- `deprecated/modal-orchestrator.js.cancelado` - Intento de arquitectura modular cancelado
+
+**Nota importante:**
+- Los componentes modulares (`base-component.js`, `discharge-component.js`) **SOLO se usan en egreso.html**
+- El dashboard principal (`index.html`) NO carga estos componentes para mantener simplicidad
+- El modal en `index.html` usa renderizado simple con `renderAdmissionData()`
 
 ---
 
