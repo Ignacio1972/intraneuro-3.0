@@ -413,6 +413,32 @@ function renderAdmissionData(patient) {
             <input type="hidden" id="patientObservations" value="${patient.observations || ''}">
             <input type="hidden" id="patientPendingTasks" value="${patient.pendingTasks || ''}">
         </div>
+
+        <!-- BOTÓN: Egresar Paciente -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid var(--border-color); text-align: center;">
+            <button
+                onclick="goToDischarge(${patient.id})"
+                style="
+                    padding: 15px 40px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: white;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                "
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';"
+            >
+                🏥 Egresar Paciente
+            </button>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                Procesar el egreso definitivo del paciente
+            </p>
+        </div>
     `;
 }
 
@@ -625,7 +651,25 @@ if (typeof window.editPatientService === 'undefined') {
 }
 
 // Exportar funciones necesarias para otros módulos
+/**
+ * Navegar a la página de egreso
+ * @param {number} patientId - ID del paciente a egresar
+ */
+function goToDischarge(patientId) {
+    console.log(`[UI] Navegando a egreso para paciente ${patientId}`);
+
+    // Cerrar modal antes de navegar
+    if (typeof closeModal === 'function') {
+        closeModal('patientModal');
+    }
+
+    // Navegar a página de egreso
+    window.location.href = `egreso.html?patientId=${patientId}`;
+}
+
+// Exportar funciones globales
 window.renderPatientCard = renderPatientCard;
 window.renderPatientTable = renderPatientTable;
 window.renderEmptyState = renderEmptyState;
 window.renderAdmissionData = renderAdmissionData;
+window.goToDischarge = goToDischarge;
