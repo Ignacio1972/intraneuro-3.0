@@ -367,10 +367,6 @@ function renderAdmissionData(patient) {
 
         <!-- SECCIÓN: Sistema de Notas Simples -->
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--border-color);">
-            <h3 style="font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem;">
-                📝 Seguimiento del Paciente
-            </h3>
-
             <div class="simple-notes-container">
                 <!-- Historia Clínica - TEXTAREA SIMPLE -->
                 <div class="note-section">
