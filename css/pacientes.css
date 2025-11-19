@@ -312,17 +312,54 @@
     }
     
     .patients-table {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         display: block;
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .patients-table th,
     .patients-table td {
-        padding: 0.75rem;
+        padding: 0.4rem 0.3rem;
         white-space: nowrap;
+    }
+
+    /* Columna de checkbox ultra compacta */
+    .patients-table th:first-child,
+    .patients-table td:first-child {
+        padding: 0.4rem 0.1rem;
+        width: 30px;
+        min-width: 30px;
+    }
+
+    /* Columna de número de índice ultra compacta */
+    .patients-table th:nth-child(2),
+    .patients-table td:nth-child(2) {
+        padding: 0.4rem 0.15rem;
+        width: 35px;
+        min-width: 35px;
+        text-align: center;
+    }
+
+    /* Columna de servicio compacta */
+    .patients-table th:nth-child(3),
+    .patients-table td:nth-child(3) {
+        padding: 0.4rem 0.2rem;
+        max-width: 80px;
+    }
+
+    /* Columna de cama compacta */
+    .patients-table th:nth-child(4),
+    .patients-table td:nth-child(4) {
+        padding: 0.4rem 0.3rem;
+        max-width: 60px;
+    }
+
+    /* Reducir tamaño de badges de servicio en mobile */
+    .patients-table td span[style*="border-radius: 12px"] {
+        font-size: 9px !important;
+        padding: 2px 6px !important;
     }
 }
 

@@ -38,7 +38,7 @@ async function loadPatientsFromAPI(forceReload = false) {
 async function updatePatientBedAPI(patientId, bed) {
     const response = await apiRequest(`/patients/${patientId}/bed`, {
         method: 'PUT',
-        body: JSON.stringify({ bed: bed || 'Sin asignar' })
+        body: JSON.stringify({ bed: bed || 'n/a' })
     });
     return response;
 }

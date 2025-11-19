@@ -86,10 +86,10 @@ async function handleAdmission(e) {
 
     const formData = {
         name: document.getElementById('patientName').value,
-        age: 18, // Edad mínima válida por defecto, se actualizará desde el modal
+        age: parseInt(document.getElementById('patientAge').value) || 18, // Tomar edad del campo o usar 18 por defecto
         rut: document.getElementById('patientRut').value || null, // Sin validación
         prevision: null, // Se agregará desde el modal del paciente
-        bed: bedValue || 'Sin asignar', // Usar el valor ingresado o 'Sin asignar' si está vacío
+        bed: bedValue || 'n/a', // Usar el valor ingresado o 'n/a' si está vacío
         admissionDate: document.getElementById('admissionDate').value,
         diagnosis: diagnosisValue,
         diagnosisText: diagnosisValue,
@@ -100,7 +100,7 @@ async function handleAdmission(e) {
     };
 
     console.log('Diagnóstico seleccionado:', diagnosisValue);
-    console.log('Cama asignada:', bedValue || 'Sin asignar');
+    console.log('Cama asignada:', bedValue || 'n/a');
 
     // Validar que se haya seleccionado un diagnóstico
     if (!diagnosisValue || diagnosisValue.trim() === '') {

@@ -3,7 +3,6 @@
 // Render patient card
 function renderPatientCard(patient) {
     const initials = getInitials(patient.name);
-    const days = patient.daysInHospital;
     const diagnosisText = catalogos.getDiagnosisText(patient.diagnosis);
 
     // Usar configuración global de servicios
@@ -59,16 +58,13 @@ function renderPatientCard(patient) {
                     <div class="patient-age">${patient.age} años</div>
                 </div>
             </div>
-            <div class="stay-duration">
-                <span class="days">${days}</span> días
-            </div>
             <div class="diagnosis-code">${diagnosisText}</div>
             <div class="tooltip">${patient.diagnosisText}</div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding: 0.5rem 0; border-top: 1px solid rgba(0,0,0,0.05);">
                 <span class="patient-meta" style="font-size: 0.85rem; color: var(--text-secondary);">
                     <span class="icon">🛏️</span> Cama:
                     <span class="bed-display">
-                        ${patient.bed || 'Sin asignar'}
+                        ${patient.bed || 'n/a'}
                     </span>
                 </span>
                 <div style="display: flex; gap: 5px;">
@@ -129,10 +125,6 @@ function renderPatientTable(activePatients) {
                     <th onclick="sortByColumn('doctor')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
                         onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
                         Médico Tratante <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
-                    <th onclick="sortByColumn('days')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Días <span style="opacity: 0.6; font-size: 14px;">⇅</span>
                     </th>
                     <th onclick="sortByColumn('admission')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
                         onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
@@ -205,7 +197,7 @@ function renderPatientTable(activePatients) {
                             </span>` : '<span style="color: #999;">-</span>'}</td>
                         <td>
                             <span class="bed-display">
-                                ${patient.bed || 'Sin asignar'}
+                                ${patient.bed || 'n/a'}
                             </span>
                         </td>
                         <td>
@@ -219,7 +211,6 @@ function renderPatientTable(activePatients) {
                                 ${patient.admittedBy || 'Sin asignar'}
                             </span>
                         </td>
-                        <td>${patient.daysInHospital}</td>
                         <td>${formatDate(patient.admissionDate)}</td>
                         <td>
                             <button onclick="sharePatientFromList(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')"
@@ -320,7 +311,7 @@ function renderAdmissionData(patient) {
             <span class="info-label">Cama:</span>
             <span class="info-value" id="bed-${patient.id}"
                   onclick="editPatientField(event, ${patient.id}, 'bed')"
-                  style="cursor: pointer;">${patient.bed || 'Sin asignar'}</span>
+                  style="cursor: pointer;">${patient.bed || 'n/a'}</span>
         </div>
         <div class="patient-info-row">
             <span class="info-label">Servicio:</span>

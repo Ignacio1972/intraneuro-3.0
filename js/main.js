@@ -181,7 +181,7 @@ async function showMainApp() {
     try {
         await updateDashboardFromAPI();
         await renderPatients();
-        
+
         // Verificar si hay un paciente en la URL para abrir automáticamente
         if (typeof loadPatientFromUrl === 'function') {
             await loadPatientFromUrl();

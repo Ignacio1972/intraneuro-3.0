@@ -18,15 +18,15 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
 
 <!-- CSS Files (en el <head>) -->
-<link rel="stylesheet" href="css/main.css?v=23">
-<link rel="stylesheet" href="css/pacientes.css?v=23">
-<link rel="stylesheet" href="css/modal.css?v=23">
+<link rel="stylesheet" href="css/main.css?v=24">
+<link rel="stylesheet" href="css/pacientes.css?v=25">
+<link rel="stylesheet" href="css/modal.css?v=24">
 <link rel="stylesheet" href="css/pacientes-print.css?v=23">
 <link rel="stylesheet" href="css/chat-notes.css?v=5">
 <!-- Sistema de chat desactivado - ahora usando sistema simple de textboxes -->
 <!-- <link rel="stylesheet" href="css/clinical-chat.css?v=1"> -->
-<!-- Sistema de Tareas con Checkboxes y Audio -->
-<link rel="stylesheet" href="css/task-manager.css?v=1">
+<!-- Sistema de Tareas con Checkboxes (Audio removido) -->
+<link rel="stylesheet" href="css/task-manager.css?v=4">
 <!-- Sistema de Notas de Voz para Pacientes -->
 <link rel="stylesheet" href="css/voice-notes.css?v=1">
 
@@ -95,7 +95,7 @@
                 <div class="dashboard-row">
                     <!-- Filtro por médico tratante -->
                     <select id="doctorFilter" onchange="filterByDoctor()" class="btn-tool filter-select">
-                        <option value="">🔍 Todos los médicos</option>
+                        <option value="">Médicos</option>
                     </select>
 
                     <!-- Dropdown de exportación con selector de mes -->
@@ -237,6 +237,10 @@
                         <label>RUT (Opcional)</label>
                         <input type="text" id="patientRut" placeholder="Opcional - Sin validación">
                     </div>
+                    <div class="form-group">
+                        <label>Edad (Opcional)</label>
+                        <input type="number" id="patientAge" placeholder="Opcional" min="0" max="120">
+                    </div>
                 </div>
             </div>
 
@@ -270,7 +274,6 @@
                 </div>
 
                 <!-- Campos ocultos para compatibilidad -->
-                <input type="hidden" id="patientAge" value="0">
                 <input type="hidden" id="patientPrevision" value="">
                 <input type="hidden" id="patientBed" value="">
                 <input type="hidden" id="diagnosisDetails" value="">
@@ -314,14 +317,14 @@
 <script src="js/validaciones.js?v=25"></script>
 <script src="js/data-catalogos.js?v=21"></script>
 <!-- Módulos de UI -->
-<script src="js/pacientes-ui.js?v=47"></script>
+<script src="js/pacientes-ui.js?v=49"></script>
 <!-- Sistema Unificado de Dropdowns v2.0 - DEBE cargarse ANTES de ingreso.js -->
 <script src="js/modules/dropdown-system.js?v=2"></script>
 <!-- Script de debug para dropdowns -->
 <script src="js/debug-dropdowns.js"></script>
 <!-- Módulos principales -->
 <script src="js/auth.js?v=25"></script>
-<script src="js/ingreso.js?v=23"></script>
+<script src="js/ingreso.js?v=25"></script>
 
 <!-- ===== Sistema modular de componentes desactivado ===== -->
 <!-- Los componentes base-component.js y discharge-component.js -->
@@ -337,13 +340,13 @@
 <!-- Sistema de edición de servicio hospitalario -->
 <script src="js/modules/pacientes/pacientes-service-edit.js?v=1"></script>
 <script src="js/modules/pacientes/pacientes-discharge.js?v=37"></script>
-<script src="js/pacientes-refactored.js?v=38"></script>
+<script src="js/pacientes-refactored.js?v=39"></script>
 <!-- Sistema SIMPLIFICADO de notas - Solo textareas -->
 <script src="js/simple-notes.js?v=3"></script>
-<!-- Sistema de Tareas con Checkboxes y Audio -->
-<script src="js/modules/task-manager.js?v=1"></script>
-<script src="js/modules/task-audio.js?v=1"></script>
-<!-- Sistema de Notas de Voz para Pacientes -->
+<!-- Sistema de Tareas con Checkboxes (Audio removido) -->
+<script src="js/modules/task-manager.js?v=2"></script>
+<!-- <script src="js/modules/task-audio.js?v=1"></script> --> <!-- DESACTIVADO: Audio en tareas eliminado -->
+<!-- Sistema de Notas de Voz para Pacientes (MANTENER - NO TOCAR) -->
 <script src="js/modules/patient-voice-notes.js?v=1"></script>
 <!-- Sistema de Chat Clínico tipo WhatsApp - DESACTIVADO (ahora usando sistema simple de textboxes) -->
 <!-- <script src="js/modules/clinical-chat.js?v=1"></script> -->
@@ -351,7 +354,7 @@
 <!-- <script src="js/pacientes.js?v=40"></script> -->
 
 <!-- Módulo de Servicios -->
-<script src="js/modules/services.js?v=3"></script>
+<script src="js/modules/services.js?v=4"></script>
 <script src="js/services-integration.js"></script>
 
 <!-- PWA Service Worker -->

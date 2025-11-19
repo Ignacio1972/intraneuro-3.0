@@ -90,16 +90,16 @@ const FIELD_CONFIGS = {
         // API - Este SÍ usa /bed al final según el código original
         apiEndpoint: (id) => `/patients/${id}/bed`,
         apiMethod: 'PUT',
-        apiPayload: (value) => ({ bed: value || 'Sin asignar' }),
+        apiPayload: (value) => ({ bed: value || 'n/a' }),
 
         // UI
         updateElement: (patientId, value) => {
             const el = document.getElementById(`bed-${patientId}`);
-            if (el) el.textContent = value || 'Sin asignar';
+            if (el) el.textContent = value || 'n/a';
         },
 
         // Formateo
-        formatDisplay: (value) => value || 'Sin asignar',
+        formatDisplay: (value) => value || 'n/a',
         formatPrompt: (value) => value || ''
     },
 

@@ -682,18 +682,17 @@ window.saveObservationsAndTasks = saveObservationsAndTasks;
 window.exportActivePatientsToExcel = exportActivePatientsToExcel;
 window.printActivePatients = printActivePatients;
 
-// Exponer funciones de edición
-window.editPatientName = PacientesEdit.editPatientName;
-window.editPatientAge = PacientesEdit.editPatientAge;
-window.editPatientRut = PacientesEdit.editPatientRut;
-window.editPatientBed = PacientesEdit.editPatientBed;
-// window.editPatientPrevision = PacientesEdit.editPatientPrevision; // Comentado: Usar la versión con DropdownSystem
-window.editPatientPrevision = PacientesEdit.editPatientPrevision; // Mantenemos la función básica
-// window.editAdmissionDate = PacientesEdit.editAdmissionDate; // Comentado: Usar la versión refactorizada con Flatpickr
-window.editDiagnosis = PacientesEdit.editDiagnosis;
-window.editDiagnosisDetails = PacientesEdit.editDiagnosisDetails;
-window.editAdmittedBy = PacientesEdit.editAdmittedBy;
-window.editBed = PacientesEdit.editBed;
+// Exponer funciones de edición (usando el módulo refactorizado)
+window.editPatientName = PacientesEditRefactored.editPatientNameRefactored;
+window.editPatientAge = PacientesEditRefactored.editPatientAgeRefactored;
+window.editPatientRut = PacientesEditRefactored.editPatientRutRefactored;
+window.editPatientBed = PacientesEditRefactored.editPatientBedRefactored;
+window.editPatientPrevision = PacientesEditRefactored.editPatientPrevision;
+window.editDiagnosis = PacientesEditRefactored.editDiagnosis;
+window.editDiagnosisDetails = PacientesEditRefactored.editDiagnosisDetails;
+window.editAdmittedBy = PacientesEditRefactored.editAdmittedByRefactored;
+window.editBed = PacientesEditRefactored.editPatientBedRefactored;
+window.editAdmissionDate = PacientesEditRefactored.editAdmissionDate;
 
 // Exponer funciones de alta/egreso
 window.toggleScheduledDischarge = PacientesDischarge.toggleScheduledDischarge;
@@ -713,15 +712,15 @@ window.sharePatientFromList = function(event, patientId, patientName) {
 // Función para eliminar paciente
 window.deletePatient = async function(event, patientId, patientName) {
     event.stopPropagation();
-    
+
     // Confirmación para evitar eliminación accidental
     const confirmDelete = confirm(`¿Está seguro que desea eliminar al paciente?`);
-    
+
     if (confirmDelete) {
         try {
             // Llamar a la API para eliminar
             const response = await apiRequest(`/patients/${patientId}`, { method: 'DELETE' });
-            
+
             console.log('Respuesta de eliminación:', response);
             
             if (response) {
@@ -914,7 +913,7 @@ function updateDoctorFilter() {
     const currentValue = select.value;
     
     // Limpiar opciones actuales (excepto la primera)
-    select.innerHTML = '<option value="">🔍 Todos los médicos</option>';
+    select.innerHTML = '<option value="">Médicos</option>';
     
     // Agregar médicos normalizados y ordenados alfabéticamente
     const sortedDoctors = Array.from(doctorMap.keys()).sort();

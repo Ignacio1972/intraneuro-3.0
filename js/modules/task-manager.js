@@ -80,8 +80,7 @@ function createTask(text, patientId) {
         createdBy: getCurrentUser(),
         completed: false,
         completedAt: null,
-        completedBy: null,
-        audioNote: null
+        completedBy: null
     };
 
     // Agregar a la lista de tareas
@@ -145,12 +144,6 @@ function deleteTask(taskId, patientId) {
     // Confirmar eliminación
     if (!confirm(`¿Eliminar tarea "${task.text}"?`)) {
         return;
-    }
-
-    // Si tiene audio, eliminar archivo (TO-DO: implementar endpoint)
-    if (task.audioNote && task.audioNote.url) {
-        // deleteAudioFile(task.audioNote.url);
-        console.log(`[TaskManager] Audio asociado a eliminar: ${task.audioNote.url}`);
     }
 
     // Eliminar de la lista
@@ -303,26 +296,7 @@ function renderTaskItem(task, patientId) {
            </div>`
         : '';
 
-    // Renderizar audio si existe
-    const audioSection = task.audioNote
-        ? `<button id="play-btn-${task.id}"
-                   class="task-audio-play-btn"
-                   onclick="playTaskAudio('${task.id}')"
-                   title="Reproducir nota de voz"
-                   style="display: flex; align-items: center; gap: 6px;">
-                <span style="font-size: 14px;">►</span> ${formatDuration(task.audioNote.duration)}
-           </button>
-           <button class="task-audio-delete-btn"
-                   onclick="deleteTaskAudio('${task.id}', ${patientId})"
-                   title="Eliminar audio">
-                🗑️
-           </button>`
-        : `<button class="task-audio-record-btn"
-                   onclick="recordTaskAudio('${task.id}', ${patientId})"
-                   title="Grabar nota de voz">
-                🎙️ Grabar
-           </button>`;
-
+    // Audio de tareas eliminado - Solo mantener botón de eliminar tarea
     return `
         <div class="task-item ${completedClass}" data-task-id="${task.id}">
             <div class="task-checkbox" onclick="toggleTaskComplete('${task.id}', ${patientId})">
@@ -336,7 +310,6 @@ function renderTaskItem(task, patientId) {
                 ${completedInfo}
             </div>
             <div class="task-actions">
-                ${audioSection}
                 <button class="task-delete-btn"
                         onclick="deleteTask('${task.id}', ${patientId})"
                         title="Eliminar tarea">
@@ -444,18 +417,6 @@ function formatTaskDate(dateString) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${day}/${month}/${year} ${hours}:${minutes}`;
-}
-
-/**
- * Formatear duración de audio en segundos a mm:ss
- */
-function formatDuration(seconds) {
-    if (!seconds) return '0:00';
-
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-
-    return `${mins}:${String(secs).padStart(2, '0')}`;
 }
 
 /**

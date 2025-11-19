@@ -73,7 +73,7 @@
     serviceFilter.style.marginLeft = '8px';
 
     serviceFilter.innerHTML = `
-      <option value="">🏥 Todos los servicios</option>
+      <option value="">Servicios</option>
       ${Object.keys(SERVICES).map(key =>
         `<option value="${key}">${SERVICES[key].icon} ${SERVICES[key].label}</option>`
       ).join('')}

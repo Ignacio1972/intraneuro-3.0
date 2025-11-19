@@ -385,6 +385,44 @@ body {
     .view-btn[onclick*="xero.resultadosdeimagenes"] {
         display: none;
     }
+
+    /* Ocultar elementos en mobile - Issue solicitado */
+    /* 1. Ocultar botón de imprimir */
+    .btn-icon[onclick*="printActivePatients"] {
+        display: none !important;
+    }
+
+    /* 2. Ocultar dropdown de Excel */
+    .export-controls {
+        display: none !important;
+    }
+
+    /* 3. Ocultar botón "Seleccionar todos" */
+    .btn-tool[onclick*="selectAll"] {
+        display: none !important;
+    }
+
+    /* Mejorar alineación de dropdowns de filtro en mobile */
+    .dashboard-row {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    /* Dropdowns de filtro en mobile */
+    #doctorFilter,
+    #serviceFilter {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 140px;
+        max-width: 100%;
+        margin: 0 !important;
+        font-size: 0.85rem;
+        padding: 0.6rem 0.5rem;
+        text-align: left;
+    }
 }
 /* Switch/Toggle style */
 .switch {

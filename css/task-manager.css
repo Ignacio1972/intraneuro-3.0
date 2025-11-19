@@ -102,8 +102,8 @@
 .task-item {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 15px;
+    gap: 8px;
+    padding: 12px;
     background: #f8f9fa;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
@@ -195,9 +195,7 @@
 /* ========================================
    BOTONES DE ACCIÓN
    ======================================== */
-.task-audio-record-btn,
-.task-audio-play-btn,
-.task-audio-delete-btn,
+/* Botón eliminar tarea */
 .task-delete-btn {
     background: white;
     border: 1px solid #e5e7eb;
@@ -207,49 +205,8 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-}
-
-/* Botón grabar audio */
-.task-audio-record-btn {
-    color: #3b82f6;
-    border-color: #3b82f6;
-}
-
-.task-audio-record-btn:hover {
-    background: #3b82f6;
-    color: white;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-}
-
-/* Botón reproducir audio */
-.task-audio-play-btn {
-    color: #10b981;
-    border-color: #10b981;
-}
-
-.task-audio-play-btn:hover {
-    background: #10b981;
-    color: white;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-}
-
-/* Botón eliminar audio */
-.task-audio-delete-btn {
-    color: #f59e0b;
-    border-color: #f59e0b;
-    padding: 6px 8px;
-}
-
-.task-audio-delete-btn:hover {
-    background: #f59e0b;
-    color: white;
-}
-
-/* Botón eliminar tarea */
-.task-delete-btn {
     color: #ef4444;
     border-color: #ef4444;
-    padding: 6px 8px;
 }
 
 .task-delete-btn:hover {
@@ -347,49 +304,6 @@
 }
 
 /* ========================================
-   SISTEMA DE GRABACIÓN DE AUDIO
-   ======================================== */
-.task-audio-recorder {
-    margin-top: 10px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
-}
-
-.task-audio-recorder.recording {
-    background: #fef2f2;
-    border-color: #fecaca;
-}
-
-.task-recording-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: center;
-}
-
-.task-recording-time {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #ef4444;
-    font-family: monospace;
-}
-
-.task-audio-player {
-    margin-top: 10px;
-    padding: 10px;
-    background: white;
-    border-radius: 4px;
-    border: 1px solid #e5e7eb;
-}
-
-.task-audio-player audio {
-    width: 100%;
-    height: 35px;
-}
-
-/* ========================================
    RESPONSIVE
    ======================================== */
 @media (max-width: 768px) {
@@ -406,17 +320,39 @@
     }
 
     .task-item {
-        flex-direction: column;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        gap: 6px 8px;
+        padding: 10px;
     }
 
-    .task-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
+    /* Checkbox en la primera fila, primera columna */
     .task-checkbox {
+        grid-column: 1;
+        grid-row: 1;
         font-size: 1.3em;
+        align-self: flex-start;
+    }
+
+    /* Contenido en la primera fila, segunda columna */
+    .task-content {
+        grid-column: 2;
+        grid-row: 1;
+        width: 100%;
+    }
+
+    /* Acciones en la segunda fila, segunda columna (abajo a la derecha) */
+    .task-actions {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: flex-end;
+        margin-top: 4px;
+    }
+
+    .task-delete-btn {
+        padding: 5px 10px;
+        font-size: 0.85em;
     }
 }
 
