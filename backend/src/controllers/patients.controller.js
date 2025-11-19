@@ -395,30 +395,36 @@ exports.searchByRut = async (req, res) => {
 // Actualizar alta programada o procesar egreso completo
 exports.updateDischarge = async (req, res) => {
     const transaction = await sequelize.transaction();
-    
+
     try {
         const { id } = req.params;
-        const { 
-            scheduledDischarge, 
+        const {
+            scheduledDischarge,
             dischargeDate,
             // ranking, // Campo eliminado del sistema
             dischargeDiagnosis,
             dischargeDetails,
             deceased,
-            dischargedBy 
+            dischargedBy
         } = req.body;
-        
+
+        console.log('[updateDischarge] Procesando egreso para paciente:', id);
+        console.log('[updateDischarge] Datos recibidos:', { dischargeDate, dischargeDiagnosis, dischargeDetails, deceased, dischargedBy });
+
         // Buscar admisión activa del paciente
         const admission = await Admission.findOne({
-            where: { 
+            where: {
                 patient_id: id,
                 status: 'active'
             }
         });
-        
+
         if (!admission) {
+            console.log('[updateDischarge] No se encontró admisión activa para paciente:', id);
             return res.status(404).json({ error: 'Admisión activa no encontrada' });
         }
+
+        console.log('[updateDischarge] Admisión encontrada:', admission.id, 'Status actual:', admission.status);
         
         // Si solo es actualización de alta programada
         if (scheduledDischarge !== undefined && !dischargeDate) {
@@ -427,6 +433,7 @@ exports.updateDischarge = async (req, res) => {
         } 
         // Si es egreso completo
         else if (dischargeDate) {
+            console.log('[updateDischarge] Procesando egreso completo...');
             admission.discharge_date = dischargeDate;
             admission.discharge_diagnosis = dischargeDiagnosis;
             admission.discharge_details = dischargeDetails;
@@ -435,14 +442,17 @@ exports.updateDischarge = async (req, res) => {
             admission.discharged_by = normalizeDoctorName(dischargedBy) || 'Sistema';
             admission.scheduled_discharge = false;
             admission.status = 'discharged';
-            
+
+            console.log('[updateDischarge] Guardando cambios - Nuevo status:', admission.status);
             await admission.save({ transaction });
+            console.log('[updateDischarge] Cambios guardados exitosamente');
         }
-        
+
         await transaction.commit();
-        
-        res.json({ 
-            success: true, 
+        console.log('[updateDischarge] Transacción confirmada');
+
+        res.json({
+            success: true,
             scheduledDischarge: admission.scheduled_discharge,
             status: admission.status
         });

@@ -660,60 +660,6 @@
     }
 }
 
-/* Switch Toggle Styles - Hermoso diseño original */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 34px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-input:checked + .slider {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
-.switch-label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-}
-
 /* Botón compartir mejorado */
 .btn-secondary {
     background-color: #6c757d;
@@ -726,47 +672,6 @@ input:checked + .slider:before {
 
 .btn-secondary:hover {
     background-color: #5a6268;
-}
-
-/* Toggle Alta Programada */
-.scheduled-discharge-toggle {
-    margin-bottom: 20px;
-}
-
-.btn-scheduled {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.btn-scheduled.inactive {
-    background-color: #f8f9fa;
-    border-color: #28a745;
-    color: #28a745;
-}
-
-.btn-scheduled.inactive:hover {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-scheduled.active {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #000;
-}
-
-.btn-scheduled.active:hover {
-    background-color: #e0a800;
-    border-color: #e0a800;
 }
 
 /* ===================================================================
@@ -932,31 +837,6 @@ input:checked + .slider:before {
     margin-top: 0.25rem;
 }
 
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-.checkbox-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
-
-.checkbox-text {
-    font-size: 1rem;
-    color: var(--text-primary);
-}
-
 .form-actions {
     display: flex;
     gap: 1rem;
@@ -1041,14 +921,6 @@ input:checked + .slider:before {
     margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
-}
-
-/* Deceased Mode (formulario de fallecimiento) */
-.discharge-form-content.deceased-mode {
-    background-color: #fff3cd;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border: 2px solid #ffc107;
 }
 
 /* Responsive - Tabs */

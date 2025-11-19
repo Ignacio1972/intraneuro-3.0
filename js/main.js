@@ -176,11 +176,21 @@ async function showMainApp() {
     document.getElementById('loginModal').classList.remove('active');
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('currentUser').textContent = `Usuario: ${currentUser}`;
-    
+
     // CAMBIO 6: Solo cargar datos si estamos autenticados
     try {
+        // Verificar si hay parámetro de reload en la URL (post-egreso)
+        const urlParams = new URLSearchParams(window.location.search);
+        const forceReload = urlParams.has('reload');
+
+        if (forceReload) {
+            console.log('[Dashboard] Forzando recarga completa de datos post-egreso');
+            // Limpiar la URL sin recargar la página
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         await updateDashboardFromAPI();
-        await renderPatients();
+        await renderPatients(false, forceReload);
 
         // Verificar si hay un paciente en la URL para abrir automáticamente
         if (typeof loadPatientFromUrl === 'function') {

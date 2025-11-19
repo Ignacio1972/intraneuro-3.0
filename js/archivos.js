@@ -104,15 +104,19 @@ document.addEventListener('DOMContentLoaded', function() {
 // Cargar pacientes archivados
 async function loadArchivedPatients() {
     try {
+        console.log('[Archivos] Cargando pacientes archivados...');
         const response = await apiRequest('/patients/archived');
+        console.log('[Archivos] Respuesta del API:', response);
+        console.log('[Archivos] Total de pacientes archivados:', response.length);
+
         archivedPatients = response;
         populateDoctorFilter(); // Llenar el dropdown de médicos
         renderArchivedPatients();
     } catch (error) {
-        console.error('Error cargando archivos:', error);
-        
+        console.error('[Archivos] Error cargando archivos:', error);
+
         // TEMPORAL: Usar datos de prueba si el backend falla
-        console.log('Usando datos de prueba...');
+        console.log('[Archivos] Usando datos de prueba...');
         archivedPatients = mockArchivedPatients;
         populateDoctorFilter(); // Llenar el dropdown de médicos
         renderArchivedPatients();
@@ -194,8 +198,11 @@ function populateDoctorFilter() {
 // Renderizar lista de archivados
 function renderArchivedPatients(patientsToRender = archivedPatients) {
     const container = document.getElementById('archivosContainer');
-    
+
+    console.log('[Archivos] Renderizando pacientes...', patientsToRender.length);
+
     if (!patientsToRender || patientsToRender.length === 0) {
+        console.warn('[Archivos] No hay pacientes para renderizar');
         container.innerHTML = '<p class="no-data">No se encontraron pacientes archivados</p>';
         return;
     }
@@ -253,10 +260,18 @@ function renderArchivedPatients(patientsToRender = archivedPatients) {
     
     // Limitar a 25 registros
     const limitedPatients = patientsToRender.slice(0, 25);
-    
+
+    console.log('[Archivos] Ejemplo de paciente:', limitedPatients[0]);
+
     limitedPatients.forEach(patient => {
         // Tomar la última admisión (más reciente)
         const lastAdmission = patient.admissions[0];
+
+        if (!lastAdmission) {
+            console.error('[Archivos] Paciente sin admisiones:', patient);
+            return;
+        }
+
         const days = calculateDaysBetween(lastAdmission.admissionDate, lastAdmission.dischargeDate);
         
         html += `

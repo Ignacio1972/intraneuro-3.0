@@ -6,7 +6,7 @@
     <title>Egreso de Paciente - IntraNeuro</title>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/egreso.css?v=1">
+    <link rel="stylesheet" href="css/egreso.css?v=2">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -89,7 +89,7 @@
             async processDischargeAPI(patientId, dischargeData) {
                 try {
                     const response = await apiRequest(`/patients/${patientId}/discharge`, {
-                        method: 'POST',
+                        method: 'PUT',
                         body: JSON.stringify(dischargeData)
                     });
                     return response;
@@ -107,8 +107,8 @@
     </script>
 
     <!-- Componentes Modulares -->
-    <script src="js/modal-components/base-component.js"></script>
-    <script src="js/modal-components/discharge-component.js"></script>
+    <script src="js/modal-components/base-component.js?v=1"></script>
+    <script src="js/modal-components/discharge-component.js?v=2"></script>
 
     <!-- App Logic -->
     <script>
@@ -159,12 +159,44 @@
             const container = document.getElementById('discharge-container');
             container.style.display = 'block';
 
-            // Actualizar header
+            // Actualizar header con campos editables
             const headerInfo = document.getElementById('patient-header-info');
             headerInfo.innerHTML = `
-                <strong>${currentPatient.name}</strong> •
-                Cama ${currentPatient.bed || 'N/A'} •
-                RUT: ${currentPatient.rut || 'N/A'}
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <strong style="font-weight: 600; color: #555;">Nombre:</strong>
+                        <span id="name-${currentPatient.id}"
+                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'name', '${currentPatient.name.replace(/'/g, "\\'")}')"
+                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                              onmouseover="this.style.background='#f0f0f0'"
+                              onmouseout="this.style.background='transparent'"
+                              title="Clic para editar">
+                            ${currentPatient.name}
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <strong style="font-weight: 600; color: #555;">Cama:</strong>
+                        <span id="bed-${currentPatient.id}"
+                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'bed', '${currentPatient.bed || ''}')"
+                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                              onmouseover="this.style.background='#f0f0f0'"
+                              onmouseout="this.style.background='transparent'"
+                              title="Clic para editar">
+                            ${currentPatient.bed || 'N/A'}
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <strong style="font-weight: 600; color: #555;">RUT:</strong>
+                        <span id="rut-${currentPatient.id}"
+                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'rut', '${currentPatient.rut || ''}')"
+                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                              onmouseover="this.style.background='#f0f0f0'"
+                              onmouseout="this.style.background='transparent'"
+                              title="Clic para editar">
+                            ${currentPatient.rut || 'N/A'}
+                        </span>
+                    </div>
+                </div>
             `;
 
             // Crear instancia del componente
@@ -172,6 +204,49 @@
 
             // Renderizar
             dischargeComponent.mount();
+        }
+
+        /**
+         * Editar campo inline (nombre, cama, RUT)
+         */
+        async function editPatientFieldInline(event, patientId, fieldName, currentValue) {
+            event.stopPropagation();
+
+            const fieldLabels = {
+                name: 'Nombre',
+                bed: 'Cama',
+                rut: 'RUT'
+            };
+
+            const newValue = prompt(`Editar ${fieldLabels[fieldName]}:`, currentValue);
+
+            if (newValue === null || newValue === currentValue) {
+                return; // Cancelado o sin cambios
+            }
+
+            try {
+                // Actualizar en el backend
+                const response = await apiRequest(`/patients/${patientId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ [fieldName]: newValue.trim() })
+                });
+
+                if (response) {
+                    // Actualizar en el objeto local
+                    currentPatient[fieldName] = newValue.trim();
+
+                    // Actualizar en la UI
+                    const element = document.getElementById(`${fieldName}-${patientId}`);
+                    if (element) {
+                        element.textContent = newValue.trim() || 'N/A';
+                    }
+
+                    showToast(`${fieldLabels[fieldName]} actualizado correctamente`);
+                }
+            } catch (error) {
+                console.error(`Error actualizando ${fieldName}:`, error);
+                alert(`Error al actualizar ${fieldLabels[fieldName]}`);
+            }
         }
 
         /**
@@ -217,13 +292,11 @@
         document.addEventListener('patient:discharged', (event) => {
             console.log('[Egreso] Paciente egresado:', event.detail);
 
-            // Mostrar confirmación
+            // Redirect a dashboard con parámetro para forzar recarga
+            // El toast ya se mostró en el componente, no necesitamos alert duplicado
             setTimeout(() => {
-                alert('✅ Paciente egresado correctamente');
-
-                // Redirect a dashboard
-                window.location.href = 'index.html';
-            }, 500);
+                window.location.href = 'index.html?reload=' + Date.now();
+            }, 1500); // Dar tiempo a que el usuario vea el toast antes del redirect
         });
 
         // Iniciar al cargar la página

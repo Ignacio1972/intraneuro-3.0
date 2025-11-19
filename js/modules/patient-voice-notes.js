@@ -512,6 +512,18 @@ function formatVoiceNoteDate(dateString) {
 }
 
 /**
+ * Formatear duración en segundos a formato mm:ss
+ */
+function formatDuration(seconds) {
+    if (!seconds || isNaN(seconds)) return '0:00';
+
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
+/**
  * Obtener usuario actual de la sesión
  */
 function getCurrentUser() {
