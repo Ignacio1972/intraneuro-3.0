@@ -36,7 +36,19 @@
       "Bash(curl:*)",
       "Bash(python3:*)",
       "Bash(pm2 restart:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(NODE_ENV=development PORT=3001 pm2 start:*)",
+      "Bash(node -e \"try { require(''/var/www/intraneuro-dev/backend/src/routes/audio.routes.js''); console.log(''✅ Module loads OK''); } catch(e) { console.error(''❌ Error:'', e.message); }\")",
+      "mcp__Ref__ref_search_documentation",
+      "mcp__Ref__ref_read_url",
+      "Bash(gh:*)",
+      "Bash(dd:*)",
+      "Bash(chmod:*)",
+      "Bash(tee:*)",
+      "Bash(apt update:*)",
+      "Bash(apt install:*)",
+      "Bash(https://api.github.com/repos/Ignacio1972/intraneuro-3.0/pulls/1/merge )",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []
