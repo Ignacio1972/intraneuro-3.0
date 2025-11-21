@@ -29,6 +29,8 @@
 <link rel="stylesheet" href="css/task-manager.css?v=4">
 <!-- Sistema de Notas de Voz para Pacientes -->
 <link rel="stylesheet" href="css/voice-notes.css?v=1">
+<!-- ✨ NUEVO: Sistema OCR para ingreso de pacientes -->
+<link rel="stylesheet" href="css/ocr.css?v=1">
 
     <!-- Flatpickr - Calendario visual -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -222,6 +224,19 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Nuevo Ingreso</h2>
+
+        <!-- ✨ NUEVO: Toggle OCR -->
+        <div class="ocr-toggle-section">
+            <button type="button" id="ocrToggleBtn" class="btn btn-secondary">
+                📸 Ingresar desde Foto del Monitor
+            </button>
+        </div>
+
+        <!-- ✨ NUEVO: Sección OCR (inicialmente oculta) -->
+        <div id="ocrUploadSection" style="display: none;">
+            <!-- El contenido se inyectará dinámicamente por OCRUploader -->
+        </div>
+
         <form id="admissionForm">
             <div class="form-section">
                 <h3>📝 Datos Personales</h3>
@@ -322,6 +337,10 @@
 <script src="js/modules/dropdown-system.js?v=2"></script>
 <!-- Script de debug para dropdowns -->
 <script src="js/debug-dropdowns.js"></script>
+<!-- ✨ NUEVO: Módulos OCR para ingreso desde foto -->
+<script src="js/modules/ocr/ocr-uploader.js?v=1"></script>
+<script src="js/modules/ocr/ocr-integration.js?v=1"></script>
+<script src="js/modules/ocr/ocr-init.js?v=1"></script>
 <!-- Módulos principales -->
 <script src="js/auth.js?v=25"></script>
 <script src="js/ingreso.js?v=25"></script>

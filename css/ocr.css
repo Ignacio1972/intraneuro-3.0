@@ -1,0 +1,188 @@
+/**
+ * OCR Module Styles
+ * Estilos para el sistema de OCR de ingreso de pacientes
+ */
+
+/* Toggle Section */
+.ocr-toggle-section {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #F0F8FF;
+    border-radius: 8px;
+    border: 2px dashed #2563EB;
+    text-align: center;
+}
+
+.ocr-toggle-section button {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+}
+
+.ocr-toggle-section button.active {
+    background: #27AE60;
+    border-color: #27AE60;
+}
+
+/* Upload Zone */
+.ocr-upload-zone {
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.ocr-upload-instructions {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.ocr-upload-instructions h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2C3E50;
+}
+
+.ocr-upload-instructions p {
+    margin: 0;
+    color: #7F8C8D;
+    font-size: 0.9rem;
+}
+
+.ocr-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Preview Section */
+#ocrPreviewSection {
+    text-align: center;
+}
+
+#ocrImagePreview {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Loading Section */
+#ocrLoadingSection {
+    background: #F8F9FA;
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+#ocrLoadingSection .spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 1rem;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #2563EB;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#ocrLoadingSection p {
+    margin: 0.5rem 0;
+    font-weight: 600;
+    color: #2C3E50;
+}
+
+#ocrLoadingSection small {
+    color: #7F8C8D;
+}
+
+/* Preview Modal */
+.ocr-preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.ocr-preview-modal .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.ocr-preview-modal h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2C3E50;
+    border-bottom: 2px solid #2563EB;
+    padding-bottom: 0.5rem;
+}
+
+/* Extracted Fields Table */
+.ocr-extracted-fields table {
+    font-size: 0.9rem;
+}
+
+.ocr-extracted-fields th {
+    font-weight: 600;
+    color: #2C3E50;
+}
+
+.ocr-extracted-fields td {
+    color: #34495E;
+}
+
+/* Warnings */
+.ocr-warnings h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.ocr-warnings p {
+    font-size: 0.85rem;
+}
+
+/* Info Box */
+.ocr-info {
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ocr-upload-zone {
+        padding: 1rem;
+    }
+
+    .ocr-buttons {
+        flex-direction: column;
+    }
+
+    .ocr-buttons button {
+        width: 100%;
+    }
+
+    .ocr-preview-modal .modal-content {
+        margin: 1rem;
+        padding: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+
+    .ocr-extracted-fields table {
+        font-size: 0.8rem;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+}

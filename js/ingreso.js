@@ -50,7 +50,7 @@ function initializeDiagnosisDropdown() {
         try {
             diagnosisDropdownInstance = window.DropdownSystem.createDiagnosisDropdown({
                 containerId: 'diagnosis-container',
-                required: true
+                required: false
             });
 
             // Hacer la instancia disponible globalmente para debug
@@ -86,7 +86,7 @@ async function handleAdmission(e) {
 
     const formData = {
         name: document.getElementById('patientName').value,
-        age: parseInt(document.getElementById('patientAge').value) || 18, // Tomar edad del campo o usar 18 por defecto
+        age: parseInt(document.getElementById('patientAge').value) || 1, // Tomar edad del campo o usar 1 por defecto
         rut: document.getElementById('patientRut').value || null, // Sin validación
         prevision: null, // Se agregará desde el modal del paciente
         bed: bedValue || 'n/a', // Usar el valor ingresado o 'n/a' si está vacío
@@ -99,18 +99,18 @@ async function handleAdmission(e) {
         status: 'active'
     };
 
-    console.log('Diagnóstico seleccionado:', diagnosisValue);
+    console.log('Diagnóstico seleccionado:', diagnosisValue || '(sin diagnóstico)');
     console.log('Cama asignada:', bedValue || 'n/a');
 
-    // Validar que se haya seleccionado un diagnóstico
-    if (!diagnosisValue || diagnosisValue.trim() === '') {
-        if (typeof showToast === 'function') {
-            showToast('Por favor seleccione un diagnóstico', 'error');
-        } else {
-            alert('Por favor seleccione un diagnóstico');
-        }
-        return;
-    }
+    // Diagnóstico es opcional - se puede asignar después desde el modal del paciente
+    // if (!diagnosisValue || diagnosisValue.trim() === '') {
+    //     if (typeof showToast === 'function') {
+    //         showToast('Por favor seleccione un diagnóstico', 'error');
+    //     } else {
+    //         alert('Por favor seleccione un diagnóstico');
+    //     }
+    //     return;
+    // }
 
     // Sin validación de RUT - ingreso rápido
 

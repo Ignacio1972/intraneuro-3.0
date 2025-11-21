@@ -66,12 +66,12 @@ const FIELD_CONFIGS = {
         // UI
         updateElement: (patientId, value) => {
             const el = document.getElementById(`age-${patientId}`);
-            if (el) el.textContent = `${value} años`;
+            if (el) el.textContent = value && value > 0 ? `${value} años` : 'n/a';
         },
 
         // Formateo
-        formatDisplay: (value) => value ? `${value} años` : 'Sin edad',
-        formatPrompt: (value) => value ? String(value) : ''
+        formatDisplay: (value) => value && value > 0 ? `${value} años` : 'n/a',
+        formatPrompt: (value) => value && value > 0 ? String(value) : ''
     },
 
     // Campo: Cama
@@ -529,11 +529,11 @@ async function showDropdownModal(patient, config, currentValue, displayValue) {
                     <!-- El dropdown se insertará aquí -->
                 </div>
                 <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" id="${modalId}-cancel-btn">
-                        Cancelar
-                    </button>
                     <button type="button" class="btn btn-primary" id="${modalId}-save-btn">
                         Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="${modalId}-cancel-btn">
+                        Cancelar
                     </button>
                 </div>
             </div>
@@ -643,11 +643,11 @@ async function showDateDialog(patient, config, currentValue, displayValue) {
                     />
                 </div>
                 <div class="form-actions" style="display: flex; gap: 8px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" id="${modalId}-cancel-btn">
-                        Cancelar
-                    </button>
                     <button type="button" class="btn btn-primary" id="${modalId}-save-btn">
                         Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="${modalId}-cancel-btn">
+                        Cancelar
                     </button>
                 </div>
             </div>
