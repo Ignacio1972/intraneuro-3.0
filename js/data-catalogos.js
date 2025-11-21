@@ -1,8 +1,28 @@
 // data-catalogos.js - INTRANEURO Catálogos y Datos Estáticos
 
-// Mapping de diagnósticos - Ahora incluye neurológicos
+// Mapping de diagnósticos - Actualizado Noviembre 2025
 const diagnosisMapping = {
-    // Diagnósticos neurológicos (texto directo)
+    // Diagnósticos neurológicos actuales
+    'ACV': 'ACV',
+    'ACV isquémico': 'ACV isquémico',
+    'ACV isquémico insular izquierdo': 'ACV isquémico insular izquierdo',
+    'ACV isquémico insular derecho': 'ACV isquémico insular derecho',
+    'ACV trombolisis': 'ACV trombolisis',
+    'ACV trombolizado': 'ACV trombolizado',
+    'ACV múltiple': 'ACV múltiple',
+    'Infarto Cerebral': 'Infarto Cerebral',
+    'Hidrocefalia': 'Hidrocefalia',
+    'Síndrome convulsivo': 'Síndrome convulsivo',
+    'Crisis epiléptica': 'Crisis epiléptica',
+    'Vértigo - Cefalea': 'Vértigo - Cefalea',
+    'HIC MAV': 'HIC MAV',
+    'HSA': 'HSA',
+    'EAI': 'EAI',
+    'Síndrome Serotoninérgico': 'Síndrome Serotoninérgico',
+    'Hemorragia Intracerebral': 'Hemorragia Intracerebral',
+    'Guillan Barre': 'Guillan Barre',
+
+    // Diagnósticos antiguos (mantener por compatibilidad con registros históricos)
     'ACV Isquémico': 'ACV Isquémico',
     'ACV Hemorrágico': 'ACV Hemorrágico',
     'Epilepsia': 'Epilepsia',
@@ -19,7 +39,6 @@ const diagnosisMapping = {
     'Encefalitis': 'Encefalitis',
     'Tumor Cerebral': 'Tumor Cerebral',
     'Traumatismo Craneoencefálico': 'Traumatismo Craneoencefálico',
-    'Hidrocefalia': 'Hidrocefalia',
     'Vértigo': 'Vértigo',
     'Miastenia Gravis': 'Miastenia Gravis',
     'Esclerosis Lateral Amiotrófica': 'Esclerosis Lateral Amiotrófica',

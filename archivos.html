@@ -40,7 +40,31 @@
                     📊 Exportar a Excel
                 </button>
             </div>
-            <p class="info-text">Mostrando los últimos 25 pacientes dados de alta</p>
+
+            <!-- Controles de paginación -->
+            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 4px; margin-top: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="pageSizeSelector" style="font-weight: 500;">Mostrar:</label>
+                    <select id="pageSizeSelector" onchange="changePageSize()" class="form-control" style="width: auto; padding: 0.5rem;">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">Todos</option>
+                    </select>
+                </div>
+
+                <p id="paginationInfo" class="info-text" style="margin: 0; color: #666;">Mostrando pacientes...</p>
+
+                <div class="pagination-buttons" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <button id="prevPageBtn" onclick="previousPage()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                        ← Anterior
+                    </button>
+                    <span id="pageIndicator" style="font-weight: 500; min-width: 100px; text-align: center;">Página 1</span>
+                    <button id="nextPageBtn" onclick="nextPage()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                        Siguiente →
+                    </button>
+                </div>
+            </div>
         </section>
 
         <!-- Contenedor de pacientes archivados -->

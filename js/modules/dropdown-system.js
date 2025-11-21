@@ -15,26 +15,24 @@
     // ===========================================
 
     const DIAGNOSTICOS_NEUROLOGICOS = [
-        'ACV Isquémico',
-        'ACV Hemorrágico',
-        'Epilepsia',
-        'Crisis Convulsiva',
-        'Cefalea',
-        'Migraña',
-        'Demencia tipo Alzheimer',
-        'Demencia Vascular',
-        'Enfermedad de Parkinson',
-        'Esclerosis Múltiple',
-        'Neuropatía Periférica',
-        'Síndrome de Guillain-Barré',
-        'Meningitis',
-        'Encefalitis',
-        'Tumor Cerebral',
-        'Traumatismo Craneoencefálico',
+        'ACV',
+        'ACV isquémico',
+        'ACV isquémico insular izquierdo',
+        'ACV isquémico insular derecho',
+        'ACV trombolisis',
+        'ACV trombolizado',
+        'ACV múltiple',
+        'Infarto Cerebral',
         'Hidrocefalia',
-        'Vértigo',
-        'Miastenia Gravis',
-        'Esclerosis Lateral Amiotrófica'
+        'Síndrome convulsivo',
+        'Crisis epiléptica',
+        'Vértigo - Cefalea',
+        'HIC MAV',
+        'HSA',
+        'EAI',
+        'Síndrome Serotoninérgico',
+        'Hemorragia Intracerebral',
+        'Guillan Barre'
     ];
 
     const PREVISIONES = [

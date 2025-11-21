@@ -6,6 +6,10 @@ let currentFilter = {
 };
 let currentPatientData = null;
 
+// Variables de paginación
+let currentPageSize = 25;  // Tamaño de página por defecto
+let currentPage = 1;       // Página actual
+
 // DATOS DE PRUEBA - ELIMINAR CUANDO EL BACKEND ESTÉ LISTO
 const mockArchivedPatients = [
     {
@@ -258,12 +262,23 @@ function renderArchivedPatients(patientsToRender = archivedPatients) {
             <tbody>
     `;
     
-    // Limitar a 25 registros
-    const limitedPatients = patientsToRender.slice(0, 25);
+    // Aplicar paginación
+    let paginatedPatients;
+    if (currentPageSize === 'all') {
+        // Mostrar todos los pacientes
+        paginatedPatients = patientsToRender;
+    } else {
+        // Calcular índices de paginación
+        const startIndex = (currentPage - 1) * currentPageSize;
+        const endIndex = startIndex + currentPageSize;
+        paginatedPatients = patientsToRender.slice(startIndex, endIndex);
+    }
 
-    console.log('[Archivos] Ejemplo de paciente:', limitedPatients[0]);
+    console.log('[Archivos] Total pacientes:', patientsToRender.length);
+    console.log('[Archivos] Mostrando pacientes:', paginatedPatients.length);
+    console.log('[Archivos] Ejemplo de paciente:', paginatedPatients[0]);
 
-    limitedPatients.forEach(patient => {
+    paginatedPatients.forEach(patient => {
         // Tomar la última admisión (más reciente)
         const lastAdmission = patient.admissions[0];
 
@@ -295,6 +310,9 @@ function renderArchivedPatients(patientsToRender = archivedPatients) {
     
     html += '</tbody></table>';
     container.innerHTML = html;
+
+    // Actualizar controles de paginación
+    updatePaginationControls(patientsToRender.length, paginatedPatients.length);
 }
 
 // Buscar en archivos
@@ -303,9 +321,12 @@ function searchArchivos() {
     const select = document.getElementById('filterDoctor');
     const doctorFilter = select.value;
     const dateFilter = document.getElementById('filterDate').value;
-    
+
     console.log('Filtros aplicados:', { searchTerm, doctorFilter, dateFilter }); // Debug temporal
-    
+
+    // Resetear a página 1 cuando se aplican filtros
+    currentPage = 1;
+
     let filtered = archivedPatients;
     
     // Filtrar por búsqueda de texto
@@ -764,6 +785,99 @@ function calculateDaysBetween(startDate, endDate) {
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+}
+
+// ========================================
+// FUNCIONES DE PAGINACIÓN
+// ========================================
+
+// Cambiar tamaño de página
+function changePageSize() {
+    const select = document.getElementById('pageSizeSelector');
+    if (!select) return;
+
+    const value = select.value;
+
+    if (value === 'all') {
+        currentPageSize = 'all';
+    } else {
+        currentPageSize = parseInt(value);
+    }
+
+    // Resetear a página 1 cuando cambia el tamaño
+    currentPage = 1;
+
+    // Re-renderizar con nuevo tamaño
+    renderArchivedPatients();
+}
+
+// Ir a página anterior
+function previousPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderArchivedPatients();
+
+        // Scroll al inicio de la tabla
+        document.getElementById('archivosContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Ir a página siguiente
+function nextPage() {
+    const totalPages = calculateTotalPages(archivedPatients.length);
+
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderArchivedPatients();
+
+        // Scroll al inicio de la tabla
+        document.getElementById('archivosContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// Calcular total de páginas
+function calculateTotalPages(totalItems) {
+    if (currentPageSize === 'all') return 1;
+    return Math.ceil(totalItems / currentPageSize);
+}
+
+// Actualizar controles de paginación
+function updatePaginationControls(totalItems, displayedItems) {
+    // Actualizar info de paginación
+    const paginationInfo = document.getElementById('paginationInfo');
+    if (paginationInfo) {
+        if (currentPageSize === 'all') {
+            paginationInfo.textContent = `Mostrando todos los ${totalItems} pacientes`;
+        } else {
+            const startIndex = (currentPage - 1) * currentPageSize + 1;
+            const endIndex = Math.min(startIndex + displayedItems - 1, totalItems);
+            paginationInfo.textContent = `Mostrando ${startIndex}-${endIndex} de ${totalItems} pacientes`;
+        }
+    }
+
+    // Actualizar indicador de página
+    const pageIndicator = document.getElementById('pageIndicator');
+    if (pageIndicator) {
+        const totalPages = calculateTotalPages(totalItems);
+        if (currentPageSize === 'all') {
+            pageIndicator.textContent = 'Todos';
+        } else {
+            pageIndicator.textContent = `Página ${currentPage} de ${totalPages}`;
+        }
+    }
+
+    // Habilitar/deshabilitar botones
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+
+    if (prevBtn) {
+        prevBtn.disabled = currentPage === 1 || currentPageSize === 'all';
+    }
+
+    if (nextBtn) {
+        const totalPages = calculateTotalPages(totalItems);
+        nextBtn.disabled = currentPage >= totalPages || currentPageSize === 'all';
+    }
 }
 
 // Variables para controlar el ordenamiento

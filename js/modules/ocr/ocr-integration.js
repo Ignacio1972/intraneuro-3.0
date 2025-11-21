@@ -140,28 +140,66 @@ class OCRIntegration {
         return html;
     }
 
-    static confirmOCRData() {
-        if (this.currentOCRData) {
+    static async confirmOCRData() {
+        if (!this.currentOCRData) return;
+
+        try {
+            console.log('[OCR Integration] Confirmando datos OCR y procesando ingreso automático...');
+
+            // 1. Establecer flag para que handleAdmission() sepa que debe abrir modal del paciente
+            window.OCR_AUTO_OPEN_MODAL = true;
+
+            // 2. Llenar el formulario con los datos del OCR
             this.fillFormFromOCR(this.currentOCRData);
             this.closePreviewModal();
 
-            // Ocultar sección OCR y mostrar formulario
+            // 3. Mostrar mensaje de procesamiento
+            if (typeof showToast === 'function') {
+                showToast('Procesando ingreso del paciente...', 'info');
+            }
+
+            // 4. Esperar un momento para que los campos se llenen correctamente
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            // 5. Obtener el formulario y disparar submit automático
+            const admissionForm = document.getElementById('admissionForm');
+            if (!admissionForm) {
+                throw new Error('Formulario de ingreso no encontrado');
+            }
+
+            // 6. Disparar el submit - Esto ejecutará handleAdmission()
+            const submitEvent = new Event('submit', {
+                bubbles: true,
+                cancelable: true
+            });
+
+            console.log('[OCR Integration] Enviando formulario automáticamente...');
+            admissionForm.dispatchEvent(submitEvent);
+
+            // Nota: El resto del flujo (crear paciente, cerrar modal, abrir ficha)
+            // será manejado por handleAdmission() en ingreso.js
+
+        } catch (error) {
+            console.error('[OCR Integration] Error al procesar ingreso automático:', error);
+
+            // Limpiar flag en caso de error
+            window.OCR_AUTO_OPEN_MODAL = false;
+
+            if (typeof showToast === 'function') {
+                showToast(`Error: ${error.message}`, 'error');
+            }
+
+            // Fallback: mostrar formulario para corrección manual
             const ocrSection = document.getElementById('ocrUploadSection');
             const formSection = document.getElementById('admissionForm');
 
             if (ocrSection) ocrSection.style.display = 'none';
             if (formSection) formSection.style.display = 'block';
 
-            // Cambiar texto del toggle
             const toggleBtn = document.getElementById('ocrToggleBtn');
             if (toggleBtn) {
                 toggleBtn.innerHTML = '📸 Volver a OCR';
                 toggleBtn.classList.add('active');
-            }
-
-            // Mostrar mensaje de éxito
-            if (typeof showToast === 'function') {
-                showToast('Formulario pre-llenado con datos del OCR. Por favor, revisar y completar campos faltantes.', 'success');
             }
         }
     }

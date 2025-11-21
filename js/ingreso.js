@@ -128,7 +128,7 @@ async function handleAdmission(e) {
 
         if (response && response.patient) {
             console.log('Paciente guardado en BD:', response);
-            
+
             // Crear objeto paciente con datos de respuesta y admisión
             const newPatient = {
                 ...response.patient,
@@ -144,10 +144,58 @@ async function handleAdmission(e) {
                 scheduledDischarge: false,
                 admission_id: response.admission?.id
             };
-            
+
             // Actualizar array local para mantener sincronía
             patients.push(newPatient);
-            
+
+            // ✨ NUEVO: Verificar si viene de OCR para flujo automático
+            if (window.OCR_AUTO_OPEN_MODAL === true) {
+                console.log('[Ingreso] Detectado flag OCR - Abriendo modal del paciente automáticamente');
+
+                // Limpiar flag inmediatamente
+                window.OCR_AUTO_OPEN_MODAL = false;
+
+                // Reset form
+                e.target.reset();
+
+                // Limpiar dropdown de diagnósticos
+                if (diagnosisDropdownInstance && typeof diagnosisDropdownInstance.clear === 'function') {
+                    diagnosisDropdownInstance.clear();
+                }
+
+                // Limpiar campo de cama
+                if (bedInput) {
+                    bedInput.value = '';
+                }
+
+                // Cerrar modal de ingreso SIN delay
+                closeModal('admissionModal');
+
+                // Actualizar dashboard (sin recargar lista completa)
+                if (typeof updateDashboard === 'function') {
+                    updateDashboard();
+                }
+
+                // Esperar un momento para que el modal de ingreso cierre completamente
+                setTimeout(() => {
+                    console.log('[Ingreso] Abriendo modal del paciente ID:', newPatient.id);
+
+                    // Abrir modal del paciente recién creado
+                    if (typeof openPatientModal === 'function') {
+                        openPatientModal(newPatient.id);
+                    } else {
+                        console.error('[Ingreso] openPatientModal no está disponible');
+                        // Fallback: mostrar toast de éxito
+                        if (typeof showToast === 'function') {
+                            showToast(`Paciente ${newPatient.name} ingresado correctamente`, 'success');
+                        }
+                    }
+                }, 400); // Delay para transición suave entre modales
+
+                return; // Salir - flujo OCR completado
+            }
+
+            // Flujo normal (sin OCR) - mantener comportamiento original
             // Show success message
             showAdmissionSuccess(newPatient);
 
@@ -185,7 +233,7 @@ async function handleAdmission(e) {
                     window.location.reload();
                 }
             }, 1500);
-            
+
             return; // Salir si API funcionó
         } else {
             console.error('Respuesta inesperada del servidor:', response);
@@ -193,6 +241,12 @@ async function handleAdmission(e) {
     } catch (error) {
         console.error('❌ ERROR CRÍTICO guardando en API:', error);
         console.error('Detalles del error:', error.message);
+
+        // Limpiar flag OCR en caso de error
+        if (window.OCR_AUTO_OPEN_MODAL === true) {
+            window.OCR_AUTO_OPEN_MODAL = false;
+            console.log('[Ingreso] Flag OCR limpiado debido a error');
+        }
 
         // Mostrar error al usuario
         if (typeof showToast === 'function') {
