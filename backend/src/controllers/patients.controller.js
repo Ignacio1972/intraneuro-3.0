@@ -336,6 +336,7 @@ exports.createPatient = async (req, res) => {
         
     } catch (error) {
         console.error('Error creando paciente:', error.message);
+        console.error('Error completo:', error);
         
         if (transaction) {
             try {

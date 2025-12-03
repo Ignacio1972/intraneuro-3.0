@@ -137,11 +137,12 @@ const FIELD_CONFIGS = {
     },
 
     // Campo: Médico tratante (segundo grupo - fase 2)
+    // ACTUALIZADO v2.1: Ahora usa modal-dropdown con lista de médicos administrable
     admittedBy: {
         label: 'Médico Tratante',
         apiField: 'admittedBy',  // CORREGIDO: usar camelCase para coincidir con objeto patient
-        inputType: 'text',
-        placeholder: 'Ingrese el nombre del médico tratante',
+        inputType: 'modal-dropdown',
+        dropdownType: 'doctor',  // Nuevo tipo: usa DoctorDropdown con administración
 
         validator: () => true,
         transformer: (val) => val?.trim() || '',
@@ -558,15 +559,24 @@ async function showDropdownModal(patient, config, currentValue, displayValue) {
                     containerId: containerId,
                     required: false
                 });
+            } else if (config.dropdownType === 'doctor') {
+                // Nuevo: Dropdown de médicos tratantes con administración integrada
+                dropdownInstance = window.DropdownSystem.createDoctorDropdown({
+                    containerId: containerId,
+                    required: false,
+                    currentValue: currentValue
+                });
             } else {
                 console.error('[DropdownModal] Tipo de dropdown desconocido:', config.dropdownType);
             }
 
             // Establecer valor actual si existe
+            // Para doctor dropdown, esperar más tiempo porque carga desde API
             if (dropdownInstance && currentValue) {
+                const delay = config.dropdownType === 'doctor' ? 500 : 100;
                 setTimeout(() => {
                     dropdownInstance.setValue(currentValue);
-                }, 100);
+                }, delay);
             }
         } else {
             console.error('[DropdownModal] DropdownSystem no disponible');

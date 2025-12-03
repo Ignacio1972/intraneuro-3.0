@@ -71,15 +71,10 @@ async function renderPatients(skipAPILoad = false, forceReload = false) {
     
     // Aplicar filtro de médico si está activo
     if (currentDoctorFilter) {
-        if (Array.isArray(currentDoctorFilter)) {
-            // Si es un array de variaciones, filtrar por cualquiera de ellas
-            activePatients = activePatients.filter(p => 
-                currentDoctorFilter.includes(p.admittedBy)
-            );
-        } else {
-            // Compatibilidad con string simple
-            activePatients = activePatients.filter(p => p.admittedBy === currentDoctorFilter);
-        }
+        const filterLower = currentDoctorFilter.toLowerCase();
+        activePatients = activePatients.filter(p =>
+            p.admittedBy && p.admittedBy.toLowerCase() === filterLower
+        );
     }
     
     // Actualizar el dropdown de médicos
@@ -521,13 +516,10 @@ window.sortByColumn = function(column) {
     let activePatients = patients.filter(p => p.status === 'active');
     
     if (currentDoctorFilter) {
-        if (Array.isArray(currentDoctorFilter)) {
-            activePatients = activePatients.filter(p => 
-                currentDoctorFilter.includes(p.admittedBy)
-            );
-        } else {
-            activePatients = activePatients.filter(p => p.admittedBy === currentDoctorFilter);
-        }
+        const filterLower = currentDoctorFilter.toLowerCase();
+        activePatients = activePatients.filter(p =>
+            p.admittedBy && p.admittedBy.toLowerCase() === filterLower
+        );
     }
 
     // Ordenar según la columna
@@ -867,68 +859,52 @@ window.exportSelectedToExcel = function() {
     showToast(`${selectedPatients.size} pacientes exportados a Excel`, 'success');
 };
 
-// Función para actualizar el dropdown de médicos
-function updateDoctorFilter() {
+// Función para actualizar el dropdown de médicos (carga desde API /doctors)
+async function updateDoctorFilter() {
     const select = document.getElementById('doctorFilter');
     if (!select) {
         return;
     }
-    
-    // Función para normalizar nombres (capitalizar cada palabra correctamente)
-    function normalizeName(name) {
-        if (!name) return '';
-        
-        // Normalizar espacios y convertir a minúsculas
-        let normalized = name.trim().replace(/\s+/g, ' ').toLowerCase();
-        
-        // Capitalizar primera letra de cada palabra (incluyendo con tildes)
-        normalized = normalized.split(' ').map(word => {
-            if (word.length === 0) return word;
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        }).join(' ');
-        
-        // Corregir preposiciones y artículos
-        return normalized
-            .replace(/\bDe\b/g, 'de')
-            .replace(/\bDel\b/g, 'del')
-            .replace(/\bLa\b/g, 'la')
-            .replace(/\bLos\b/g, 'los')
-            .replace(/\bLas\b/g, 'las');
-    }
-    
-    // Usar un Map para mantener relación entre nombre normalizado y originales
-    const doctorMap = new Map();
-    
-    patients.filter(p => p.status === 'active').forEach(p => {
-        if (p.admittedBy && p.admittedBy !== 'Sin asignar') {
-            const normalized = normalizeName(p.admittedBy);
-            if (!doctorMap.has(normalized)) {
-                doctorMap.set(normalized, []);
-            }
-            doctorMap.get(normalized).push(p.admittedBy);
-        }
-    });
-    
+
     // Guardar valor actual
     const currentValue = select.value;
-    
+
     // Limpiar opciones actuales (excepto la primera)
     select.innerHTML = '<option value="">Médicos</option>';
-    
-    // Agregar médicos normalizados y ordenados alfabéticamente
-    const sortedDoctors = Array.from(doctorMap.keys()).sort();
-    
-    sortedDoctors.forEach(normalizedName => {
-        const originalNames = doctorMap.get(normalizedName);
-        const option = document.createElement('option');
-        // Usar el nombre normalizado para mostrar y como valor
-        option.value = normalizedName;
-        option.textContent = normalizedName;
-        // Guardar todas las variaciones como atributo de datos
-        option.setAttribute('data-variations', JSON.stringify(originalNames));
-        select.appendChild(option);
-    });
-    
+
+    try {
+        // Cargar médicos desde la API (tabla doctors)
+        const doctors = await apiRequest('/doctors');
+
+        if (Array.isArray(doctors) && doctors.length > 0) {
+            // Ordenar por frecuencia (más usados primero)
+            doctors.sort((a, b) => (b.frequency_count || 0) - (a.frequency_count || 0));
+
+            doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.name;
+                option.textContent = doctor.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('[updateDoctorFilter] Error cargando médicos:', error);
+        // Fallback: cargar desde pacientes activos si falla la API
+        const doctorSet = new Set();
+        patients.filter(p => p.status === 'active').forEach(p => {
+            if (p.admittedBy && p.admittedBy !== 'Sin asignar') {
+                doctorSet.add(p.admittedBy);
+            }
+        });
+
+        Array.from(doctorSet).sort().forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+        });
+    }
+
     // Restaurar selección previa si existe
     select.value = currentValue;
 }
@@ -936,16 +912,14 @@ function updateDoctorFilter() {
 // Función para filtrar por médico
 window.filterByDoctor = function() {
     const select = document.getElementById('doctorFilter');
-    const selectedOption = select.options[select.selectedIndex];
-    
+
     if (select.value === '') {
         currentDoctorFilter = '';
     } else {
-        // Obtener todas las variaciones del médico seleccionado
-        const variations = selectedOption.getAttribute('data-variations');
-        currentDoctorFilter = variations ? JSON.parse(variations) : [select.value];
+        // Usar el nombre normalizado directamente
+        currentDoctorFilter = select.value;
     }
-    
+
     renderPatients(true); // true para evitar recargar desde API
 };
 

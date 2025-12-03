@@ -28,12 +28,27 @@ class OCRService {
                 throw new Error(`Archivo de credenciales no encontrado: ${keyPath}`);
             }
 
+            // Leer el archivo de credenciales para obtener el project_id
+            const credentials = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+            const projectId = credentials.project_id;
+
+            console.log(`[OCR] Inicializando con proyecto: ${projectId}`);
+            console.log(`[OCR] Usando credenciales: ${keyPath}`);
+
+            // IMPORTANTE: Eliminar cualquier variable de entorno de credenciales por defecto
+            // para forzar el uso explícito del archivo de credenciales
+            delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+            delete process.env.GCLOUD_PROJECT;
+
+            // Crear cliente con credenciales explícitas
             this.client = new vision.ImageAnnotatorClient({
-                keyFilename: keyPath
+                keyFilename: keyPath,
+                projectId: projectId,
+                credentials: credentials
             });
 
             this.initialized = true;
-            console.log('✅ OCR Service inicializado correctamente');
+            console.log(`✅ OCR Service inicializado correctamente con proyecto ${projectId}`);
         } catch (error) {
             console.error('❌ Error inicializando OCR Service:', error.message);
             throw error;

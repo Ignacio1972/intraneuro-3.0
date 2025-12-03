@@ -10,7 +10,7 @@
     UTI: { label: 'UTI', color: '#ea580c', icon: '⚕️' },
     MQ: { label: 'MQ', color: '#2563eb', icon: '🔬' },
     Urgencias: { label: 'Urgencias', color: '#ca8a04', icon: '🚨' },
-    Interconsulta: { label: 'Interconsulta', color: '#16a34a', icon: '📋' }
+    Interconsulta: { label: 'IC', color: '#16a34a', icon: '📋' }
   };
 
   // Inicializar módulo cuando el DOM esté listo

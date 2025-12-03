@@ -15,7 +15,8 @@ class OCRIntegration {
             'patientRut': extractedData.rut,
             'patientAge': extractedData.age,
             'admissionDate': this.formatDateForInput(extractedData.admissionDate),
-            'patientBedInput': extractedData.bed
+            // 'patientBedInput' - NO se mapea: la cama se asigna manualmente más adelante
+            'patientPrevision': extractedData.prevision
         };
 
         // Rellenar campos del formulario
@@ -56,35 +57,16 @@ class OCRIntegration {
         const modalHTML = `
             <div class="ocr-preview-modal" id="ocrPreviewModal">
                 <div class="modal-content" style="max-width: 600px;">
-                    <h3>📋 Datos Extraídos - Revisar antes de confirmar</h3>
-
                     <div class="ocr-extracted-fields">
                         ${this.renderExtractedFields(result.extracted, result.confidence)}
                     </div>
 
-                    ${result.warnings && result.warnings.length > 0 ? `
-                        <div class="ocr-warnings" style="background: #FFF3CD; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
-                            <h4 style="color: #856404; margin-bottom: 0.5rem;">⚠️ Advertencias:</h4>
-                            ${result.warnings.map(w => `
-                                <p style="color: #856404; margin: 0.25rem 0;">
-                                    <strong>${w.field}:</strong> ${w.message}
-                                </p>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-
-                    <div class="ocr-info" style="background: #D1ECF1; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
-                        <p style="color: #0C5460; margin: 0; font-size: 0.9rem;">
-                            ℹ️ Los campos de <strong>Diagnóstico</strong> y <strong>Servicio</strong> deben completarse manualmente después de confirmar.
-                        </p>
-                    </div>
-
-                    <div class="modal-actions" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                        <button type="button" onclick="OCRIntegration.cancelOCR()" class="btn btn-secondary">
-                            ❌ Cancelar
-                        </button>
+                    <div class="modal-actions" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
                         <button type="button" onclick="OCRIntegration.confirmOCRData()" class="btn btn-primary">
                             ✅ Confirmar y Rellenar Formulario
+                        </button>
+                        <button type="button" onclick="OCRIntegration.cancelOCR()" class="btn btn-secondary">
+                            ❌ Cancelar
                         </button>
                     </div>
                 </div>
@@ -108,15 +90,12 @@ class OCRIntegration {
             name: 'Nombre',
             rut: 'RUT',
             age: 'Edad',
-            birthDate: 'Fecha de Nacimiento',
             prevision: 'Previsión',
-            admissionDate: 'Fecha de Ingreso',
-            bed: 'Cama',
-            attendingDoctor: 'Médico Tratante'
+            admissionDate: 'Fecha de Ingreso'
+            // 'bed' - NO se muestra: la cama se asigna manualmente más adelante
         };
 
         let html = '<table style="width: 100%; border-collapse: collapse;">';
-        html += '<thead><tr style="background: #f8f9fa;"><th style="padding: 0.5rem; text-align: left;">Campo</th><th style="padding: 0.5rem; text-align: left;">Valor</th><th style="padding: 0.5rem; text-align: center;">Confianza</th></tr></thead>';
         html += '<tbody>';
 
         for (const [field, label] of Object.entries(fieldLabels)) {
@@ -155,7 +134,7 @@ class OCRIntegration {
 
             // 3. Mostrar mensaje de procesamiento
             if (typeof showToast === 'function') {
-                showToast('Procesando ingreso del paciente...', 'info');
+                showToast('Procesando ingreso del paciente...', 'success');
             }
 
             // 4. Esperar un momento para que los campos se llenen correctamente

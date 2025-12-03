@@ -76,7 +76,7 @@ const Admission = sequelize.define('Admission', {
         defaultValue: 'active'
     },
     service: {
-        type: DataTypes.ENUM('UCI', 'UTI', 'MQ', 'Urgencias', 'Interconsulta'),
+        type: DataTypes.STRING(50),
         allowNull: true,
         comment: 'Servicio hospitalario'
     },

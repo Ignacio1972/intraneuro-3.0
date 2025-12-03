@@ -86,9 +86,9 @@ async function handleAdmission(e) {
 
     const formData = {
         name: document.getElementById('patientName').value,
-        age: parseInt(document.getElementById('patientAge').value) || 1, // Tomar edad del campo o usar 1 por defecto
+        age: document.getElementById('patientAge')?.value ? parseInt(document.getElementById('patientAge').value) : 1, // Default 1 si no se ingresa
         rut: document.getElementById('patientRut').value || null, // Sin validación
-        prevision: null, // Se agregará desde el modal del paciente
+        prevision: document.getElementById('patientPrevision')?.value || null, // ✅ CAMBIADO: Tomar del campo del formulario (OCR o manual)
         bed: bedValue || 'n/a', // Usar el valor ingresado o 'n/a' si está vacío
         admissionDate: document.getElementById('admissionDate').value,
         diagnosis: diagnosisValue,
@@ -248,11 +248,26 @@ async function handleAdmission(e) {
             console.log('[Ingreso] Flag OCR limpiado debido a error');
         }
 
+        // Determinar mensaje de error apropiado
+        let errorMessage = error.message || 'Error desconocido';
+
+        // Si el error viene del backend con mensaje específico, usarlo
+        if (error.response && error.response.message) {
+            errorMessage = error.response.message;
+        } else if (error.response && error.response.error) {
+            errorMessage = error.response.error;
+        }
+
+        // Detectar caso específico de paciente ya ingresado
+        if (errorMessage.includes('ya tiene una admisión activa') || errorMessage.includes('ya está ingresado')) {
+            errorMessage = `⚠️ Este paciente ya está ingresado en el sistema. Verifique el RUT.`;
+        }
+
         // Mostrar error al usuario
         if (typeof showToast === 'function') {
-            showToast(`Error al crear ingreso: ${error.message}`, 'error');
+            showToast(errorMessage, 'error');
         } else {
-            alert(`Error al crear ingreso: ${error.message}`);
+            alert(errorMessage);
         }
 
         // NO continuar con el fallback si hay error

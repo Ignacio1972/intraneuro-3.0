@@ -7,7 +7,6 @@
     'use strict';
 
     let ocrUploaderInstance = null;
-    let isOCRMode = false;
 
     // Inicializar cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
@@ -27,54 +26,36 @@
     }
 
     function handleOCRToggle() {
-        const ocrSection = document.getElementById('ocrUploadSection');
-        const formSection = document.getElementById('admissionForm');
-        const toggleBtn = document.getElementById('ocrToggleBtn');
+        // ✨ NUEVO: Activar cámara directamente sin mostrar página intermedia
 
-        if (!isOCRMode) {
-            // Activar modo OCR
-            isOCRMode = true;
-
-            if (ocrSection) ocrSection.style.display = 'block';
-            if (formSection) formSection.style.display = 'none';
-            if (toggleBtn) {
-                toggleBtn.innerHTML = '✏️ Ingreso Manual';
-                toggleBtn.classList.add('active');
+        // Inicializar uploader si no existe (silenciosamente, sin mostrar UI)
+        if (!ocrUploaderInstance) {
+            // Crear contenedor temporal oculto si no existe
+            let ocrSection = document.getElementById('ocrUploadSection');
+            if (!ocrSection) {
+                ocrSection = document.createElement('div');
+                ocrSection.id = 'ocrUploadSection';
+                ocrSection.style.display = 'none';
+                document.body.appendChild(ocrSection);
             }
 
-            // Inicializar uploader si no existe
-            if (!ocrUploaderInstance) {
-                ocrUploaderInstance = new window.OCRUploader();
-                ocrUploaderInstance.initialize('ocrUploadSection');
+            ocrUploaderInstance = new window.OCRUploader();
+            ocrUploaderInstance.initialize('ocrUploadSection');
 
-                // Configurar callback para preview
-                ocrUploaderInstance.onPreview((result) => {
-                    window.OCRIntegration.showPreviewModal(result);
-                });
+            // Configurar callback para preview
+            ocrUploaderInstance.onPreview((result) => {
+                window.OCRIntegration.showPreviewModal(result);
+            });
 
-                // Hacer disponible globalmente para debugging
-                window.ocrUploaderInstance = ocrUploaderInstance;
-            }
+            // Hacer disponible globalmente para debugging
+            window.ocrUploaderInstance = ocrUploaderInstance;
 
-            console.log('[OCR] Modo OCR activado');
-        } else {
-            // Volver a modo manual
-            isOCRMode = false;
-
-            if (ocrSection) ocrSection.style.display = 'none';
-            if (formSection) formSection.style.display = 'block';
-            if (toggleBtn) {
-                toggleBtn.innerHTML = '📸 Ingresar desde Foto del Monitor';
-                toggleBtn.classList.remove('active');
-            }
-
-            // Resetear uploader
-            if (ocrUploaderInstance) {
-                ocrUploaderInstance.reset();
-            }
-
-            console.log('[OCR] Modo manual activado');
+            console.log('[OCR] Uploader inicializado (modo directo)');
         }
+
+        // Activar cámara directamente
+        console.log('[OCR] Abriendo cámara directamente...');
+        ocrUploaderInstance.openCamera();
     }
 
     // Resetear al cerrar el modal
@@ -84,30 +65,16 @@
     });
 
     function resetOCRMode() {
-        if (isOCRMode) {
-            isOCRMode = false;
-
-            const ocrSection = document.getElementById('ocrUploadSection');
-            const formSection = document.getElementById('admissionForm');
-            const toggleBtn = document.getElementById('ocrToggleBtn');
-
-            if (ocrSection) ocrSection.style.display = 'none';
-            if (formSection) formSection.style.display = 'block';
-            if (toggleBtn) {
-                toggleBtn.innerHTML = '📸 Ingresar desde Foto del Monitor';
-                toggleBtn.classList.remove('active');
-            }
-
-            if (ocrUploaderInstance) {
-                ocrUploaderInstance.reset();
-            }
+        // Resetear uploader si existe
+        if (ocrUploaderInstance) {
+            ocrUploaderInstance.reset();
+            console.log('[OCR] Uploader reseteado al cerrar modal');
         }
     }
 
     // Exportar para uso externo si es necesario
     window.OCRInit = {
-        reset: resetOCRMode,
-        isOCRMode: () => isOCRMode
+        reset: resetOCRMode
     };
 
 })();

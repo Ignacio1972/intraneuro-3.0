@@ -227,8 +227,9 @@
 
         <!-- ✨ NUEVO: Toggle OCR -->
         <div class="ocr-toggle-section">
-            <button type="button" id="ocrToggleBtn" class="btn btn-secondary">
-                📸 Ingresar desde Foto del Monitor
+            <button type="button" id="ocrToggleBtn" class="btn btn-secondary ocr-camera-btn">
+                <img src="assets/img/camera.svg" alt="Cámara" class="camera-icon">
+                <span class="camera-text">Capturar con foto</span>
             </button>
         </div>
 
@@ -251,10 +252,6 @@
                     <div class="form-group">
                         <label>RUT (Opcional)</label>
                         <input type="text" id="patientRut" placeholder="Opcional - Sin validación">
-                    </div>
-                    <div class="form-group">
-                        <label>Edad (Opcional)</label>
-                        <input type="number" id="patientAge" placeholder="Opcional" min="0" max="120">
                     </div>
                 </div>
             </div>
@@ -289,6 +286,7 @@
                 </div>
 
                 <!-- Campos ocultos para compatibilidad -->
+                <input type="hidden" id="patientAge" value="">
                 <input type="hidden" id="patientPrevision" value="">
                 <input type="hidden" id="patientBed" value="">
                 <input type="hidden" id="diagnosisDetails" value="">
@@ -296,8 +294,8 @@
                 <input type="hidden" id="noRut" value="false">
 
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('admissionModal')">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Registrar Ingreso</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('admissionModal')">Cancelar</button>
                 </div>
             </form>
         </div>
@@ -338,9 +336,9 @@
 <!-- Script de debug para dropdowns -->
 <script src="js/debug-dropdowns.js"></script>
 <!-- ✨ NUEVO: Módulos OCR para ingreso desde foto -->
-<script src="js/modules/ocr/ocr-uploader.js?v=1"></script>
-<script src="js/modules/ocr/ocr-integration.js?v=1"></script>
-<script src="js/modules/ocr/ocr-init.js?v=1"></script>
+<script src="js/modules/ocr/ocr-uploader.js?v=20251121"></script>
+<script src="js/modules/ocr/ocr-integration.js?v=20251121"></script>
+<script src="js/modules/ocr/ocr-init.js?v=20251121"></script>
 <!-- Módulos principales -->
 <script src="js/auth.js?v=25"></script>
 <script src="js/ingreso.js?v=25"></script>

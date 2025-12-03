@@ -5,6 +5,7 @@ const authRoutes = require('./auth.routes');
 const patientsRoutes = require('./patients.routes');
 const dashboardRoutes = require('./dashboard.routes');
 const diagnosisRoutes = require('./diagnosis.routes'); // Nuevo: Catálogo de diagnósticos
+const doctorsRoutes = require('./doctors.routes'); // Nuevo: Catálogo de médicos tratantes
 const ocrRoutes = require('./ocr.routes'); // ✨ NUEVO: OCR para ingreso de pacientes
 const healthController = require('../controllers/health.controller');
 
@@ -17,6 +18,7 @@ router.use('/', authRoutes);  // Login estará en /api/login
 router.use('/patients', patientsRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/diagnosis', diagnosisRoutes); // Nuevo: Catálogo de diagnósticos
+router.use('/doctors', doctorsRoutes); // Nuevo: Catálogo de médicos tratantes
 router.use('/ocr', ocrRoutes); // ✨ NUEVO: OCR para ingreso de pacientes
 
 // Ruta de prueba adicional

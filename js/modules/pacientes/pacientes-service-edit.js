@@ -7,7 +7,7 @@ const HOSPITAL_SERVICES = [
     { value: 'UTI', label: 'UTI', icon: '⚕️', color: '#ea580c' },
     { value: 'MQ', label: 'MQ', icon: '🔬', color: '#2563eb' },
     { value: 'Urgencias', label: 'Urgencias', icon: '🚨', color: '#ca8a04' },
-    { value: 'Interconsulta', label: 'Interconsulta', icon: '📋', color: '#16a34a' }
+    { value: 'Interconsulta', label: 'IC', icon: '📋', color: '#16a34a' }
 ];
 
 // Función principal para editar servicio

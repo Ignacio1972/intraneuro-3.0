@@ -11,7 +11,7 @@ function renderPatientCard(patient) {
         UTI: { label: 'UTI', color: '#ea580c', icon: '⚕️' },
         MQ: { label: 'MQ', color: '#2563eb', icon: '🔬' },
         Urgencias: { label: 'Urgencias', color: '#ca8a04', icon: '🚨' },
-        Interconsulta: { label: 'Interconsulta', color: '#16a34a', icon: '📋' }
+        Interconsulta: { label: 'IC', color: '#16a34a', icon: '📋' }
     };
 
     // Generar badge de servicio si existe
@@ -48,25 +48,23 @@ function renderPatientCard(patient) {
                        onchange="togglePatientSelection(${patient.id})"
                        style="cursor: pointer; width: 20px; height: 20px; opacity: 1;">
             </div>
-            <div class="patient-header">
-                <div class="patient-avatar">${initials}</div>
+            <div class="patient-header" style="display: block; padding-top: 1rem;">
                 <div class="patient-basic-info">
-                    <div class="patient-name">
+                    <div class="patient-name" style="margin-bottom: 0.5rem; text-align: center;">
                         ${patient.name}
-                        ${serviceBadge}
                     </div>
-                    <div class="patient-age">${patient.age} años</div>
+                    <div style="display: flex; align-items: center; gap: 0.8rem; text-align: left;">
+                        ${serviceBadge || '<span style="color: #999; font-size: 0.9rem;">Sin servicio</span>'}
+                        <span style="font-size: 0.9rem; color: var(--text-secondary);">
+                            Cama: <span class="bed-display">${patient.bed || 'n/a'}</span>
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="diagnosis-code">${diagnosisText}</div>
             <div class="tooltip">${patient.diagnosisText}</div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; padding: 0.5rem 0; border-top: 1px solid rgba(0,0,0,0.05);">
-                <span class="patient-meta" style="font-size: 0.85rem; color: var(--text-secondary);">
-                    <span class="icon">🛏️</span> Cama:
-                    <span class="bed-display">
-                        ${patient.bed || 'n/a'}
-                    </span>
-                </span>
+                <div style="flex: 1;"></div>
                 <div style="display: flex; gap: 5px;">
                     <button onclick="sharePatientFromList(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')"
                             class="share-btn-inline"
@@ -80,9 +78,9 @@ function renderPatientCard(patient) {
                     <button onclick="deletePatient(event, ${patient.id}, '${patient.name.replace(/'/g, "\\'")}')"
                             class="delete-btn-inline"
                             title="Eliminar paciente"
-                            style="background: #fff; border: 1px solid #dc3545; border-radius: 3px; cursor: pointer; padding: 5px; color: #dc3545; transition: all 0.2s ease;"
-                            onmouseover="this.style.background='#dc3545'; this.style.color='white';"
-                            onmouseout="this.style.background='#fff'; this.style.color='#dc3545';">
+                            style="background: none; border: none; cursor: pointer; padding: 5px; color: #dc3545; opacity: 0.7; transition: all 0.2s ease;"
+                            onmouseover="this.style.opacity='1';"
+                            onmouseout="this.style.opacity='0.7';">
                         🗑️
                     </button>
                 </div>
@@ -93,6 +91,15 @@ function renderPatientCard(patient) {
 
 // Render patient table
 function renderPatientTable(activePatients) {
+    // Usar configuración global de servicios
+    const SERVICES = window.HOSPITAL_SERVICES_CONFIG || {
+        UCI: { label: 'UCI', color: '#dc2626', icon: '🏥' },
+        UTI: { label: 'UTI', color: '#ea580c', icon: '⚕️' },
+        MQ: { label: 'MQ', color: '#2563eb', icon: '🔬' },
+        Urgencias: { label: 'Urgencias', color: '#ca8a04', icon: '🚨' },
+        Interconsulta: { label: 'IC', color: '#16a34a', icon: '📋' }
+    };
+
     return `
         <table class="patients-table">
             <thead>
@@ -134,7 +141,27 @@ function renderPatientTable(activePatients) {
                 </tr>
             </thead>
             <tbody>
-                ${activePatients.map((patient, index) => `
+                ${activePatients.map((patient, index) => {
+                    // Generar badge de servicio
+                    const serviceConfig = patient.service ? SERVICES[patient.service] : null;
+                    const serviceBadge = serviceConfig ? `
+                        <span style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 4px;
+                            padding: 4px 8px;
+                            background: ${serviceConfig.color}15;
+                            border: 1px solid ${serviceConfig.color}40;
+                            border-radius: 12px;
+                            font-size: 11px;
+                            font-weight: 600;
+                            color: ${serviceConfig.color};
+                        ">
+                            ${serviceConfig.icon} ${serviceConfig.label}
+                        </span>
+                    ` : '<span style="color: #999;">-</span>';
+
+                    return `
                     <tr data-patient-id="${patient.id}" data-service="${patient.service || ''}" data-unit="${patient.unit || ''}">
                         <td>
                             <input type="checkbox"
@@ -144,57 +171,7 @@ function renderPatientTable(activePatients) {
                                    style="cursor: pointer;">
                         </td>
                         <td style="text-align: center;">${index + 1}</td>
-                        <td>${patient.service ? `
-                            <span style="
-                                display: inline-flex;
-                                align-items: center;
-                                gap: 4px;
-                                padding: 4px 8px;
-                                background: ${(() => {
-                                    const SERVICES = {
-                                        UCI: '#dc2626',
-                                        UTI: '#ea580c',
-                                        MQ: '#2563eb',
-                                        Urgencias: '#ca8a04',
-                                        Interconsulta: '#16a34a'
-                                    };
-                                    return SERVICES[patient.service] || '#666';
-                                })()}15;
-                                border: 1px solid ${(() => {
-                                    const SERVICES = {
-                                        UCI: '#dc2626',
-                                        UTI: '#ea580c',
-                                        MQ: '#2563eb',
-                                        Urgencias: '#ca8a04',
-                                        Interconsulta: '#16a34a'
-                                    };
-                                    return SERVICES[patient.service] || '#666';
-                                })()}40;
-                                border-radius: 12px;
-                                font-size: 11px;
-                                font-weight: 600;
-                                color: ${(() => {
-                                    const SERVICES = {
-                                        UCI: '#dc2626',
-                                        UTI: '#ea580c',
-                                        MQ: '#2563eb',
-                                        Urgencias: '#ca8a04',
-                                        Interconsulta: '#16a34a'
-                                    };
-                                    return SERVICES[patient.service] || '#666';
-                                })()};
-                            ">
-                                ${(() => {
-                                    const SERVICES_ICONS = {
-                                        UCI: '🏥',
-                                        UTI: '⚕️',
-                                        MQ: '🔬',
-                                        Urgencias: '🚨',
-                                        Interconsulta: '📋'
-                                    };
-                                    return SERVICES_ICONS[patient.service] || '🏥';
-                                })()} ${patient.service}
-                            </span>` : '<span style="color: #999;">-</span>'}</td>
+                        <td>${serviceBadge}</td>
                         <td>
                             <span class="bed-display">
                                 ${patient.bed || 'n/a'}
@@ -204,7 +181,7 @@ function renderPatientTable(activePatients) {
                             <!-- Badge verde eliminado -->
                         </td>
                         <td>${patient.name}</td>
-                        <td>${patient.age} años</td>
+                        <td>${patient.age && patient.age > 0 ? `${patient.age} años` : 'n/a'}</td>
                         <td>${catalogos.getDiagnosisText(patient.diagnosis)}</td>
                         <td>
                             <span class="doctor-display">
@@ -234,7 +211,7 @@ function renderPatientTable(activePatients) {
                             </button>
                         </td>
                     </tr>
-                `).join('')}
+                `}).join('')}
             </tbody>
         </table>
     `;
@@ -261,7 +238,7 @@ function renderAdmissionData(patient) {
         UTI: { label: 'UTI', color: '#ea580c', icon: '⚕️' },
         MQ: { label: 'MQ', color: '#2563eb', icon: '🔬' },
         Urgencias: { label: 'Urgencias', color: '#ca8a04', icon: '🚨' },
-        Interconsulta: { label: 'Interconsulta', color: '#16a34a', icon: '📋' }
+        Interconsulta: { label: 'IC', color: '#16a34a', icon: '📋' }
     };
 
     // Cargar notas simples y sistema de tareas al abrir el modal
@@ -284,37 +261,37 @@ function renderAdmissionData(patient) {
     
     return `
         <div class="patient-info-row">
-            <span class="info-label">Nombre:</span>
+            <span class="info-label" onclick="editPatientField(event, ${patient.id}, 'name')" style="cursor: pointer;">Nombre:</span>
             <span class="info-value" id="name-${patient.id}"
                   onclick="editPatientField(event, ${patient.id}, 'name')"
                   style="cursor: pointer;">${patient.name}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Edad:</span>
+            <span class="info-label" onclick="editPatientField(event, ${patient.id}, 'age')" style="cursor: pointer;">Edad:</span>
             <span class="info-value" id="age-${patient.id}"
                   onclick="editPatientField(event, ${patient.id}, 'age')"
-                  style="cursor: pointer;">${patient.age} años</span>
+                  style="cursor: pointer;">${patient.age && patient.age > 0 ? `${patient.age} años` : 'n/a'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">RUT:</span>
+            <span class="info-label" onclick="editPatientField(event, ${patient.id}, 'rut')" style="cursor: pointer;">RUT:</span>
             <span class="info-value" id="rut-${patient.id}"
                   onclick="editPatientField(event, ${patient.id}, 'rut')"
                   style="cursor: pointer;">${patient.rut || 'Sin RUT'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Previsión:</span>
+            <span class="info-label" onclick="editPatientPrevision(event, ${patient.id})" style="cursor: pointer;">Previsión:</span>
             <span class="info-value" id="prevision-${patient.id}"
                   onclick="editPatientPrevision(event, ${patient.id})"
                   style="cursor: pointer;">${patient.prevision || 'No especificada'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Cama:</span>
+            <span class="info-label" onclick="editPatientField(event, ${patient.id}, 'bed')" style="cursor: pointer;">Cama:</span>
             <span class="info-value" id="bed-${patient.id}"
                   onclick="editPatientField(event, ${patient.id}, 'bed')"
                   style="cursor: pointer;">${patient.bed || 'n/a'}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Servicio:</span>
+            <span class="info-label" onclick="editPatientService(event, ${patient.id})" style="cursor: pointer;">Servicio:</span>
             <span class="info-value" id="service-${patient.id}"
                   onclick="editPatientService(event, ${patient.id})"
                   style="cursor: pointer;">
@@ -337,25 +314,25 @@ function renderAdmissionData(patient) {
             </span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Fecha Ingreso:</span>
+            <span class="info-label" onclick="editAdmissionDate(event, ${patient.id})" style="cursor: pointer;">Fecha Ingreso:</span>
             <span class="info-value" id="admission-date-${patient.id}"
                   onclick="editAdmissionDate(event, ${patient.id})"
                   style="cursor: pointer;">${formatDate(patient.admissionDate)}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Diagnóstico:</span>
+            <span class="info-label" onclick="editPatientDiagnosis(event, ${patient.id})" style="cursor: pointer;">Diagnóstico:</span>
             <span class="info-value" id="diagnosis-${patient.id}"
                   onclick="editPatientDiagnosis(event, ${patient.id})"
                   style="cursor: pointer;">${diagnosisText}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Descripción:</span>
+            <span class="info-label" onclick="editDiagnosisDetails(event, ${patient.id})" style="cursor: pointer;">Descripción:</span>
             <span class="info-value" id="diagnosis-details-${patient.id}"
                   onclick="editDiagnosisDetails(event, ${patient.id})"
                   style="cursor: pointer;">${patient.diagnosisDetails || ''}</span>
         </div>
         <div class="patient-info-row">
-            <span class="info-label">Médico Tratante:</span>
+            <span class="info-label" onclick="editAdmittedBy(event, ${patient.id})" style="cursor: pointer;">Médico Tratante:</span>
             <span class="info-value" id="admitted-by-${patient.id}"
                   onclick="editAdmittedBy(event, ${patient.id})"
                   style="cursor: pointer;">${patient.admittedBy}</span>
@@ -640,6 +617,27 @@ if (typeof window.editPatientService === 'undefined') {
  */
 function goToDischarge(patientId) {
     console.log(`[UI] Navegando a egreso para paciente ${patientId}`);
+
+    // Buscar datos del paciente
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) {
+        showToast('Paciente no encontrado', 'error');
+        return;
+    }
+
+    // Validar RUT y Previsión antes de permitir egreso
+    const missingFields = [];
+    if (!patient.rut || patient.rut.trim() === '') {
+        missingFields.push('RUT');
+    }
+    if (!patient.prevision || patient.prevision.trim() === '') {
+        missingFields.push('Previsión');
+    }
+
+    if (missingFields.length > 0) {
+        showToast(`No se puede egresar: falta ${missingFields.join(' y ')}. Complete estos datos primero.`, 'error');
+        return;
+    }
 
     // Confirmación antes de egresar
     if (!confirm('¿Está seguro que quiere egresar al paciente?')) {

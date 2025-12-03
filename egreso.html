@@ -196,6 +196,17 @@
                             ${currentPatient.rut || 'N/A'}
                         </span>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <strong style="font-weight: 600; color: #555;">Previsión:</strong>
+                        <span id="prevision-${currentPatient.id}"
+                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'prevision', '${(currentPatient.prevision || '').replace(/'/g, "\\'")}')"
+                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
+                              onmouseover="this.style.background='#f0f0f0'"
+                              onmouseout="this.style.background='transparent'"
+                              title="Clic para editar">
+                            ${currentPatient.prevision || 'N/A'}
+                        </span>
+                    </div>
                 </div>
             `;
 
@@ -215,7 +226,8 @@
             const fieldLabels = {
                 name: 'Nombre',
                 bed: 'Cama',
-                rut: 'RUT'
+                rut: 'RUT',
+                prevision: 'Previsión'
             };
 
             const newValue = prompt(`Editar ${fieldLabels[fieldName]}:`, currentValue);

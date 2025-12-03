@@ -28,7 +28,7 @@ window.HOSPITAL_SERVICES_CONFIG = {
         fullName: 'Servicio de Urgencias'
     },
     Interconsulta: {
-        label: 'Interconsulta',
+        label: 'IC',
         color: '#16a34a',
         icon: '📋',
         fullName: 'Interconsulta'

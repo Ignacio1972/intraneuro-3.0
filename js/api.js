@@ -68,9 +68,25 @@ async function apiRequest(endpoint, options = {}) {
                 window.location.reload();
                 return;
             }
-            
-            const error = new Error(`Error ${response.status}: ${response.statusText}`);
+
+            // Intentar obtener mensaje de error del backend
+            let errorMessage = `Error ${response.status}: ${response.statusText}`;
+            let errorData = null;
+
+            try {
+                errorData = await response.json();
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData.error) {
+                    errorMessage = errorData.error;
+                }
+            } catch (e) {
+                // Si no se puede parsear JSON, usar mensaje genérico
+            }
+
+            const error = new Error(errorMessage);
             error.status = response.status;
+            error.response = errorData;
             throw error;
         }
         

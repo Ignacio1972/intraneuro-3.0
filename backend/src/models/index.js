@@ -8,6 +8,7 @@ const Observation = require('./observation.model');
 const PendingTask = require('./pending-task.model');  // Nombre correcto del modelo
 const TimelineEvent = require('./timeline-event.model'); // Agregar este modelo si existe
 const Diagnosis = require('./diagnosis.model')(sequelize); // Nuevo: Catálogo de diagnósticos
+const Doctor = require('./doctor.model')(sequelize); // Nuevo: Catálogo de médicos tratantes
 
 // Configurar todas las asociaciones
 const setupAssociations = () => {
@@ -105,6 +106,7 @@ module.exports = {
     PendingTask,    // Cambiar de Task a PendingTask
     TimelineEvent,  // Agregar si existe
     Diagnosis,      // Nuevo: Catálogo de diagnósticos
+    Doctor,         // Nuevo: Catálogo de médicos tratantes
     setupAssociations,
     syncDatabase,
     testConnection  // Función helper útil

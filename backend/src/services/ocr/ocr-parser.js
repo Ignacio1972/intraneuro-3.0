@@ -11,11 +11,9 @@ class OCRParser {
             name: this.extractName(ocrText),
             rut: this.extractRUT(ocrText),
             age: this.extractAge(ocrText),
-            birthDate: this.extractBirthDate(ocrText),
             prevision: this.extractPrevision(ocrText),
             admissionDate: this.extractAdmissionDate(ocrText),
-            bed: this.extractBed(ocrText),
-            attendingDoctor: this.extractDoctor(ocrText)
+            bed: this.extractBed(ocrText)
         };
 
         const confidence = this.calculateConfidence(data, ocrText);
@@ -35,6 +33,14 @@ class OCRParser {
     }
 
     extractName(text) {
+        // Textos que NO son nombres de pacientes (filtrar)
+        const textosProhibidos = [
+            'LEY DE URGENCIA', 'LEY URGENCIA', 'URGENCIA',
+            'HOSPITALIZACION', 'HOSPITALIZACIÓN', 'HOSPITALIZACION INTEGRAL',
+            'FICHA CLINICA', 'FICHA CLÍNICA', 'DATOS PACIENTE',
+            'INGRESO', 'EGRESO', 'ADMISION', 'ADMISIÓN'
+        ];
+
         // Buscar nombre después de etiquetas comunes
         const patterns = [
             /(?:Nombre|Paciente|Titular)[:\s]+([A-ZÁÉÍÓÚÑ\s]+?)(?=\n|RUT|Edad|Sexo|$)/i,
@@ -44,9 +50,19 @@ class OCRParser {
         for (const pattern of patterns) {
             const match = text.match(pattern);
             if (match && match[1]) {
-                const name = match[1].trim();
-                // Filtrar si es muy corto o contiene números
-                if (name.length >= 10 && !/\d/.test(name)) {
+                let name = match[1].trim();
+
+                // Limpiar textos prohibidos del nombre
+                for (const prohibido of textosProhibidos) {
+                    name = name.replace(new RegExp(prohibido, 'gi'), '').trim();
+                }
+
+                // Filtrar si es muy corto, contiene números, o ES un texto prohibido
+                const esProhibido = textosProhibidos.some(p =>
+                    name.toUpperCase() === p || name.toUpperCase().includes(p)
+                );
+
+                if (name.length >= 10 && !/\d/.test(name) && !esProhibido) {
                     return name;
                 }
             }
@@ -95,19 +111,6 @@ class OCRParser {
         return null;
     }
 
-    extractBirthDate(text) {
-        // Formato DD/MM/YYYY o DD-MM-YYYY
-        const match = text.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/);
-        if (match) {
-            const [_, day, month, year] = match;
-            // Validar que sea una fecha razonable
-            if (parseInt(day) <= 31 && parseInt(month) <= 12 && parseInt(year) >= 1900) {
-                return `${day}/${month}/${year}`;
-            }
-        }
-        return null;
-    }
-
     extractPrevision(text) {
         // Previsiones de salud chilenas
         const previsiones = [
@@ -136,11 +139,32 @@ class OCRParser {
             }
         }
 
-        // Si no se encuentra, buscar la fecha más reciente
+        // Si no hay contexto, buscar todas las fechas y elegir la MÁS RECIENTE
+        // (La fecha de ingreso será reciente, la de nacimiento será antigua)
         const dates = text.match(/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/g);
         if (dates && dates.length > 0) {
-            // Retornar la última fecha encontrada (probablemente la más reciente)
-            return dates[dates.length - 1].replace(/-/g, '/');
+            const today = new Date();
+            let closestDate = null;
+            let closestDiff = Infinity;
+
+            for (const dateStr of dates) {
+                const normalized = dateStr.replace(/-/g, '/');
+                const [day, month, year] = normalized.split('/').map(Number);
+
+                // Validar fecha
+                if (day > 31 || month > 12 || year < 1900) continue;
+
+                const date = new Date(year, month - 1, day);
+                const diff = Math.abs(today - date);
+
+                // Elegir la fecha más cercana a hoy
+                if (diff < closestDiff) {
+                    closestDiff = diff;
+                    closestDate = normalized;
+                }
+            }
+
+            return closestDate;
         }
 
         return null;
@@ -161,27 +185,6 @@ class OCRParser {
                 // Validar que no sea un RUT o fecha
                 if (!/^\d{7,}/.test(bed) && bed.length <= 6) {
                     return bed;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    extractDoctor(text) {
-        // Buscar nombres de médicos después de etiquetas
-        const patterns = [
-            /(?:M[eé]dico|Doctor|Dra?\.?)[:\s]+([A-ZÁÉÍÓÚÑ\s]{10,50})/i,
-            /Tratante[:\s]+([A-ZÁÉÍÓÚÑ\s]{10,50})/i
-        ];
-
-        for (const pattern of patterns) {
-            const match = text.match(pattern);
-            if (match && match[1]) {
-                const doctor = match[1].trim();
-                // Filtrar si es muy corto o contiene números
-                if (doctor.length >= 10 && !/\d/.test(doctor)) {
-                    return doctor;
                 }
             }
         }
@@ -241,7 +244,6 @@ class OCRParser {
                 return (value > 0 && value < 120) ? 0.95 : 0.50;
 
             case 'name':
-            case 'attendingDoctor':
                 // Mayor confianza si está todo en mayúsculas y sin números
                 const isUpperCase = value === value.toUpperCase();
                 const hasNoNumbers = !/\d/.test(value);
@@ -251,7 +253,6 @@ class OCRParser {
                 // Confianza media para camas (formato puede variar)
                 return /^[A-Z]{1,2}\d{2,3}$/.test(value) ? 0.88 : 0.65;
 
-            case 'birthDate':
             case 'admissionDate':
                 // Validar formato de fecha
                 const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
