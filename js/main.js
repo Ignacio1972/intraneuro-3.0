@@ -111,7 +111,18 @@ function initializeEventListeners() {
             }
         });
     });
-    
+
+    // Cerrar modal al hacer clic fuera del contenido (en el backdrop)
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            // Solo cerrar si el clic fue directamente en el backdrop (el elemento .modal)
+            // y no en ningún elemento hijo (como .modal-content)
+            if (e.target === modal && modal.id !== 'loginModal') {
+                closeModal(modal.id);
+            }
+        });
+    });
+
     // CAMBIO 4: Prevenir cierre del loginModal con ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -271,10 +282,8 @@ function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('active');
-        setTimeout(() => {
-            modal.style.display = 'none';
-        }, 300);
-        
+        modal.style.display = 'none';
+
         // Limpiar historial cuando se cierra modal de paciente normalmente
         if (modalId === 'patientModal') {
             history.replaceState(null, '', window.location.pathname);

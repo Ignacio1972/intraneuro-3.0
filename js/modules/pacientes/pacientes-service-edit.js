@@ -98,11 +98,11 @@ async function editPatientService(event, patientId) {
             </div>
 
             <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove()">
-                    Cancelar
-                </button>
                 <button type="button" class="btn btn-primary" id="saveServiceBtn">
                     Guardar
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove()">
+                    Cancelar
                 </button>
             </div>
         </div>
