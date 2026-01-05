@@ -65,11 +65,17 @@
 
 /* Secciones */
 .ficha-section {
-    background: white;
+    background: var(--light-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: var(--shadow);
+    transition: all 0.3s;
+}
+
+.ficha-section:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
 }
 
 .section-header {
@@ -91,7 +97,10 @@
 .patient-data-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 4px;
 }
 
 .data-item {
@@ -142,7 +151,6 @@
 .admissions-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
 }
 
 .admission-card {
@@ -206,9 +214,22 @@
 }
 
 .admission-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 4px;
+}
+
+/* Detalles de egreso ocupan toda la fila (texto largo) */
+.admission-details .discharge-details {
+    grid-column: 1 / -1;
+}
+
+/* Selector de diagnóstico ocupa 2 columnas */
+.admission-details .detail-item:has(.diagnosis-selector) {
+    grid-column: span 2;
 }
 
 .detail-item {
@@ -232,19 +253,6 @@
 .diagnosis-text {
     color: var(--secondary-color);
 }
-
-/* Escala de Rankin */
-.rankin-score {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.rankin-0, .rankin-1 { background: #d4edda; color: #155724; }
-.rankin-2, .rankin-3 { background: #fff3cd; color: #856404; }
-.rankin-4, .rankin-5 { background: #f8d7da; color: #721c24; }
-.rankin-6 { background: #6c757d; color: white; }
 
 .admission-actions {
     margin-top: 1rem;
@@ -413,6 +421,39 @@
     color: var(--text-muted);
     padding: 2rem;
     font-style: italic;
+}
+
+/* Selector de Diagnóstico con Acordeón */
+.diagnosis-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.diagnosis-display {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--secondary-color);
+}
+
+.diagnosis-selector .btn {
+    flex-shrink: 0;
+}
+
+/* Formulario del modal de reingresar */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-muted);
 }
 
 /* Responsive */

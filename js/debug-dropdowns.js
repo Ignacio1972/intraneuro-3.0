@@ -75,59 +75,15 @@
         setTimeout(window.debugDropdowns, 2000);
     }
 
-    // Función para reinicializar manualmente
+    // Función para reinicializar manualmente - DESHABILITADA 18/12/2025
+    // El dropdown de diagnóstico fue eliminado del formulario de ingreso
+    // Ahora se asigna desde el modal del paciente
     window.reinitDropdowns = function() {
-        console.log('Reinicializando dropdowns...');
-
-        // Limpiar contenedor de diagnóstico
-        const diagnosisContainer = document.getElementById('diagnosis-container');
-        if (diagnosisContainer) {
-            diagnosisContainer.innerHTML = '';
-        }
-
-        // Reinicializar
-        if (window.DropdownSystem) {
-            try {
-                window.diagnosisDropdownInstance = window.DropdownSystem.createDiagnosisDropdown({
-                    containerId: 'diagnosis-container',
-                    required: true
-                });
-                console.log('✅ Dropdown reinicializado correctamente');
-            } catch (error) {
-                console.error('❌ Error reinicializando:', error);
-            }
-        } else {
-            console.error('❌ DropdownSystem no disponible');
-        }
+        console.log('[Debug] reinitDropdowns() deshabilitado - diagnóstico se edita desde modal del paciente');
     };
 
-    // Monitorear cuando se abre el modal de admisión
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.target.id === 'admissionModal' && mutation.target.style.display === 'block') {
-                console.log('Modal de admisión abierto, verificando dropdown...');
-                setTimeout(() => {
-                    const container = document.getElementById('diagnosis-container');
-                    if (container && !container.querySelector('.intraneuro-dropdown')) {
-                        console.log('⚠️ Dropdown no encontrado, reinicializando...');
-                        window.reinitDropdowns();
-                    }
-                }, 100);
-            }
-        });
-    });
-
-    // Observar cambios en el modal si existe
-    setTimeout(() => {
-        const modal = document.getElementById('admissionModal');
-        if (modal) {
-            observer.observe(modal, {
-                attributes: true,
-                attributeFilter: ['style']
-            });
-            console.log('[Debug] Observador configurado para el modal de admisión');
-        }
-    }, 1000);
+    // MutationObserver DESHABILITADO - Ya no hay dropdown de diagnóstico en el ingreso
+    // El diagnóstico se asigna desde el modal del paciente después del ingreso
 
     console.log('[Debug] Script de debug de dropdowns cargado. Usa debugDropdowns() para debug manual.');
 

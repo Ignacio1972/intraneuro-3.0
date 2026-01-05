@@ -102,20 +102,63 @@ body {
 .egreso-header {
     background: var(--primary-color);
     color: white;
-    padding: 30px;
-    text-align: center;
+    padding: 30px 40px;
 }
 
 .egreso-header h1 {
-    margin: 0 0 10px 0;
-    font-size: 28px;
-    font-weight: 600;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    opacity: 0.9;
+    text-align: center;
 }
 
-.egreso-header .patient-info {
-    font-size: 16px;
-    opacity: 0.95;
-    margin: 5px 0;
+.egreso-header .patient-name {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 15px 0 20px 0;
+    text-align: center;
+    cursor: pointer;
+    display: inline-block;
+    width: 100%;
+    padding: 5px 0;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.egreso-header .patient-name:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.egreso-header .patient-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 40px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.egreso-header .info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+}
+
+.egreso-header .info-item .label {
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+.egreso-header .info-item .value {
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.egreso-header .info-item .value:hover {
+    background: rgba(255,255,255,0.15);
 }
 
 .egreso-body {

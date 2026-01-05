@@ -41,68 +41,63 @@ async function editPatientService(event, patientId) {
         existingModal.remove();
     }
 
+    // Crear otros servicios (todos menos Urgencias)
+    const otherServices = HOSPITAL_SERVICES.filter(s => s.value !== 'Urgencias');
+
+    // Determinar texto inicial del botón "Hospitalización"
+    const currentOtherService = otherServices.find(s => s.value === currentService);
+    const otherButtonText = currentOtherService
+        ? `${currentOtherService.icon} ${currentOtherService.label}`
+        : 'Hospitalización';
+    const otherButtonSelected = currentOtherService ? 'selected' : '';
+
     const modal = document.createElement('div');
     modal.id = modalId;
     modal.className = 'modal active';
     modal.style.zIndex = '10000';
     modal.innerHTML = `
-        <div class="modal-content" style="max-width: 500px; padding: 2rem;">
+        <div class="modal-content" style="max-width: 650px; padding: 2rem; min-height: 480px; overflow: visible;">
             <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
                 Editar Servicio Hospitalario
             </h3>
-            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 14px;">
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 14px;">
                 Paciente: <strong>${patient.name}</strong><br>
                 Servicio actual: <strong>${currentService || 'No asignado'}</strong>
             </p>
-            <div id="edit-service-container" style="margin-bottom: 1.5rem;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 500;">
-                    Seleccionar Servicio
-                </label>
-                <select id="edit-service-select" class="service-dropdown" required style="
-                    width: 100%;
-                    padding: 10px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    font-size: 14px;
-                    background: white;
-                ">
-                    <option value="">-- Sin servicio asignado --</option>
-                    ${HOSPITAL_SERVICES.map(s => `
-                        <option value="${s.value}"
-                                ${s.value === currentService ? 'selected' : ''}
-                                style="padding: 8px;">
-                            ${s.icon} ${s.label}
-                        </option>
-                    `).join('')}
-                </select>
 
-                <!-- Vista previa del servicio seleccionado -->
-                <div id="service-preview" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: ${currentService ? 'block' : 'none'};">
-                    <small style="color: #666; display: block; margin-bottom: 5px;">Vista previa:</small>
-                    <span id="service-badge-preview" style="
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 6px;
-                        padding: 4px 12px;
-                        border-radius: 12px;
-                        font-size: 14px;
-                        font-weight: 600;
-                        transition: all 0.3s;
-                    ">
-                        ${currentService ? `
-                            ${HOSPITAL_SERVICES.find(s => s.value === currentService)?.icon || '🏥'}
-                            ${HOSPITAL_SERVICES.find(s => s.value === currentService)?.label || currentService}
-                        ` : ''}
-                    </span>
+            <div id="edit-service-container" class="service-selector-container" style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">Seleccionar Servicio</label>
+                <div class="service-selector">
+                    <!-- Botón de Urgencias -->
+                    <button type="button" id="editBtnUrgencias" class="btn-urgencias-primary ${currentService === 'Urgencias' ? 'selected' : ''}" data-service="Urgencias">
+                        <span class="icon">🚨</span>
+                        <span>Urgencias</span>
+                    </button>
+
+                    <!-- Dropdown de otros servicios -->
+                    <div class="service-dropdown-wrapper">
+                        <button type="button" id="editBtnOtherServices" class="btn-other-services ${otherButtonSelected}">
+                            <span id="editOtherServicesLabel">${otherButtonText}</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div id="editServiceDropdownMenu" class="service-dropdown-menu">
+                            ${otherServices.map(s => `
+                                <div class="service-dropdown-item ${s.value === currentService ? 'selected' : ''}" data-service="${s.value}">
+                                    <span class="icon">${s.icon}</span>
+                                    <span class="label">${s.label}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" class="btn btn-primary" id="saveServiceBtn">
-                    Guardar
-                </button>
+            <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: auto;">
                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('${modalId}').remove()">
                     Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="saveServiceBtn">
+                    Guardar
                 </button>
             </div>
         </div>
@@ -110,40 +105,107 @@ async function editPatientService(event, patientId) {
 
     document.body.appendChild(modal);
 
-    // Configurar eventos del dropdown
-    const select = document.getElementById('edit-service-select');
-    const preview = document.getElementById('service-preview');
-    const badgePreview = document.getElementById('service-badge-preview');
+    // Variable para guardar el servicio seleccionado en el modal de edición
+    let editSelectedService = currentService;
 
-    select.addEventListener('change', function() {
-        const selectedValue = this.value;
-        const selectedService = HOSPITAL_SERVICES.find(s => s.value === selectedValue);
+    // Configurar event listeners para el selector
+    const btnUrgencias = document.getElementById('editBtnUrgencias');
+    const btnOtherServices = document.getElementById('editBtnOtherServices');
+    const otherServicesLabel = document.getElementById('editOtherServicesLabel');
+    const dropdownMenu = document.getElementById('editServiceDropdownMenu');
+    const dropdownItems = document.querySelectorAll('#editServiceDropdownMenu .service-dropdown-item');
 
-        if (selectedService) {
-            preview.style.display = 'block';
-            badgePreview.style.background = `${selectedService.color}15`;
-            badgePreview.style.color = selectedService.color;
-            badgePreview.style.border = `1px solid ${selectedService.color}40`;
-            badgePreview.innerHTML = `${selectedService.icon} ${selectedService.label}`;
-        } else {
-            preview.style.display = 'none';
-        }
+    // Click en botón de Urgencias
+    if (btnUrgencias) {
+        btnUrgencias.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Toggle selection
+            if (editSelectedService === 'Urgencias') {
+                // Deseleccionar
+                editSelectedService = null;
+                this.classList.remove('selected');
+            } else {
+                // Seleccionar Urgencias
+                editSelectedService = 'Urgencias';
+                this.classList.add('selected');
+
+                // Deseleccionar otros
+                btnOtherServices.classList.remove('selected');
+                btnOtherServices.classList.remove('active');
+                dropdownMenu.classList.remove('show');
+                dropdownItems.forEach(item => item.classList.remove('selected'));
+                otherServicesLabel.textContent = 'Hospitalización';
+            }
+        });
+    }
+
+    // Click en botón de otros servicios (toggle dropdown)
+    if (btnOtherServices) {
+        btnOtherServices.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            this.classList.toggle('active');
+            dropdownMenu.classList.toggle('show');
+        });
+    }
+
+    // Click en items del dropdown
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const service = this.dataset.service;
+
+            // Si ya está seleccionado, deseleccionar
+            if (editSelectedService === service) {
+                editSelectedService = null;
+                this.classList.remove('selected');
+                btnOtherServices.classList.remove('selected');
+                btnOtherServices.classList.remove('active');
+                dropdownMenu.classList.remove('show');
+                otherServicesLabel.textContent = 'Hospitalización';
+                return;
+            }
+
+            // Seleccionar nuevo servicio
+            editSelectedService = service;
+
+            // Deseleccionar botón de Urgencias
+            if (btnUrgencias) btnUrgencias.classList.remove('selected');
+
+            // Actualizar UI del dropdown
+            dropdownItems.forEach(i => i.classList.remove('selected'));
+            this.classList.add('selected');
+
+            // Mostrar servicio seleccionado en el botón
+            const serviceConfig = HOSPITAL_SERVICES.find(s => s.value === service);
+            if (serviceConfig) {
+                otherServicesLabel.textContent = serviceConfig.icon + ' ' + serviceConfig.label;
+            }
+            btnOtherServices.classList.add('selected');
+
+            // Cerrar dropdown
+            btnOtherServices.classList.remove('active');
+            dropdownMenu.classList.remove('show');
+        });
     });
 
-    // Si hay servicio actual, configurar preview inicial
-    if (currentService) {
-        const currentServiceConfig = HOSPITAL_SERVICES.find(s => s.value === currentService);
-        if (currentServiceConfig) {
-            badgePreview.style.background = `${currentServiceConfig.color}15`;
-            badgePreview.style.color = currentServiceConfig.color;
-            badgePreview.style.border = `1px solid ${currentServiceConfig.color}40`;
+    // Cerrar dropdown al hacer click fuera (solo dentro del modal)
+    modal.addEventListener('click', function(e) {
+        if (!e.target.closest('.service-dropdown-wrapper')) {
+            if (btnOtherServices) btnOtherServices.classList.remove('active');
+            if (dropdownMenu) dropdownMenu.classList.remove('show');
         }
-    }
+    });
 
     // Configurar botón de guardar
     const saveBtn = document.getElementById('saveServiceBtn');
     saveBtn.onclick = async () => {
-        const newService = select.value;
+        const newService = editSelectedService;
 
         // Verificar si hay cambios
         if (newService === currentService) {
@@ -205,15 +267,12 @@ async function editPatientService(event, patientId) {
         }
     };
 
-    // Cerrar modal al hacer clic fuera
+    // Cerrar modal al hacer clic fuera del contenido
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.remove();
         }
     });
-
-    // Focus en el select
-    setTimeout(() => select.focus(), 100);
 }
 
 // Hacer la función global

@@ -365,16 +365,9 @@ function updateSaveButtonState() {
     });
 }
 
-// View switching
+// View switching (solo vista de lista disponible)
 function switchView(view) {
-    viewMode = view;
-    
-    // Update buttons
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === view);
-    });
-    
-    // Re-render patients
+    viewMode = 'list'; // Vista fija en lista
     renderPatients();
 }
 

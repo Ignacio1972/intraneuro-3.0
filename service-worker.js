@@ -2,8 +2,8 @@
 // PWA con estrategia de cache para funcionalidad offline
 // v3.2: Corregido manejo de PUT/POST requests
 
-const CACHE_NAME = 'intraneuro-v3.2';
-const RUNTIME_CACHE = 'intraneuro-runtime-v3.2';
+const CACHE_NAME = 'intraneuro-v3.9';
+const RUNTIME_CACHE = 'intraneuro-runtime-v3.9';
 
 // Assets estáticos para cachear en instalación
 const STATIC_ASSETS = [
@@ -12,6 +12,8 @@ const STATIC_ASSETS = [
   '/archivos.html',
   '/ficha.html',
   '/css/main.css',
+  '/css/archivos.css',
+  '/js/archivos.js',
   '/css/pacientes.css',
   '/css/modal.css',
   '/css/chat-notes.css',
@@ -35,7 +37,7 @@ const STATIC_ASSETS = [
 
 // Instalar Service Worker y cachear assets estáticos
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalando Service Worker v3.1');
+  console.log('[SW] Instalando Service Worker v3.6');
 
   event.waitUntil(
     caches.open(CACHE_NAME)

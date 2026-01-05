@@ -9,7 +9,7 @@ const fs = require('fs');
 // Configuración de storage para audios de tareas
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Crear estructura: uploads/tasks/
+        // Usar directorio raíz de uploads (servido por Nginx)
         const uploadPath = path.join(
             __dirname,
             '../../../uploads/tasks'

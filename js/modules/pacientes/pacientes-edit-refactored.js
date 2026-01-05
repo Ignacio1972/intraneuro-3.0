@@ -506,6 +506,20 @@ async function showPromptDialog(patient, config, currentValue, displayValue) {
 // Helper para modales con dropdown (usando DropdownSystem)
 async function showDropdownModal(patient, config, currentValue, displayValue) {
     return new Promise((resolve) => {
+        // NUEVO: Para diagnóstico, usar el modal acordeón
+        if (config.dropdownType === 'diagnosis' && window.DropdownSystem && window.DropdownSystem.showDiagnosisAccordion) {
+            window.DropdownSystem.showDiagnosisAccordion({
+                currentValue: currentValue,
+                onSelect: (value) => {
+                    resolve(value);
+                },
+                onCancel: () => {
+                    resolve(null);
+                }
+            });
+            return;
+        }
+
         const modalId = `edit-${config.apiField}-modal`;
 
         // Remover modal existente si hay uno
@@ -549,12 +563,7 @@ async function showDropdownModal(patient, config, currentValue, displayValue) {
             const containerId = `${modalId}-dropdown-container`;
 
             // Usar el tipo de dropdown apropiado
-            if (config.dropdownType === 'diagnosis') {
-                dropdownInstance = window.DropdownSystem.createDiagnosisDropdown({
-                    containerId: containerId,
-                    required: false
-                });
-            } else if (config.dropdownType === 'prevision') {
+            if (config.dropdownType === 'prevision') {
                 dropdownInstance = window.DropdownSystem.createPrevisionDropdown({
                     containerId: containerId,
                     required: false

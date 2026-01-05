@@ -6,6 +6,7 @@
 // ========================================
 window.taskAudioState = {
     recorder: null,
+    stream: null,  // Stream del micrófono para poder detenerlo al cancelar
     recordingTaskId: null,
     audioChunks: [],
     recordingStartTime: null,
@@ -40,6 +41,7 @@ async function recordTaskAudio(taskId, patientId) {
         });
 
         window.taskAudioState.recorder = recorder;
+        window.taskAudioState.stream = stream;  // Guardar stream para poder detenerlo al cancelar
         window.taskAudioState.recordingTaskId = taskId;
         window.taskAudioState.audioChunks = [];
         window.taskAudioState.recordingStartTime = Date.now();
@@ -70,6 +72,7 @@ async function recordTaskAudio(taskId, patientId) {
             window.taskAudioState.audioChunks = [];
             window.taskAudioState.recordingTaskId = null;
             window.taskAudioState.recordingStartTime = null;
+            window.taskAudioState.stream = null;
         };
 
         // Iniciar grabación
@@ -122,16 +125,19 @@ function stopTaskAudioRecording() {
 function cancelTaskAudioRecording(taskId, patientId) {
     console.log('[TaskAudio] Cancelando grabación...');
 
+    // Detener stream del micrófono primero
+    if (window.taskAudioState.stream) {
+        window.taskAudioState.stream.getTracks().forEach(track => track.stop());
+        console.log('[TaskAudio] Stream del micrófono detenido');
+    }
+
     // Detener recorder sin guardar
     if (window.taskAudioState.recorder && window.taskAudioState.recorder.state === 'recording') {
         const recorder = window.taskAudioState.recorder;
 
-        // Remover evento onstop temporal para evitar upload
+        // Remover evento onstop para evitar upload
         recorder.onstop = () => {
-            // Detener stream
-            if (recorder.stream) {
-                recorder.stream.getTracks().forEach(track => track.stop());
-            }
+            console.log('[TaskAudio] Grabación cancelada - no se guarda');
         };
 
         recorder.stop();
@@ -142,6 +148,7 @@ function cancelTaskAudioRecording(taskId, patientId) {
     window.taskAudioState.recordingTaskId = null;
     window.taskAudioState.recordingStartTime = null;
     window.taskAudioState.recorder = null;
+    window.taskAudioState.stream = null;
 
     // Detener contador
     stopRecordingTimer();
@@ -271,6 +278,26 @@ async function deleteTaskAudio(taskId, patientId) {
 
     console.log(`[TaskAudio] Eliminando audio de tarea ${taskId}`);
 
+    // Extraer nombre del archivo para eliminar del servidor
+    const audioUrl = task.audioNote.url;
+    const filename = audioUrl.split('/').pop();
+
+    // Eliminar archivo físico del servidor
+    try {
+        const response = await fetch(`/api/patients/task-audio/${filename}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (response.ok) {
+            console.log(`[TaskAudio] Archivo ${filename} eliminado del servidor`);
+        }
+    } catch (error) {
+        console.warn('[TaskAudio] No se pudo eliminar archivo del servidor:', error);
+    }
+
     // Eliminar audioNote de la tarea
     task.audioNote = null;
 
@@ -280,10 +307,7 @@ async function deleteTaskAudio(taskId, patientId) {
     // Re-renderizar lista
     renderTaskList(patientId);
 
-    showToast('Audio eliminado', 'success');
-
-    // TODO: Eliminar archivo físico del servidor si es necesario
-    // await deleteAudioFile(audioUrl);
+    showToast('Nota de voz eliminada', 'success');
 }
 
 // ========================================

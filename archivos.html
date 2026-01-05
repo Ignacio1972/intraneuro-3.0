@@ -4,138 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INTRANEURO - Archivo de Pacientes</title>
-    
-    <!-- Reusar CSS existentes -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/modal.css">
-    <link rel="stylesheet" href="css/pacientes.css">
-    
-    <!-- CSS específico si necesario -->
-    <link rel="stylesheet" href="css/archivos.css">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/main.css?v=24">
+    <link rel="stylesheet" href="css/pacientes.css?v=25">
+    <link rel="stylesheet" href="css/modal.css?v=25">
+    <link rel="stylesheet" href="css/archivos.css?v=8">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <!-- Header con navegación -->
+<body class="archivos-page">
+    <!-- Header -->
     <header class="main-header">
         <div class="header-content">
-            <h1>📁 Archivo de Pacientes Egresados</h1>
-            <nav class="header-nav">
-                <a href="index.html" class="btn btn-secondary">← Volver al Sistema</a>
-                <span id="currentUser" class="user-info"></span>
-            </nav>
+            <div class="logo-section">
+                <img src="assets/img/logo.png" alt="INTRANEURO" class="header-logo">
+                <span class="clinic-name">INTRANEURO</span>
+                <span class="page-title">Archivo de Pacientes</span>
+            </div>
+            <div class="user-section">
+                <span id="currentUser">Cargando...</span>
+                <a href="index.html" class="btn btn-secondary btn-sm">
+                    ← Volver al Sistema
+                </a>
+            </div>
         </div>
     </header>
 
-    <!-- Contenido Principal -->
-    <main id="archivosMain" class="main-content">
-        <!-- Barra de búsqueda y acciones -->
-        <section class="search-section">
-            <div class="search-container">
-                <input type="text" id="searchArchivos" placeholder="Buscar por nombre, apellido o RUT..." class="search-input">
-                <select id="filterDoctor" class="doctor-filter" onchange="searchArchivos()">
-                    <option value="">Todos los médicos</option>
-                </select>
-                <input type="date" id="filterDate" class="date-filter" onchange="searchArchivos()">
-                <button onclick="searchArchivos()" class="btn btn-primary">Buscar</button>
-                <button onclick="exportToExcel()" class="btn btn-secondary">
-                    📊 Exportar a Excel
-                </button>
-            </div>
-
-            <!-- Controles de paginación -->
-            <div class="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 4px; margin-top: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <label for="pageSizeSelector" style="font-weight: 500;">Mostrar:</label>
-                    <select id="pageSizeSelector" onchange="changePageSize()" class="form-control" style="width: auto; padding: 0.5rem;">
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="all">Todos</option>
-                    </select>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard de Filtros -->
+        <section class="dashboard">
+            <!-- Primera fila: Búsqueda y herramientas -->
+            <div class="dashboard-row dashboard-row-spread">
+                <div class="search-container">
+                    <input type="text"
+                           id="searchArchivos"
+                           placeholder="Buscar por nombre o RUT..."
+                           class="search-input"
+                           onkeypress="if(event.key === 'Enter') searchArchivos()">
+                    <button onclick="searchArchivos()" class="btn btn-primary btn-action">
+                        Buscar
+                    </button>
                 </div>
 
-                <p id="paginationInfo" class="info-text" style="margin: 0; color: #666;">Mostrando pacientes...</p>
+                <!-- Exportar Excel (alineado a la derecha) -->
+                <button onclick="exportToExcel()" class="btn btn-success btn-action">
+                    Exportar Excel
+                </button>
+            </div>
+        </section>
 
-                <div class="pagination-buttons" style="display: flex; align-items: center; gap: 0.5rem;">
-                    <button id="prevPageBtn" onclick="previousPage()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
-                        ← Anterior
-                    </button>
-                    <span id="pageIndicator" style="font-weight: 500; min-width: 100px; text-align: center;">Página 1</span>
-                    <button id="nextPageBtn" onclick="nextPage()" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
-                        Siguiente →
-                    </button>
+        <!-- Tabla de Pacientes Archivados -->
+        <section class="patients-list">
+            <div id="archivosContainer">
+                <!-- Loading state -->
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <span style="margin-left: 1rem;">Cargando archivos...</span>
                 </div>
             </div>
         </section>
 
-        <!-- Contenedor de pacientes archivados -->
-        <section id="archivosContainer" class="patients-container">
-            <!-- Se llenará dinámicamente -->
-            <div class="loading">Cargando archivos...</div>
+        <!-- Paginación al final -->
+        <section class="pagination-bar">
+            <div class="pagination-left">
+                <span id="paginationInfo" class="pagination-info">Cargando pacientes...</span>
+            </div>
+
+            <div class="pagination-center">
+                <button id="prevPageBtn" onclick="previousPage()" class="btn-tool" disabled>
+                    « Anterior
+                </button>
+                <span id="pageIndicator" class="page-indicator">Página 1</span>
+                <button id="nextPageBtn" onclick="nextPage()" class="btn-tool" disabled>
+                    Siguiente »
+                </button>
+            </div>
+
+            <div class="pagination-right">
+                <span class="filter-label">Mostrar:</span>
+                <select id="pageSizeSelector" onchange="changePageSize()" class="filter-select filter-select-sm">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">Todos</option>
+                </select>
+            </div>
         </section>
     </main>
 
     <!-- Modal para ver detalles del paciente archivado -->
     <div id="archivedPatientModal" class="modal">
-        <div class="modal-content modal-large">
+        <div class="modal-content" style="max-width: 900px;">
+            <span class="close" onclick="closeArchivedModal()">&times;</span>
+
+            <!-- Header del Modal -->
             <div class="modal-header">
                 <h2 id="modalPatientName">Ficha del Paciente</h2>
-                <button class="close-btn" onclick="closeArchivedModal()">&times;</button>
             </div>
-            
-            <div class="modal-body">
-                <!-- Tabs para navegación -->
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="showTab('datos')">Datos Personales</button>
-                    <button class="tab-btn" onclick="showTab('admisiones')">Historial de Admisiones</button>
-                    <button class="tab-btn" onclick="showTab('observaciones')">Observaciones</button>
-                </div>
-                
-                <!-- Tab: Datos Personales -->
-                <div id="tab-datos" class="tab-content active">
-                    <div class="patient-info-grid">
-                        <div class="info-item">
-                            <label>Nombre:</label>
-                            <span id="modalName"></span>
-                        </div>
-                        <div class="info-item">
-                            <label>RUT:</label>
-                            <span id="modalRut"></span>
-                        </div>
-                        <div class="info-item">
-                            <label>Edad:</label>
-                            <span id="modalAge"></span>
-                        </div>
+
+            <!-- Tabs -->
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="datos" onclick="showTab('datos', this)">
+                    Datos Personales
+                </button>
+                <button class="tab-btn" data-tab="admisiones" onclick="showTab('admisiones', this)">
+                    Historial de Admisiones
+                </button>
+                <button class="tab-btn" data-tab="observaciones" onclick="showTab('observaciones', this)">
+                    Observaciones
+                </button>
+            </div>
+
+            <!-- Tab: Datos Personales -->
+            <div id="tab-datos" class="tab-content active">
+                <div class="patient-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre</span>
+                        <span class="detail-value" id="modalName">-</span>
                     </div>
-                </div>
-                
-                <!-- Tab: Historial de Admisiones -->
-                <div id="tab-admisiones" class="tab-content" style="display: none;">
-                    <div id="admissionsHistory">
-                        <!-- Se llenará dinámicamente -->
+                    <div class="detail-item">
+                        <span class="detail-label">RUT</span>
+                        <span class="detail-value" id="modalRut">-</span>
                     </div>
-                </div>
-                
-                <!-- Tab: Observaciones -->
-                <div id="tab-observaciones" class="tab-content" style="display: none;">
-                    <div id="observationsHistory">
-                        <!-- Se llenará dinámicamente -->
+                    <div class="detail-item">
+                        <span class="detail-label">Edad</span>
+                        <span class="detail-value" id="modalAge">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Previsión</span>
+                        <span class="detail-value" id="modalPrevision">-</span>
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Tab: Historial de Admisiones -->
+            <div id="tab-admisiones" class="tab-content">
+                <div id="admissionsHistory" class="admissions-list">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Tab: Observaciones -->
+            <div id="tab-observaciones" class="tab-content">
+                <div id="observationsHistory" class="observations-list">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Footer del Modal -->
             <div class="modal-footer">
-                <button onclick="editPatientData()" class="btn btn-secondary">Editar Datos</button>
-                <button onclick="closeArchivedModal()" class="btn btn-secondary">Cerrar</button>
+                <button onclick="editPatientData()" class="btn btn-primary">
+                    Editar Datos
+                </button>
+                <button onclick="closeArchivedModal()" class="btn btn-secondary">
+                    Cerrar
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-     <script src="assets/libs/xlsx.full.min.js"></script>
+    <script src="assets/libs/xlsx.full.min.js"></script>
+    <script src="js/api.js?v=21"></script>
+    <script src="js/data-catalogos.js?v=21"></script>
+    <script src="js/validaciones.js?v=25"></script>
+    <script src="js/archivos.js?v=5"></script>
 
-    <script src="js/api.js"></script>
-    <script src="js/data-catalogos.js"></script>
-    <script src="js/validaciones.js"></script>
-    <script src="js/archivos.js"></script>
+    <!-- Footer -->
+    <footer class="app-footer">
+        <small>
+            <strong>INTRANEURO</strong> v2.7.0 |
+            © 2025 <span style="color: #828e9a; font-weight: 200;">Lobo-Media</span> |
+            Sistema de Gestión Clínica
+        </small>
+    </footer>
 </body>
 </html>

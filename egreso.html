@@ -6,7 +6,8 @@
     <title>Egreso de Paciente - IntraNeuro</title>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/egreso.css?v=2">
+    <link rel="stylesheet" href="css/egreso.css?v=3">
+    <link rel="stylesheet" href="css/dropdown-system.css?v=1">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,9 +34,12 @@
         <div class="egreso-container">
             <!-- Header -->
             <div class="egreso-header">
-                <h1>🏥 Egreso de Paciente</h1>
-                <div id="patient-header-info" class="patient-info">
-                    Cargando información del paciente...
+                <h1>Egreso de Paciente</h1>
+                <div id="patient-name-display" class="patient-name">
+                    Cargando...
+                </div>
+                <div id="patient-header-info" class="patient-info-grid">
+                    <!-- Se renderiza dinámicamente -->
                 </div>
             </div>
 
@@ -68,6 +72,7 @@
     <!-- Scripts -->
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/modules/dropdown-system.js?v=3.1"></script>
 
     <!-- API para DischargeComponent -->
     <script>
@@ -159,54 +164,47 @@
             const container = document.getElementById('discharge-container');
             container.style.display = 'block';
 
-            // Actualizar header con campos editables
+            // Actualizar nombre del paciente (grande, destacado)
+            const nameDisplay = document.getElementById('patient-name-display');
+            nameDisplay.textContent = currentPatient.name;
+            nameDisplay.onclick = () => editPatientFieldInline(event, currentPatient.id, 'name', currentPatient.name);
+            nameDisplay.title = 'Clic para editar nombre';
+            nameDisplay.id = `name-${currentPatient.id}`;
+
+            // Actualizar grid de información (dos columnas)
             const headerInfo = document.getElementById('patient-header-info');
             headerInfo.innerHTML = `
-                <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <strong style="font-weight: 600; color: #555;">Nombre:</strong>
-                        <span id="name-${currentPatient.id}"
-                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'name', '${currentPatient.name.replace(/'/g, "\\'")}')"
-                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
-                              onmouseover="this.style.background='#f0f0f0'"
-                              onmouseout="this.style.background='transparent'"
-                              title="Clic para editar">
-                            ${currentPatient.name}
-                        </span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <strong style="font-weight: 600; color: #555;">Cama:</strong>
-                        <span id="bed-${currentPatient.id}"
-                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'bed', '${currentPatient.bed || ''}')"
-                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
-                              onmouseover="this.style.background='#f0f0f0'"
-                              onmouseout="this.style.background='transparent'"
-                              title="Clic para editar">
-                            ${currentPatient.bed || 'N/A'}
-                        </span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <strong style="font-weight: 600; color: #555;">RUT:</strong>
-                        <span id="rut-${currentPatient.id}"
-                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'rut', '${currentPatient.rut || ''}')"
-                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
-                              onmouseover="this.style.background='#f0f0f0'"
-                              onmouseout="this.style.background='transparent'"
-                              title="Clic para editar">
-                            ${currentPatient.rut || 'N/A'}
-                        </span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <strong style="font-weight: 600; color: #555;">Previsión:</strong>
-                        <span id="prevision-${currentPatient.id}"
-                              onclick="editPatientFieldInline(event, ${currentPatient.id}, 'prevision', '${(currentPatient.prevision || '').replace(/'/g, "\\'")}')"
-                              style="cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;"
-                              onmouseover="this.style.background='#f0f0f0'"
-                              onmouseout="this.style.background='transparent'"
-                              title="Clic para editar">
-                            ${currentPatient.prevision || 'N/A'}
-                        </span>
-                    </div>
+                <div class="info-item">
+                    <span class="label">Cama:</span>
+                    <span class="value" id="bed-${currentPatient.id}"
+                          onclick="editPatientFieldInline(event, ${currentPatient.id}, 'bed', '${currentPatient.bed || ''}')"
+                          title="Clic para editar">
+                        ${currentPatient.bed || 'N/A'}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="label">RUT:</span>
+                    <span class="value" id="rut-${currentPatient.id}"
+                          onclick="editPatientFieldInline(event, ${currentPatient.id}, 'rut', '${currentPatient.rut || ''}')"
+                          title="Clic para editar">
+                        ${currentPatient.rut || 'N/A'}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Previsión:</span>
+                    <span class="value" id="prevision-${currentPatient.id}"
+                          onclick="editPatientPrevision(event, ${currentPatient.id})"
+                          title="Clic para editar">
+                        ${currentPatient.prevision || 'N/A'}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Diagnóstico:</span>
+                    <span class="value" id="diagnosis-${currentPatient.id}"
+                          onclick="editPatientDiagnosis(event, ${currentPatient.id})"
+                          title="Clic para editar">
+                        ${currentPatient.diagnosis || 'N/A'}
+                    </span>
                 </div>
             `;
 
@@ -259,6 +257,96 @@
                 console.error(`Error actualizando ${fieldName}:`, error);
                 alert(`Error al actualizar ${fieldLabels[fieldName]}`);
             }
+        }
+
+        /**
+         * Editar diagnóstico con acordeón
+         */
+        function editPatientDiagnosis(event, patientId) {
+            event.stopPropagation();
+
+            const currentValue = currentPatient.diagnosis || '';
+
+            DropdownSystem.showDiagnosisAccordion({
+                currentValue: currentValue,
+                onSelect: async function(value) {
+                    if (!value || value === currentValue) {
+                        return; // Sin cambios
+                    }
+
+                    try {
+                        // Guardar en el backend
+                        const response = await apiRequest(`/patients/${patientId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ diagnosis: value })
+                        });
+
+                        if (response) {
+                            // Actualizar objeto local
+                            currentPatient.diagnosis = value;
+
+                            // Actualizar UI
+                            const element = document.getElementById(`diagnosis-${patientId}`);
+                            if (element) {
+                                element.textContent = value;
+                            }
+
+                            showToast('Diagnóstico actualizado correctamente');
+                        }
+                    } catch (error) {
+                        console.error('Error actualizando diagnóstico:', error);
+                        alert('Error al actualizar el diagnóstico');
+                    }
+                },
+                onCancel: function() {
+                    // No hacer nada
+                }
+            });
+        }
+
+        /**
+         * Editar previsión con dropdown
+         */
+        function editPatientPrevision(event, patientId) {
+            event.stopPropagation();
+
+            const currentValue = currentPatient.prevision || '';
+
+            DropdownSystem.showPrevisionSelector({
+                currentValue: currentValue,
+                onSelect: async function(value) {
+                    if (!value || value === currentValue) {
+                        return; // Sin cambios
+                    }
+
+                    try {
+                        // Guardar en el backend
+                        const response = await apiRequest(`/patients/${patientId}/prevision`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ prevision: value })
+                        });
+
+                        if (response) {
+                            // Actualizar objeto local
+                            currentPatient.prevision = value;
+
+                            // Actualizar UI
+                            const element = document.getElementById(`prevision-${patientId}`);
+                            if (element) {
+                                element.textContent = value;
+                            }
+
+                            showToast('Previsión actualizada correctamente');
+                        }
+                    } catch (error) {
+                        console.error('Error actualizando previsión:', error);
+                        alert('Error al actualizar la previsión');
+                    }
+                },
+                onCancel: function() {
+                    // No hacer nada
+                }
+            });
         }
 
         /**

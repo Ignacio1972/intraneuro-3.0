@@ -13,11 +13,13 @@
     Interconsulta: { label: 'IC', color: '#16a34a', icon: '📋' }
   };
 
+  // Variable global para guardar el servicio seleccionado
+  let selectedService = null;
+
   // Inicializar módulo cuando el DOM esté listo
   function init() {
     addServiceFieldsToForm();
     addServiceFilterToDashboard();
-    // enhancePatientCards() ya no es necesario - renderPatientCard ya incluye todo
   }
 
   // 1. Agregar campos de servicio al formulario de admisión
@@ -25,21 +27,35 @@
     const diagnosisGroup = document.querySelector('.diagnosis-group');
     if (!diagnosisGroup) return;
 
+    // Crear otros servicios (todos menos Urgencias)
+    const otherServices = Object.keys(SERVICES).filter(key => key !== 'Urgencias');
+
     const serviceHTML = `
-      <div class="form-group service-group" style="margin-top: 16px;">
+      <div class="service-selector-container">
         <label>🏥 Servicio Hospitalario</label>
-        <select id="admissionService" style="
-          width: 100%;
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 14px;
-        ">
-          <option value="">Sin especificar</option>
-          ${Object.keys(SERVICES).map(key =>
-            `<option value="${key}">${SERVICES[key].icon} ${SERVICES[key].label}</option>`
-          ).join('')}
-        </select>
+        <div class="service-selector">
+          <!-- Botón de Urgencias -->
+          <button type="button" id="btnUrgencias" class="btn-urgencias-primary" data-service="Urgencias">
+            <span class="icon">🚨</span>
+            <span>Urgencias</span>
+          </button>
+
+          <!-- Dropdown de otros servicios -->
+          <div class="service-dropdown-wrapper">
+            <button type="button" id="btnOtherServices" class="btn-other-services">
+              <span id="otherServicesLabel">Hospitalización</span>
+              <span class="arrow">▼</span>
+            </button>
+            <div id="serviceDropdownMenu" class="service-dropdown-menu">
+              ${otherServices.map(key => `
+                <div class="service-dropdown-item" data-service="${key}">
+                  <span class="icon">${SERVICES[key].icon}</span>
+                  <span class="label">${SERVICES[key].label}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="form-group bed-group" style="margin-top: 12px;">
@@ -48,24 +64,117 @@
           type="text"
           id="patientBedInput"
           placeholder="Ej: 12A, 5B, etc."
-          style="
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-          "
         >
       </div>
     `;
 
     diagnosisGroup.insertAdjacentHTML('afterend', serviceHTML);
+
+    // Configurar event listeners después de insertar el HTML
+    setupServiceEventListeners();
+  }
+
+  // Configurar event listeners para el selector de servicios
+  function setupServiceEventListeners() {
+    const btnUrgencias = document.getElementById('btnUrgencias');
+    const btnOtherServices = document.getElementById('btnOtherServices');
+    const otherServicesLabel = document.getElementById('otherServicesLabel');
+    const dropdownMenu = document.getElementById('serviceDropdownMenu');
+    const dropdownItems = document.querySelectorAll('.service-dropdown-item');
+
+    // Click en botón de Urgencias
+    if (btnUrgencias) {
+      btnUrgencias.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Toggle selection
+        if (selectedService === 'Urgencias') {
+          // Deseleccionar
+          selectedService = null;
+          this.classList.remove('selected');
+        } else {
+          // Seleccionar Urgencias
+          selectedService = 'Urgencias';
+          this.classList.add('selected');
+
+          // Deseleccionar otros
+          btnOtherServices.classList.remove('selected');
+          btnOtherServices.classList.remove('active');
+          dropdownMenu.classList.remove('show');
+          dropdownItems.forEach(item => item.classList.remove('selected'));
+          otherServicesLabel.textContent = 'Hospitalización';
+        }
+      });
+    }
+
+    // Click en botón de otros servicios (toggle dropdown)
+    if (btnOtherServices) {
+      btnOtherServices.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.classList.toggle('active');
+        dropdownMenu.classList.toggle('show');
+      });
+    }
+
+    // Click en items del dropdown
+    dropdownItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const service = this.dataset.service;
+
+        // Si ya está seleccionado, deseleccionar
+        if (selectedService === service) {
+          selectedService = null;
+          this.classList.remove('selected');
+          btnOtherServices.classList.remove('selected');
+          btnOtherServices.classList.remove('active');
+          dropdownMenu.classList.remove('show');
+          otherServicesLabel.textContent = 'Hospitalización';
+          return;
+        }
+
+        // Seleccionar nuevo servicio
+        selectedService = service;
+
+        // Deseleccionar botón de Urgencias
+        if (btnUrgencias) btnUrgencias.classList.remove('selected');
+
+        // Actualizar UI del dropdown
+        dropdownItems.forEach(i => i.classList.remove('selected'));
+        this.classList.add('selected');
+
+        // Mostrar servicio seleccionado en el botón
+        const serviceConfig = SERVICES[service];
+        otherServicesLabel.textContent = serviceConfig.icon + ' ' + serviceConfig.label;
+        btnOtherServices.classList.add('selected');
+
+        // Cerrar dropdown
+        btnOtherServices.classList.remove('active');
+        dropdownMenu.classList.remove('show');
+      });
+    });
+
+    // Cerrar dropdown al hacer click fuera
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.service-dropdown-wrapper')) {
+        if (btnOtherServices) btnOtherServices.classList.remove('active');
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+      }
+    });
   }
 
   // 2. Agregar filtro de servicio al dashboard
   function addServiceFilterToDashboard() {
     const doctorFilter = document.getElementById('doctorFilter');
     if (!doctorFilter) return;
+
+    // Verificar si ya existe el filtro
+    if (document.getElementById('serviceFilter')) return;
 
     const serviceFilter = document.createElement('select');
     serviceFilter.id = 'serviceFilter';
@@ -83,12 +192,9 @@
     doctorFilter.parentNode.insertBefore(serviceFilter, doctorFilter.nextSibling);
   }
 
-  // 3. Nota: renderPatientCard en pacientes-ui.js ahora maneja los badges y data attributes directamente
-  // Ya no es necesario interceptar la función
-
   // Manejar filtro por servicio (funciona con tarjetas Y tabla)
   function handleServiceFilter(event) {
-    const selectedService = event.target.value;
+    const selectedServiceFilter = event.target.value;
 
     // Buscar tanto tarjetas como filas de tabla
     const cards = document.querySelectorAll('.patient-card');
@@ -100,14 +206,14 @@
     allElements.forEach(element => {
       const elementService = element.dataset.service;
 
-      if (!selectedService) {
+      if (!selectedServiceFilter) {
         // Mostrar todos
         element.style.display = '';
         return;
       }
 
       // Filtrar por servicio seleccionado
-      if (elementService === selectedService) {
+      if (elementService === selectedServiceFilter) {
         element.style.display = '';
       } else {
         element.style.display = 'none';
@@ -116,10 +222,6 @@
 
     // Actualizar contador
     updatePatientCount();
-
-    // Log para debugging
-    console.log(`Filtro de servicio: ${selectedService || 'todos'}`);
-    console.log(`Elementos visibles: ${allElements.filter(el => el.style.display !== 'none').length}`);
   }
 
   // Actualizar contador de pacientes visibles
@@ -137,18 +239,31 @@
 
   // Obtener datos del formulario (para integración con ingreso.js)
   function getFormData() {
-    const serviceSelect = document.getElementById('admissionService');
-
     return {
-      service: serviceSelect ? serviceSelect.value || null : null
+      service: selectedService || null
     };
   }
 
   // Limpiar formulario
   function clearForm() {
-    const serviceSelect = document.getElementById('admissionService');
+    selectedService = null;
 
-    if (serviceSelect) serviceSelect.value = '';
+    // Limpiar UI
+    const btnUrgencias = document.getElementById('btnUrgencias');
+    const btnOtherServices = document.getElementById('btnOtherServices');
+    const otherServicesLabel = document.getElementById('otherServicesLabel');
+    const dropdownMenu = document.getElementById('serviceDropdownMenu');
+    const dropdownItems = document.querySelectorAll('.service-dropdown-item');
+
+    if (btnUrgencias) btnUrgencias.classList.remove('selected');
+    if (btnOtherServices) {
+      btnOtherServices.classList.remove('active');
+      btnOtherServices.classList.remove('selected');
+    }
+    if (dropdownMenu) dropdownMenu.classList.remove('show');
+    if (otherServicesLabel) otherServicesLabel.textContent = 'Hospitalización';
+
+    dropdownItems.forEach(item => item.classList.remove('selected'));
   }
 
   // Exponer API pública

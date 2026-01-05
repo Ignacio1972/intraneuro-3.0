@@ -223,7 +223,7 @@ exports.getActivePatients = async (req, res) => {
 exports.getPatientById = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const patient = await Patient.findByPk(id, {
             include: [{
                 model: Admission,
@@ -232,12 +232,41 @@ exports.getPatientById = async (req, res) => {
                 required: false
             }]
         });
-        
+
         if (!patient) {
             return res.status(404).json({ error: 'Paciente no encontrado' });
         }
-        
-        res.json(patient);
+
+        // Obtener la admisión activa
+        const admission = patient.admissions && patient.admissions.length > 0
+            ? patient.admissions[0]
+            : null;
+
+        // Retornar datos estructurados consistentes con getActivePatients
+        const patientData = {
+            id: patient.id,
+            name: patient.name,
+            age: patient.age,
+            rut: patient.rut,
+            prevision: patient.prevision,
+            bed: admission?.bed || 'Sin asignar',
+            admissionDate: admission?.admission_date,
+            diagnosis: admission?.diagnosis_code || '',
+            diagnosisText: admission?.diagnosis_text || '',
+            diagnosisDetails: admission?.diagnosis_details || '',
+            admittedBy: admission?.admitted_by,
+            service: admission?.service || null,
+            scheduledDischarge: admission?.scheduled_discharge || false,
+            dischargeDate: admission?.discharge_date,
+            dischargeDetails: admission?.discharge_details,
+            dischargeDiagnosis: admission?.discharge_diagnosis,
+            deceased: admission?.deceased || false,
+            dischargedBy: admission?.discharged_by,
+            status: admission ? 'active' : 'inactive',
+            admissionId: admission?.id
+        };
+
+        res.json(patientData);
     } catch (error) {
         console.error('Error obteniendo paciente:', error);
         res.status(500).json({ error: 'Error del servidor' });
@@ -824,6 +853,7 @@ exports.getPatientHistory = async (req, res) => {
             name: patient.name,
             age: patient.age,
             rut: patient.rut,
+            prevision: patient.prevision,
     admissions: patient.admissions.map(admission => ({
     admissionId: admission.id,
     admissionDate: admission.admission_date,
@@ -925,7 +955,7 @@ exports.getObservationsByAdmission = async (req, res) => {
 exports.updatePatient = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, rut, age, service } = req.body;
+        const { name, rut, age, service, prevision } = req.body;
 
         const patient = await Patient.findByPk(id);
 
@@ -937,6 +967,7 @@ exports.updatePatient = async (req, res) => {
         if (name !== undefined) patient.name = name;
         if (rut !== undefined) patient.rut = rut;
         if (age !== undefined) patient.age = age;
+        if (prevision !== undefined) patient.prevision = prevision;
 
         await patient.save();
 

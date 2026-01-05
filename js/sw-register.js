@@ -40,16 +40,15 @@
       // Banner y notificaciones de actualización DESACTIVADOS
       // showPWABanner();
 
-      // Escuchar actualizaciones - FORZAR ACTUALIZACIÓN AUTOMÁTICA
+      // Escuchar actualizaciones - SIN RECARGA AUTOMÁTICA
+      // La recarga automática causaba loops infinitos
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
 
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Forzar actualización automática sin mostrar notificación
-            console.log('[SW] Nueva versión detectada - Actualizando automáticamente...');
+            console.log('[SW] Nueva versión disponible - Se aplicará en el próximo refresh');
             newWorker.postMessage({ type: 'SKIP_WAITING' });
-            setTimeout(() => window.location.reload(), 1000);
           }
         });
       });

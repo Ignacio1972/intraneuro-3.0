@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/ficha-archivo.css">
     <link rel="stylesheet" href="css/modals-archivo.css">
+    <link rel="stylesheet" href="css/dropdown-system.css?v=1">
 </head>
 <body>
     <!-- Header Principal -->
@@ -62,6 +63,10 @@
                     <label>Edad:</label>
                     <span id="viewAge" class="data-value">-</span>
                 </div>
+                <div class="data-item">
+                    <label>Previsión:</label>
+                    <span id="viewPrevision" class="data-value">-</span>
+                </div>
             </div>
 
             <!-- Modo Edición -->
@@ -78,6 +83,16 @@
                     <label for="editAge">Edad:</label>
                     <input type="number" id="editAge" class="form-control" min="1" max="120">
                 </div>
+                <div class="data-item">
+                    <label for="editPrevision">Previsión:</label>
+                    <input type="hidden" id="editPrevision" value="">
+                    <div class="diagnosis-selector">
+                        <span id="editPrevisionText" class="diagnosis-display">Sin previsión</span>
+                        <button type="button" onclick="openPrevisionSelector()" class="btn btn-small btn-secondary">
+                            Seleccionar
+                        </button>
+                    </div>
+                </div>
                 <div class="edit-actions">
                     <button onclick="savePatientData()" class="btn btn-success">
                         <i class="icon">✓</i> Guardar
@@ -90,16 +105,9 @@
         </section>
 
         <!-- Historial de Admisiones -->
-        <section class="ficha-section">
-            <div class="section-header">
-                <h2>Historial de Admisiones</h2>
-                <span class="admission-count" id="admissionCount">0 admisiones</span>
-            </div>
-            
-            <div id="admissionsList" class="admissions-container">
-                <!-- Se llena dinámicamente -->
-            </div>
-        </section>
+        <div id="admissionsList" class="admissions-container">
+            <!-- Se llena dinámicamente -->
+        </div>
         
 
         <!-- Observaciones por Admisión -->
@@ -170,9 +178,13 @@
                 </div>
                 <div class="form-group">
                     <label>Diagnóstico:</label>
-                    <select id="reingresoDiagnostico" class="form-control" required>
-                        <option value="">Seleccione diagnóstico...</option>
-                    </select>
+                    <input type="hidden" id="reingresoDiagnostico" value="">
+                    <div class="diagnosis-selector">
+                        <span id="reingresoDiagnosticoText" class="diagnosis-display">Sin seleccionar</span>
+                        <button type="button" onclick="openReingresoDiagnosisAccordion()" class="btn btn-small btn-secondary">
+                            Seleccionar
+                        </button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Cama:</label>
@@ -192,6 +204,7 @@
     <script src="js/api.js"></script>
     <script src="js/validaciones.js"></script>
     <script src="js/data-catalogos.js"></script>
+    <script src="js/modules/dropdown-system.js"></script>
     <script src="js/ficha-archivo.js"></script>
 </body>
 </html>

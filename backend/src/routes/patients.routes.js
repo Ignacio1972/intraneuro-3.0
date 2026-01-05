@@ -71,6 +71,47 @@ router.post('/upload-task-audio', authMiddleware, uploadTaskAudio, validateTaskA
     }
 });
 
+// Ruta para eliminar audio de tarea
+router.delete('/task-audio/:filename', authMiddleware, (req, res) => {
+    try {
+        const { filename } = req.params;
+        const path = require('path');
+        const fs = require('fs');
+
+        // Validar que el filename no contenga path traversal
+        if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+            return res.status(400).json({
+                success: false,
+                error: 'Nombre de archivo inválido'
+            });
+        }
+
+        const filePath = path.join(__dirname, '../../../../uploads/tasks', filename);
+
+        // Verificar que el archivo existe
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`[TaskAudio] Audio eliminado: ${filename}`);
+            res.json({
+                success: true,
+                message: 'Audio eliminado correctamente'
+            });
+        } else {
+            // Si el archivo no existe, responder éxito (ya fue eliminado)
+            res.json({
+                success: true,
+                message: 'Archivo no encontrado (ya eliminado)'
+            });
+        }
+    } catch (error) {
+        console.error('[TaskAudio] Error eliminando audio:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Error al eliminar audio'
+        });
+    }
+});
+
 // Ruta para upload de notas de voz (debe estar ANTES de /:id genérico)
 router.post('/upload-voice-note', authMiddleware, uploadVoiceNote, validateVoiceNoteUpload, handleVoiceNoteError, patientsController.uploadPatientVoiceNote);
 

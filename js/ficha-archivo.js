@@ -50,16 +50,17 @@ async function loadPatientData() {
 // Mostrar datos del paciente
 function displayPatientData() {
     if (!patientData) return;
-    
+
     // Actualizar título y header
     document.getElementById('patientNameHeader').textContent = patientData.name || 'Sin nombre';
     document.title = `INTRANEURO - ${patientData.name}`;
-    
+
     // Datos personales - Vista
     document.getElementById('viewName').textContent = patientData.name || '-';
     document.getElementById('viewRut').textContent = patientData.rut || 'Sin RUT';
     document.getElementById('viewAge').textContent = patientData.age ? `${patientData.age} años` : '-';
-    
+    document.getElementById('viewPrevision').textContent = patientData.prevision || 'Sin previsión';
+
     // Mostrar admisiones
     displayAdmissions();
 }
@@ -67,18 +68,12 @@ function displayPatientData() {
 // Mostrar historial de admisiones
 function displayAdmissions() {
     const container = document.getElementById('admissionsList');
-    const countElement = document.getElementById('admissionCount');
-    
+
     if (!patientData.admissions || patientData.admissions.length === 0) {
         container.innerHTML = '<p class="no-data">No hay admisiones registradas</p>';
-        countElement.textContent = '0 admisiones';
         return;
     }
-    
-    // Actualizar contador
-    const count = patientData.admissions.length;
-    countElement.textContent = `${count} ${count === 1 ? 'admisión' : 'admisiones'}`;
-    
+
     // Ordenar admisiones por fecha (más reciente primero)
     const sortedAdmissions = [...patientData.admissions].sort((a, b) => 
         new Date(b.admissionDate) - new Date(a.admissionDate)
@@ -87,21 +82,15 @@ function displayAdmissions() {
     let html = '';
     
     sortedAdmissions.forEach((admission, index) => {
-        const admissionNumber = sortedAdmissions.length - index;
-        const duration = calculateDaysBetween(admission.admissionDate, admission.dischargeDate);
-        
         html += `
-            <div class="admission-card" data-admission-id="${admission.admissionId}">
-                <div class="admission-header">
-                    <h3>Admisión #${admissionNumber}</h3>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <span class="admission-duration">${duration} ${duration === 1 ? 'día' : 'días'}</span>
-                        <button onclick="toggleEditAdmission(${admission.admissionId})" class="btn btn-small btn-secondary" title="Editar admisión">
-                            <i class="icon">✏️</i> Editar
-                        </button>
-                    </div>
+            <section class="ficha-section" data-admission-id="${admission.admissionId}">
+                <div class="section-header">
+                    <h2>Admisión</h2>
+                    <button onclick="toggleEditAdmission(${admission.admissionId})" class="btn btn-small btn-secondary" title="Editar admisión">
+                        <i class="icon">✏️</i> Editar
+                    </button>
                 </div>
-                
+
                 <!-- Modo Vista -->
                 <div class="admission-content" id="admissionView-${admission.admissionId}">
                     <div class="admission-dates">
@@ -118,8 +107,7 @@ function displayAdmissions() {
                     <div class="admission-details">
                         <div class="detail-item">
                             <label>Diagnóstico de Ingreso:</label>
-                            <span class="diagnosis-code">${admission.diagnosis || '-'}</span>
-                            <span class="diagnosis-text">${admission.diagnosisText || '-'}</span>
+                            <span class="diagnosis-text">${admission.diagnosis || '-'}</span>
                         </div>
                         
                         <div class="detail-item">
@@ -138,19 +126,7 @@ function displayAdmissions() {
                             <span class="diagnosis-text">${admission.dischargeDiagnosis}</span>
                         </div>
                         ` : ''}
-                        
-                        <div class="detail-item">
-                            <label>Escala de Rankin:</label>
-                            <span class="rankin-score rankin-${admission.ranking || 0}">
-                                ${admission.ranking || 0} - ${getRankinDescription(admission.ranking || 0)}
-                            </span>
-                        </div>
-                        
-                        <div class="detail-item">
-                            <label>Médico de Alta:</label>
-                            <span>${admission.dischargedBy || '-'}</span>
-                        </div>
-                        
+
                         ${admission.dischargeDetails ? `
                         <div class="detail-item discharge-details">
                             <label>Detalles de Egreso:</label>
@@ -176,9 +152,13 @@ function displayAdmissions() {
                     <div class="admission-details">
                         <div class="detail-item">
                             <label>Diagnóstico de Ingreso:</label>
-                            <select id="editDiag-${admission.admissionId}" class="form-control">
-                                <option value="">Seleccione diagnóstico...</option>
-                            </select>
+                            <input type="hidden" id="editDiag-${admission.admissionId}" value="${admission.diagnosis || ''}">
+                            <div class="diagnosis-selector">
+                                <span id="editDiagText-${admission.admissionId}" class="diagnosis-display">${admission.diagnosis || 'Sin diagnóstico'}</span>
+                                <button type="button" onclick="openDiagnosisAccordion(${admission.admissionId})" class="btn btn-small btn-secondary">
+                                    Cambiar
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="detail-item">
@@ -207,7 +187,7 @@ function displayAdmissions() {
                         Ver Observaciones
                     </button>
                 </div>
-            </div>
+            </section>
         `;
     });
     
@@ -281,21 +261,23 @@ function hideObservations() {
 // Modo edición
 function toggleEditMode() {
     editMode = !editMode;
-    
+
     const viewMode = document.getElementById('patientDataView');
     const editModeDiv = document.getElementById('patientDataEdit');
     const editBtn = document.getElementById('editPatientBtn');
-    
+
     if (editMode) {
         // Cargar datos en campos de edición
         document.getElementById('editName').value = patientData.name || '';
         document.getElementById('editRut').value = patientData.rut || '';
         document.getElementById('editAge').value = patientData.age || '';
-        
+        document.getElementById('editPrevision').value = patientData.prevision || '';
+        document.getElementById('editPrevisionText').textContent = patientData.prevision || 'Sin previsión';
+
         viewMode.style.display = 'none';
         editModeDiv.style.display = 'grid';
         editBtn.style.display = 'none';
-        
+
         // Focus en el primer campo
         document.getElementById('editName').focus();
     } else {
@@ -305,10 +287,35 @@ function toggleEditMode() {
     }
 }
 
+// Abrir selector de previsión
+function openPrevisionSelector() {
+    const currentValue = document.getElementById('editPrevision').value;
+
+    DropdownSystem.showPrevisionSelector({
+        currentValue: currentValue,
+        onSelect: function(value) {
+            if (value) {
+                document.getElementById('editPrevision').value = value;
+                document.getElementById('editPrevisionText').textContent = value;
+            }
+        },
+        onCancel: function() {
+            // No hacer nada, mantener valor actual
+        }
+    });
+}
+
 // Cancelar edición
 function cancelEdit() {
     editMode = false;
-    toggleEditMode();
+
+    const viewMode = document.getElementById('patientDataView');
+    const editModeDiv = document.getElementById('patientDataEdit');
+    const editBtn = document.getElementById('editPatientBtn');
+
+    viewMode.style.display = 'grid';
+    editModeDiv.style.display = 'none';
+    editBtn.style.display = 'block';
 }
 
 // Guardar datos del paciente
@@ -316,49 +323,46 @@ async function savePatientData() {
     const name = document.getElementById('editName').value.trim();
     const rut = document.getElementById('editRut').value.trim();
     const age = parseInt(document.getElementById('editAge').value);
-    
+    const prevision = document.getElementById('editPrevision').value.trim();
+
     // Validaciones
     if (!name) {
         showToast('El nombre es obligatorio', 'error');
         return;
     }
-    
+
     if (age && (age < 1 || age > 120)) {
         showToast('La edad debe estar entre 1 y 120 años', 'error');
         return;
     }
-    
-    // Validar RUT si se ingresó
-    if (rut && !validarRUT(rut)) {
-        showToast('RUT inválido', 'error');
-        return;
-    }
-    
+
+
     showLoading(true);
-    
+
     try {
         const updatedData = {
             name,
             rut: rut || null,
-            age: age || null
+            age: age || null,
+            prevision: prevision || null
         };
-        
+
         await apiRequest(`/patients/${patientId}`, {
             method: 'PUT',
             body: JSON.stringify(updatedData)
         });
-        
+
         // Actualizar datos locales
         patientData = { ...patientData, ...updatedData };
-        
+
         // Actualizar vista
         displayPatientData();
-        
+
         // Salir del modo edición
         cancelEdit();
-        
+
         showToast('Datos actualizados correctamente', 'success');
-        
+
     } catch (error) {
         console.error('Error guardando datos:', error);
         showToast('Error al guardar los datos', 'error');
@@ -374,51 +378,44 @@ let editingAdmissions = new Set();
 function toggleEditAdmission(admissionId) {
     const viewMode = document.getElementById(`admissionView-${admissionId}`);
     const editMode = document.getElementById(`admissionEdit-${admissionId}`);
-    
+
     if (editingAdmissions.has(admissionId)) {
         // Salir del modo edición
         cancelAdmissionEdit(admissionId);
     } else {
         // Entrar en modo edición
         editingAdmissions.add(admissionId);
-        
+
         // Buscar la admisión en los datos
         const admission = patientData.admissions.find(a => a.admissionId === admissionId);
-        
+
         if (!admission) {
             showToast('No se encontró la admisión', 'error');
             return;
         }
-        
-        // Llenar select de diagnósticos
-        const select = document.getElementById(`editDiag-${admissionId}`);
-        if (select && select.options.length <= 1) {
-            if (typeof DIAGNOSTICOS !== 'undefined') {
-                DIAGNOSTICOS.forEach(diag => {
-                    const option = document.createElement('option');
-                    option.value = diag.codigo;
-                    option.textContent = `${diag.codigo} - ${diag.nombre}`;
-                    if (diag.codigo === admission.diagnosis) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-            }
-            
-            // Si no hay diagnósticos cargados pero hay un valor actual
-            if (admission.diagnosis && !select.value) {
-                const option = document.createElement('option');
-                option.value = admission.diagnosis;
-                option.textContent = `${admission.diagnosis} - ${admission.diagnosisText || ''}`;
-                option.selected = true;
-                select.appendChild(option);
-            }
-        }
-        
+
         // Mostrar modo edición
         viewMode.style.display = 'none';
         editMode.style.display = 'block';
     }
+}
+
+// Abrir acordeón de diagnósticos para una admisión
+function openDiagnosisAccordion(admissionId) {
+    const currentValue = document.getElementById(`editDiag-${admissionId}`).value;
+
+    DropdownSystem.showDiagnosisAccordion({
+        currentValue: currentValue,
+        onSelect: function(value) {
+            if (value) {
+                document.getElementById(`editDiag-${admissionId}`).value = value;
+                document.getElementById(`editDiagText-${admissionId}`).textContent = value;
+            }
+        },
+        onCancel: function() {
+            // No hacer nada, mantener valor actual
+        }
+    });
 }
 
 // Cancelar edición de admisión
@@ -435,21 +432,21 @@ function cancelAdmissionEdit(admissionId) {
 // Guardar cambios de admisión
 async function saveAdmissionChanges(admissionId) {
     const dateInput = document.getElementById(`editDate-${admissionId}`);
-    const diagSelect = document.getElementById(`editDiag-${admissionId}`);
+    const diagInput = document.getElementById(`editDiag-${admissionId}`);
     const doctorInput = document.getElementById(`editDoctor-${admissionId}`);
     const bedInput = document.getElementById(`editBed-${admissionId}`);
-    
+
     if (!dateInput.value) {
         showToast('La fecha de ingreso es obligatoria', 'error');
         return;
     }
-    
-    const diagText = diagSelect.options[diagSelect.selectedIndex]?.text.split(' - ')[1] || '';
-    
+
+    const diagValue = diagInput.value;
+
     const datos = {
         admission_date: dateInput.value,
-        diagnosis_code: diagSelect.value,
-        diagnosis_text: diagText,
+        diagnosis_code: diagValue,
+        diagnosis_text: diagValue, // Usamos el mismo valor ya que ahora es texto descriptivo
         admitted_by: doctorInput.value || 'Sin asignar',
         bed: bedInput.value || 'Sin asignar'
     };
@@ -505,19 +502,6 @@ function calculateDaysBetween(startDate, endDate) {
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays || 1;
-}
-
-function getRankinDescription(ranking) {
-    const descriptions = [
-        'Sin síntomas',
-        'Sin incapacidad importante',
-        'Incapacidad leve',
-        'Incapacidad moderada',
-        'Incapacidad moderadamente grave',
-        'Incapacidad grave',
-        'Muerte'
-    ];
-    return descriptions[ranking] || 'Sin evaluar';
 }
 
 // Mostrar/ocultar loading
@@ -583,21 +567,30 @@ function mostrarModalReingresar() {
     document.getElementById('reingresoNombre').value = patientData.name || '';
     document.getElementById('reingresoRut').value = patientData.rut || '';
     document.getElementById('reingresoEdad').value = patientData.age || '';
-    
-    // Llenar select de diagnósticos
-    const select = document.getElementById('reingresoDiagnostico');
-    select.innerHTML = '<option value="">Seleccione diagnóstico...</option>';
-    
-    if (typeof DIAGNOSTICOS !== 'undefined') {
-        DIAGNOSTICOS.forEach(diag => {
-            const option = document.createElement('option');
-            option.value = diag.codigo;
-            option.textContent = `${diag.codigo} - ${diag.nombre}`;
-            select.appendChild(option);
-        });
-    }
-    
+
+    // Resetear diagnóstico
+    document.getElementById('reingresoDiagnostico').value = '';
+    document.getElementById('reingresoDiagnosticoText').textContent = 'Sin seleccionar';
+
     document.getElementById('modalReingresar').style.display = 'flex';
+}
+
+// Abrir acordeón de diagnósticos para reingresar
+function openReingresoDiagnosisAccordion() {
+    const currentValue = document.getElementById('reingresoDiagnostico').value;
+
+    DropdownSystem.showDiagnosisAccordion({
+        currentValue: currentValue,
+        onSelect: function(value) {
+            if (value) {
+                document.getElementById('reingresoDiagnostico').value = value;
+                document.getElementById('reingresoDiagnosticoText').textContent = value;
+            }
+        },
+        onCancel: function() {
+            // No hacer nada
+        }
+    });
 }
 
 function cerrarModalReingresar() {
@@ -605,22 +598,33 @@ function cerrarModalReingresar() {
 }
 
 async function procesarReingreso() {
-    const form = document.getElementById('formReingresar');
-    if (!form.checkValidity()) {
-        form.reportValidity();
+    const nombre = document.getElementById('reingresoNombre').value.trim();
+    const edad = document.getElementById('reingresoEdad').value;
+    const diagValue = document.getElementById('reingresoDiagnostico').value;
+
+    // Validaciones manuales
+    if (!nombre) {
+        showToast('El nombre es obligatorio', 'error');
         return;
     }
-    
-    const diagSelect = document.getElementById('reingresoDiagnostico');
-    const diagText = diagSelect.options[diagSelect.selectedIndex]?.text.split(' - ')[1] || '';
-    
+
+    if (!edad) {
+        showToast('La edad es obligatoria', 'error');
+        return;
+    }
+
+    if (!diagValue) {
+        showToast('Debe seleccionar un diagnóstico', 'error');
+        return;
+    }
+
     const datos = {
-        name: document.getElementById('reingresoNombre').value,
-        age: parseInt(document.getElementById('reingresoEdad').value),
+        name: nombre,
+        age: parseInt(edad),
         rut: document.getElementById('reingresoRut').value || null,
         admissionDate: new Date().toISOString().split('T')[0],
-        diagnosis: document.getElementById('reingresoDiagnostico').value,
-        diagnosisText: diagText,
+        diagnosis: diagValue,
+        diagnosisText: diagValue,
         bed: document.getElementById('reingresoCama').value || 'Sin asignar',
         admittedBy: sessionStorage.getItem('currentUser') || 'Sistema'
     };

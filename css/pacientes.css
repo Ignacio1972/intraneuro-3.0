@@ -426,8 +426,82 @@
         padding: 10px;
         opacity: 0.7;
     }
-    
+
     .share-btn-inline span {
         font-size: 20px !important;
+    }
+}
+
+/* ========================================
+   FILTROS INLINE EN TABLA
+   ======================================== */
+.filters-row {
+    background: var(--background) !important;
+}
+
+.filters-row th {
+    padding: 0.75rem !important;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.filter-inline {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: white;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-inline:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(93, 173, 226, 0.1);
+}
+
+.filter-inline:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.2);
+}
+
+.filter-inline option {
+    padding: 0.5rem;
+}
+
+/* Input de búsqueda inline */
+input.filter-inline {
+    cursor: text;
+}
+
+input.filter-inline::placeholder {
+    color: var(--text-secondary);
+}
+
+.btn-clear-filters {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: white;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-clear-filters:hover {
+    background: var(--background);
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+/* Responsive: ocultar filtros en mobile */
+@media (max-width: 768px) {
+    .filters-row {
+        display: none;
     }
 }
