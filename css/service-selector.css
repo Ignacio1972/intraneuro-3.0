@@ -1,0 +1,188 @@
+/* service-selector.css - Selector de servicios hospitalarios */
+/* Diseño consistente con el sistema INTRANEURO */
+
+.service-selector-container {
+    margin-top: 1rem;
+}
+
+.service-selector-container > label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.service-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Botón de Urgencias - estilo consistente con Hospitalización */
+.btn-urgencias-primary {
+    flex: 1 1 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-urgencias-primary:hover {
+    background-color: var(--background);
+    border-color: var(--text-secondary);
+}
+
+.btn-urgencias-primary.selected {
+    background-color: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+
+.btn-urgencias-primary .icon {
+    font-size: 1rem;
+}
+
+/* Dropdown de otros servicios */
+.service-dropdown-wrapper {
+    position: relative;
+    flex: 1 1 50%;
+}
+
+.btn-other-services {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-other-services:hover {
+    background-color: var(--background);
+    border-color: var(--text-secondary);
+}
+
+.btn-other-services.selected {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-other-services .arrow {
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+}
+
+.btn-other-services.active .arrow {
+    transform: rotate(180deg);
+}
+
+/* Menú dropdown */
+.service-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 180px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: var(--shadow-hover);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+}
+
+.service-dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.service-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.service-dropdown-item:first-child {
+    border-radius: 6px 6px 0 0;
+}
+
+.service-dropdown-item:last-child {
+    border-radius: 0 0 6px 6px;
+}
+
+.service-dropdown-item:hover {
+    background-color: var(--background);
+}
+
+.service-dropdown-item.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.service-dropdown-item .icon {
+    font-size: 1rem;
+    width: 1.2rem;
+    text-align: center;
+}
+
+/* Campo de cama - consistente con otros inputs */
+.bed-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+}
+
+.bed-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .service-selector {
+        flex-direction: column;
+    }
+
+    .btn-urgencias-primary,
+    .service-dropdown-wrapper {
+        width: 100%;
+    }
+
+    .btn-other-services {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .service-dropdown-menu {
+        left: 0;
+        right: 0;
+    }
+}

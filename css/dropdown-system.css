@@ -1,0 +1,469 @@
+/**
+ * Estilos para Sistema de Dropdowns - INTRANEURO
+ * Extraído de js/modules/dropdown-system.js
+ * Versión: 3.1.0
+ */
+
+/* ===========================================
+   ESTILOS BASE DE DROPDOWNS
+   =========================================== */
+
+.intraneuro-dropdown {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.intraneuro-dropdown:hover {
+    border-color: #4CAF50;
+}
+
+.intraneuro-dropdown:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.intraneuro-dropdown:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.intraneuro-dropdown option.other-option {
+    font-weight: bold;
+    background-color: #f9f9f9;
+    padding: 10px;
+}
+
+/* Headers de categoría (deshabilitados) */
+.intraneuro-dropdown option.category-header {
+    font-weight: bold;
+    background-color: #e8e8e8;
+    color: #333;
+    font-size: 13px;
+}
+
+/* Opciones con campo de texto */
+.intraneuro-dropdown option.input-option {
+    font-style: italic;
+    color: #666;
+}
+
+.other-container {
+    animation: slideDown 0.3s ease-out;
+}
+
+.other-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.other-input:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos específicos para modales */
+.modal .intraneuro-dropdown,
+.modal .other-input {
+    background-color: #fff;
+    color: #333;
+}
+
+/* ===========================================
+   MODAL ACORDEÓN DE DIAGNÓSTICOS
+   =========================================== */
+
+.diagnosis-accordion-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+}
+
+.diagnosis-accordion-modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.diagnosis-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.diagnosis-accordion-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.diagnosis-accordion-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.diagnosis-accordion-close:hover {
+    color: #4b5563;
+}
+
+.diagnosis-accordion-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Categorías del acordeón */
+.accordion-category {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.accordion-category:last-child {
+    border-bottom: none;
+}
+
+.accordion-category-header {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    background: #fafafa;
+    transition: background 0.2s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.accordion-category-header:hover {
+    background: #f3f4f6;
+}
+
+.accordion-category-header:active {
+    background: #e5e7eb;
+}
+
+.accordion-category-label {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.accordion-category-count {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-right: 0.75rem;
+}
+
+.accordion-category-arrow {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    transition: transform 0.2s;
+}
+
+.accordion-category.expanded .accordion-category-arrow {
+    transform: rotate(90deg);
+}
+
+.accordion-category-options {
+    display: none;
+    background: white;
+}
+
+.accordion-category.expanded .accordion-category-options {
+    display: block;
+}
+
+/* Opciones individuales */
+.accordion-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem 0.75rem 3.25rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.accordion-option:hover {
+    background: #f0fdf4;
+}
+
+.accordion-option:active {
+    background: #dcfce7;
+}
+
+.accordion-option.selected {
+    background: #dcfce7;
+}
+
+.accordion-option-radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.accordion-option.selected .accordion-option-radio {
+    border-color: #22c55e;
+    background: #22c55e;
+}
+
+.accordion-option.selected .accordion-option-radio::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+}
+
+.accordion-option-label {
+    font-size: 0.95rem;
+    color: #4b5563;
+}
+
+.accordion-option.selected .accordion-option-label {
+    color: #166534;
+    font-weight: 500;
+}
+
+/* Campo de texto para opciones con requiresInput */
+.accordion-input-container {
+    padding: 0.5rem 1.25rem 0.75rem 3.25rem;
+    display: none;
+}
+
+.accordion-input-container.visible {
+    display: block;
+}
+
+.accordion-input-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.accordion-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.accordion-input:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Sección "Otro diagnóstico" */
+.accordion-other-section {
+    border-top: 2px solid #e5e7eb;
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.accordion-other-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.accordion-other-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.accordion-other-input:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Footer con botones */
+.diagnosis-accordion-footer {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.accordion-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.accordion-btn-cancel {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.accordion-btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+.accordion-btn-confirm {
+    background: #22c55e;
+    color: white;
+}
+
+.accordion-btn-confirm:hover {
+    background: #16a34a;
+}
+
+.accordion-btn-confirm:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+}
+
+/* Indicador de valor actual */
+.accordion-current-value {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.accordion-current-value-icon {
+    color: #22c55e;
+}
+
+.accordion-current-value-text {
+    font-size: 0.9rem;
+    color: #166534;
+}
+
+.accordion-current-value-label {
+    font-weight: 500;
+}
+
+/* ===========================================
+   RESPONSIVE PARA MOBILE
+   =========================================== */
+
+@media (max-width: 640px) {
+    .diagnosis-accordion-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .diagnosis-accordion-modal {
+        max-width: 100%;
+        max-height: 90vh;
+        border-radius: 16px 16px 0 0;
+        animation: slideUpMobile 0.3s ease;
+    }
+
+    @keyframes slideUpMobile {
+        from { opacity: 0; transform: translateY(100%); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .diagnosis-accordion-header {
+        padding: 1.25rem;
+    }
+
+    .accordion-category-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .accordion-option {
+        padding: 1rem 1.25rem 1rem 3.5rem;
+    }
+
+    .accordion-input-container {
+        padding: 0.5rem 1.25rem 1rem 3.5rem;
+    }
+
+    .diagnosis-accordion-footer {
+        padding: 1rem 1.25rem 1.5rem;
+    }
+
+    .accordion-btn {
+        padding: 0.875rem 1rem;
+    }
+}

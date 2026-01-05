@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="intraneuro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INTRANEURO - Archivo de Pacientes</title>
+
+    <!-- Tailwind CSS + DaisyUI via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Configuración de Tailwind con colores de Intraneuro -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'intraneuro': {
+                            primary: '#5DADE2',
+                            'primary-dark': '#3498DB',
+                            secondary: '#FFFFFF',
+                            accent: '#27AE60',
+                            text: '#2C3E50',
+                            'text-light': '#7F8C8D',
+                            danger: '#E74C3C',
+                            warning: '#F39C12',
+                            background: '#F8F9FA',
+                            border: '#E1E8ED',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Tema personalizado DaisyUI para Intraneuro -->
+    <style>
+        [data-theme="intraneuro"] {
+            --p: 197 68% 63%;          /* #5DADE2 - Celeste principal */
+            --pf: 204 70% 53%;         /* #3498DB - Celeste oscuro (focus) */
+            --pc: 0 0% 100%;           /* Blanco para texto sobre primary */
+            --s: 145 63% 42%;          /* #27AE60 - Verde (secondary) */
+            --sf: 145 63% 37%;
+            --sc: 0 0% 100%;
+            --a: 36 100% 50%;          /* #F39C12 - Naranja (accent) */
+            --af: 36 100% 45%;
+            --ac: 0 0% 100%;
+            --n: 210 29% 24%;          /* #2C3E50 - Neutral */
+            --nf: 210 29% 20%;
+            --nc: 0 0% 100%;
+            --b1: 210 17% 98%;         /* #F8F9FA - Fondo */
+            --b2: 0 0% 100%;           /* Blanco */
+            --b3: 210 14% 91%;
+            --bc: 210 29% 24%;         /* #2C3E50 - Texto */
+            --in: 204 70% 53%;
+            --su: 145 63% 42%;
+            --wa: 36 100% 50%;
+            --er: 6 78% 57%;           /* #E74C3C */
+            --rounded-btn: 0.375rem;
+        }
+        .table-container { overflow-x: auto; }
+        .table th { background-color: #3498DB !important; color: white !important; }
+        .navbar { border-bottom: 3px solid #5DADE2; }
+    </style>
+</head>
+<body class="bg-base-200 min-h-screen">
+
+    <!-- Navbar -->
+    <div class="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+        <div class="flex-1">
+            <span class="text-xl font-bold px-4">📁 Archivo de Pacientes Egresados</span>
+        </div>
+        <div class="flex-none gap-2">
+            <span id="currentUser" class="badge badge-primary badge-lg"></span>
+            <a href="index.html" class="btn btn-primary btn-sm">
+                ← Volver al Sistema
+            </a>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="container mx-auto px-4 py-6 max-w-7xl">
+
+        <!-- Card de Búsqueda y Filtros -->
+        <div class="card bg-base-100 shadow-xl mb-6">
+            <div class="card-body">
+                <h2 class="card-title text-lg mb-4">🔍 Búsqueda y Filtros</h2>
+
+                <!-- Filtros -->
+                <div class="flex flex-wrap gap-3 items-end">
+                    <!-- Búsqueda -->
+                    <div class="form-control flex-1 min-w-[250px]">
+                        <label class="label">
+                            <span class="label-text">Buscar paciente</span>
+                        </label>
+                        <input type="text"
+                               id="searchArchivos"
+                               placeholder="Nombre, apellido o RUT..."
+                               class="input input-bordered w-full" />
+                    </div>
+
+                    <!-- Filtro Médico -->
+                    <div class="form-control min-w-[200px]">
+                        <label class="label">
+                            <span class="label-text">Médico tratante</span>
+                        </label>
+                        <select id="filterDoctor" class="select select-bordered w-full" onchange="searchArchivos()">
+                            <option value="">Todos los médicos</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro Fecha -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Fecha de alta</span>
+                        </label>
+                        <input type="date"
+                               id="filterDate"
+                               class="input input-bordered"
+                               onchange="searchArchivos()" />
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-2">
+                        <button onclick="searchArchivos()" class="btn btn-primary">
+                            🔍 Buscar
+                        </button>
+                        <button onclick="exportToExcel()" class="btn btn-secondary">
+                            📊 Exportar Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controles de Paginación -->
+                <div class="divider my-2"></div>
+
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <!-- Selector de cantidad -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium">Mostrar:</span>
+                        <select id="pageSizeSelector" onchange="changePageSize()" class="select select-bordered select-sm">
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
+                    <!-- Info de paginación -->
+                    <p id="paginationInfo" class="text-sm text-base-content/70">Cargando pacientes...</p>
+
+                    <!-- Botones de navegación -->
+                    <div class="join">
+                        <button id="prevPageBtn" onclick="previousPage()" class="join-item btn btn-sm">
+                            «
+                        </button>
+                        <button class="join-item btn btn-sm btn-disabled">
+                            <span id="pageIndicator">Página 1</span>
+                        </button>
+                        <button id="nextPageBtn" onclick="nextPage()" class="join-item btn btn-sm">
+                            »
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de Tabla de Pacientes -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body p-0">
+                <div id="archivosContainer" class="table-container">
+                    <!-- Loading state -->
+                    <div class="flex justify-center items-center py-12">
+                        <span class="loading loading-spinner loading-lg text-primary"></span>
+                        <span class="ml-3">Cargando archivos...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para ver detalles del paciente archivado -->
+    <dialog id="archivedPatientModal" class="modal">
+        <div class="modal-box w-11/12 max-w-4xl">
+            <!-- Header del Modal -->
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalPatientName" class="font-bold text-xl">Ficha del Paciente</h3>
+                <form method="dialog">
+                    <button class="btn btn-sm btn-circle btn-ghost">✕</button>
+                </form>
+            </div>
+
+            <!-- Tabs -->
+            <div role="tablist" class="tabs tabs-boxed mb-4">
+                <a role="tab" class="tab tab-active" onclick="showTab('datos', this)">
+                    📋 Datos Personales
+                </a>
+                <a role="tab" class="tab" onclick="showTab('admisiones', this)">
+                    🏥 Historial
+                </a>
+                <a role="tab" class="tab" onclick="showTab('observaciones', this)">
+                    📝 Observaciones
+                </a>
+            </div>
+
+            <!-- Tab: Datos Personales -->
+            <div id="tab-datos" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold text-base-content/60">Nombre</span>
+                        </label>
+                        <p id="modalName" class="text-lg font-medium">-</p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold text-base-content/60">RUT</span>
+                        </label>
+                        <p id="modalRut" class="text-lg font-medium">-</p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold text-base-content/60">Edad</span>
+                        </label>
+                        <p id="modalAge" class="text-lg font-medium">-</p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-semibold text-base-content/60">Teléfono</span>
+                        </label>
+                        <p id="modalPhone" class="text-lg font-medium">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Historial de Admisiones -->
+            <div id="tab-admisiones" class="tab-content hidden">
+                <div id="admissionsHistory" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Tab: Observaciones -->
+            <div id="tab-observaciones" class="tab-content hidden">
+                <div id="observationsHistory" class="space-y-3 max-h-96 overflow-y-auto">
+                    <!-- Se llenará dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Footer del Modal -->
+            <div class="modal-action">
+                <button onclick="editPatientData()" class="btn btn-primary">
+                    ✏️ Editar Datos
+                </button>
+                <form method="dialog">
+                    <button class="btn">Cerrar</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <!-- Toast para notificaciones -->
+    <div id="toast-container" class="toast toast-top toast-end z-50"></div>
+
+    <!-- Scripts -->
+    <script src="assets/libs/xlsx.full.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/data-catalogos.js"></script>
+    <script src="js/validaciones.js"></script>
+    <script src="js/archivos-daisyui.js"></script>
+</body>
+</html>
