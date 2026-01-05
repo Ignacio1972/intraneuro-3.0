@@ -18,8 +18,9 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
 
 <!-- CSS Files (en el <head>) -->
-<link rel="stylesheet" href="css/main.css?v=24">
-<link rel="stylesheet" href="css/pacientes.css?v=25">
+<link rel="stylesheet" href="css/main.css?v=25">
+<link rel="stylesheet" href="css/pacientes.css?v=26">
+<link rel="stylesheet" href="css/service-selector.css?v=1">
 <link rel="stylesheet" href="css/modal.css?v=25">
 <link rel="stylesheet" href="css/pacientes-print.css?v=23">
 <link rel="stylesheet" href="css/chat-notes.css?v=5">
@@ -31,6 +32,8 @@
 <link rel="stylesheet" href="css/voice-notes.css?v=1">
 <!-- ✨ NUEVO: Sistema OCR para ingreso de pacientes -->
 <link rel="stylesheet" href="css/ocr.css?v=1">
+<!-- Sistema de Dropdowns -->
+<link rel="stylesheet" href="css/dropdown-system.css?v=1">
 
     <!-- Flatpickr - Calendario visual -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -78,104 +81,19 @@
         <main class="main-content">
             <!-- Dashboard -->
             <section class="dashboard">
-                <!-- Primera fila: Acción principal y vistas -->
-                <div class="dashboard-row">
+                <!-- Fila principal: Nuevo Ingreso a la izquierda, Archivo e Imprimir a la derecha -->
+                <div class="dashboard-row" style="justify-content: space-between;">
                     <button id="newAdmissionBtn" class="btn btn-primary btn-admission">
                         <span class="icon">+</span> NUEVO INGRESO
                     </button>
-                    
-                    <div class="separator"></div>
-                    
-                    <div class="dashboard-group">
-                        <button class="view-btn" data-view="cards">📇 Tarjetas</button>
-                        <button class="view-btn active" data-view="list">📋 Lista</button>
-                        <button class="view-btn" onclick="window.location.href='archivos.html'">📁 Archivo</button>
-                    </div>
-                </div>
-                
-                <!-- Segunda fila: Herramientas -->
-                <div class="dashboard-row">
-                    <!-- Filtro por médico tratante -->
-                    <select id="doctorFilter" onchange="filterByDoctor()" class="btn-tool filter-select">
-                        <option value="">Médicos</option>
-                    </select>
 
-                    <!-- Dropdown de exportación con selector de mes -->
-                    <div class="export-controls" style="display: inline-block; position: relative;">
-                        <button onclick="toggleExportMenu()" class="btn-tool">
-                            📊 Excel ▼
+                    <div class="dashboard-group">
+                        <button class="view-btn" onclick="window.location.href='archivos.html'">📁 Archivo</button>
+                        <button onclick="printActivePatients()" class="btn-icon" title="Imprimir">
+                            🖨️
                         </button>
-                    <div id="exportMenu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; min-width: 200px;">
-                        <div style="padding: 10px;">
-                            <button onclick="exportActivePatientsToExcel()" class="btn btn-secondary" style="display: block; width: 100%; margin-bottom: 10px; text-align: left;">
-                                📊 Todos los activos
-                            </button>
-                            <hr style="margin: 10px 0;">
-                            <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Por mes específico:</label>
-                            <select id="exportMonth" style="width: 100%; padding: 5px; margin-bottom: 5px;">
-                                <option value="">-- Seleccionar mes --</option>
-                            </select>
-                            <button onclick="exportByMonth()" class="btn btn-success" style="display: block; width: 100%;">
-                                Exportar mes seleccionado
-                            </button>
-                        </div>
                     </div>
-                    </div>
-                    
-                    <!-- Botón seleccionar todo -->
-                    <button onclick="selectAll()" class="btn-tool">
-                        <input type="checkbox" id="selectAllCheckbox" style="margin-right: 5px;">
-                        ☑️ Seleccionar todos
-                    </button>
-                    
-                    <!-- Botón imprimir -->
-                    <button onclick="printActivePatients()" class="btn-icon" title="Imprimir">
-                        🖨️
-                    </button>
                 </div>
-                
-                <script>
-                    // Poblar dropdown con últimos 12 meses
-                    function initExportDropdown() {
-                        const select = document.getElementById('exportMonth');
-                        const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-                        const today = new Date();
-                        
-                        for (let i = 0; i < 12; i++) {
-                            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-                            const option = document.createElement('option');
-                            option.value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                            option.textContent = `${months[date.getMonth()]} ${date.getFullYear()}`;
-                            select.appendChild(option);
-                        }
-                    }
-                    
-                    function toggleExportMenu() {
-                        const menu = document.getElementById('exportMenu');
-                        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-                    }
-                    
-                    // Cerrar menú al hacer clic fuera
-                    document.addEventListener('click', function(e) {
-                        const exportControls = document.querySelector('.export-controls');
-                        if (!exportControls.contains(e.target)) {
-                            document.getElementById('exportMenu').style.display = 'none';
-                        }
-                    });
-                    
-                    // Inicializar al cargar
-                    document.addEventListener('DOMContentLoaded', initExportDropdown);
-                </script>
-<!-- Botones de acción en masa (ocultos hasta seleccionar) -->
-<div id="bulkActions" style="display: none;">
-    <button onclick="exportSelectedToExcel()" class="btn btn-info" id="exportSelectedBtn">
-        📊 Exportar seleccionados
-    </button>
-    <button onclick="deleteSelectedPatients()" class="btn btn-danger" id="deleteSelectedBtn">
-        🗑️ Eliminar seleccionados (<span id="selectedCount">0</span>)
-    </button>
-</div>
 
             </section>
 
@@ -267,12 +185,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group diagnosis-group">
-                   
-                     <div id="diagnosis-container">
-                        <!-- El dropdown se insertará aquí dinámicamente -->
-                    </div>
-                    </div>
+                <!-- Dropdown de diagnóstico eliminado del ingreso - 18/12/2025
+                     El diagnóstico se asigna desde el modal del paciente después del ingreso
+                     Ver: js/modules/pacientes/pacientes-edit-refactored.js
+                -->
                    <!-- CAMPO ALERGIAS TEMPORALMENTE DESHABILITADO - 08/08/2025
 <div class="form-group">
     <label>¿Presenta alergias?</label>
@@ -330,7 +246,7 @@
 <script src="js/validaciones.js?v=25"></script>
 <script src="js/data-catalogos.js?v=21"></script>
 <!-- Módulos de UI -->
-<script src="js/pacientes-ui.js?v=49"></script>
+<script src="js/pacientes-ui.js?v=51"></script>
 <!-- Sistema Unificado de Dropdowns v2.0 - DEBE cargarse ANTES de ingreso.js -->
 <script src="js/modules/dropdown-system.js?v=2"></script>
 <!-- Script de debug para dropdowns -->
@@ -357,12 +273,12 @@
 <!-- Sistema de edición de servicio hospitalario -->
 <script src="js/modules/pacientes/pacientes-service-edit.js?v=1"></script>
 <script src="js/modules/pacientes/pacientes-discharge.js?v=37"></script>
-<script src="js/pacientes-refactored.js?v=39"></script>
+<script src="js/pacientes-refactored.js?v=41"></script>
 <!-- Sistema SIMPLIFICADO de notas - Solo textareas -->
 <script src="js/simple-notes.js?v=3"></script>
-<!-- Sistema de Tareas con Checkboxes (Audio removido) -->
-<script src="js/modules/task-manager.js?v=2"></script>
-<!-- <script src="js/modules/task-audio.js?v=1"></script> --> <!-- DESACTIVADO: Audio en tareas eliminado -->
+<!-- Sistema de Tareas con Checkboxes y Audio -->
+<script src="js/modules/task-manager.js?v=3"></script>
+<script src="js/modules/task-audio.js?v=2"></script>
 <!-- Sistema de Notas de Voz para Pacientes (MANTENER - NO TOCAR) -->
 <script src="js/modules/patient-voice-notes.js?v=1"></script>
 <!-- Sistema de Chat Clínico tipo WhatsApp - DESACTIVADO (ahora usando sistema simple de textboxes) -->

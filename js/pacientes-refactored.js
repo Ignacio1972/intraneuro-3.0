@@ -7,8 +7,10 @@
 // currentPatientId se declara en main.js
 // hasUnsavedChanges se declara en main.js línea 9
 
-// Variable para el filtro de médico
+// Variables para filtros inline
 let currentDoctorFilter = '';
+let currentDiagnosisFilter = '';
+let currentNameFilter = '';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,16 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Configurar event listeners
 function setupEventListeners() {
-    // Toggle vista cards/table
-    const viewToggle = document.getElementById('viewToggle');
-    if (viewToggle) {
-        viewToggle.addEventListener('click', () => {
-            viewMode = viewMode === 'cards' ? 'table' : 'cards';
-            localStorage.setItem('viewMode', viewMode);
-            renderPatients();
-        });
-    }
-    
+    // Vista fija en lista (toggle removido)
+
     // Botón nuevo paciente
     const newPatientBtn = document.getElementById('newPatientBtn');
     if (newPatientBtn) {
@@ -68,7 +62,22 @@ async function renderPatients(skipAPILoad = false, forceReload = false) {
     
     const container = document.getElementById('patientsContainer');
     let activePatients = patients.filter(p => p.status === 'active');
-    
+
+    // Aplicar filtro de nombre si está activo
+    if (currentNameFilter) {
+        const searchLower = currentNameFilter.toLowerCase();
+        activePatients = activePatients.filter(p =>
+            p.name && p.name.toLowerCase().includes(searchLower)
+        );
+    }
+
+    // Aplicar filtro de diagnóstico si está activo
+    if (currentDiagnosisFilter) {
+        activePatients = activePatients.filter(p =>
+            p.diagnosis && p.diagnosis === currentDiagnosisFilter
+        );
+    }
+
     // Aplicar filtro de médico si está activo
     if (currentDoctorFilter) {
         const filterLower = currentDoctorFilter.toLowerCase();
@@ -77,19 +86,17 @@ async function renderPatients(skipAPILoad = false, forceReload = false) {
         );
     }
     
-    // Actualizar el dropdown de médicos
-    updateDoctorFilter();
-    
+    // Verificar si hay algún filtro activo
+    const hasActiveFilters = currentNameFilter || currentDiagnosisFilter || currentDoctorFilter;
+
     if (activePatients.length === 0) {
-        // Mostrar mensaje específico si es por filtro
-        if (currentDoctorFilter) {
-            const doctorName = document.getElementById('doctorFilter').value;
+        if (hasActiveFilters) {
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">🔍</div>
-                    <h3>No hay pacientes para este médico</h3>
-                    <p>No se encontraron pacientes activos asignados a: <strong>${doctorName}</strong></p>
-                    <button onclick="document.getElementById('doctorFilter').value=''; filterByDoctor()" class="btn btn-secondary" style="margin-top: 10px;">Ver todos los pacientes</button>
+                    <h3>No se encontraron resultados</h3>
+                    <p>No hay pacientes que coincidan con los filtros aplicados</p>
+                    <button onclick="clearAllFilters()" class="btn btn-secondary" style="margin-top: 10px;">Limpiar filtros</button>
                 </div>
             `;
         } else {
@@ -98,14 +105,13 @@ async function renderPatients(skipAPILoad = false, forceReload = false) {
         return;
     }
     
-    if (viewMode === 'cards') {
-        container.className = 'patients-grid';
-        container.innerHTML = activePatients.map(patient => renderPatientCard(patient)).join('');
-    } else {
-        container.className = 'patients-list';
-        container.innerHTML = renderPatientTable(activePatients);
-    }
-    
+    // Vista de lista (única vista disponible)
+    container.className = 'patients-list';
+    container.innerHTML = renderPatientTable(activePatients);
+
+    // Poblar los filtros inline después de crear la tabla
+    populateInlineFilters();
+
     // Agregar click handlers
     addPatientClickHandlers();
 }
@@ -581,18 +587,11 @@ window.sortByColumn = function(column) {
     console.log('ViewMode actual:', viewMode);
     console.log('Container encontrado:', !!container);
     
-    if (viewMode === 'list' || viewMode === 'table') {
-        container.className = 'patients-list';
-        container.innerHTML = renderPatientTable(activePatients);
-        addPatientClickHandlers();
-        console.log('Tabla re-renderizada con pacientes ordenados');
-    } else {
-        // También ordenar en vista de cards
-        container.className = 'patients-grid';
-        container.innerHTML = activePatients.map(patient => renderPatientCard(patient)).join('');
-        addPatientClickHandlers();
-        console.log('Cards re-renderizadas con pacientes ordenados');
-    }
+    // Vista de lista (única disponible)
+    container.className = 'patients-list';
+    container.innerHTML = renderPatientTable(activePatients);
+    addPatientClickHandlers();
+    console.log('Tabla re-renderizada con pacientes ordenados');
     
     // Actualizar indicadores visuales de ordenamiento
     updateSortIndicators(column);
@@ -921,6 +920,126 @@ window.filterByDoctor = function() {
     }
 
     renderPatients(true); // true para evitar recargar desde API
+};
+
+// ========================================
+// FUNCIONES DE FILTRADO INLINE
+// ========================================
+
+// Poblar todos los filtros inline
+function populateInlineFilters() {
+    populateDiagnosisFilterInline();
+    populateDoctorFilterInline();
+
+    // Restaurar valores de filtros si existen
+    const diagnosisSelect = document.getElementById('filterDiagnosis');
+    const doctorSelect = document.getElementById('filterDoctor');
+    const nameInput = document.getElementById('filterName');
+
+    if (diagnosisSelect) diagnosisSelect.value = currentDiagnosisFilter;
+    if (doctorSelect) doctorSelect.value = currentDoctorFilter;
+    if (nameInput) nameInput.value = currentNameFilter;
+}
+
+// Poblar filtro de diagnósticos
+function populateDiagnosisFilterInline() {
+    const select = document.getElementById('filterDiagnosis');
+    if (!select) return;
+
+    const diagnosisSet = new Set();
+    const activePatients = patients.filter(p => p.status === 'active');
+
+    activePatients.forEach(patient => {
+        if (patient.diagnosis && patient.diagnosis.trim() !== '') {
+            diagnosisSet.add(patient.diagnosis);
+        }
+    });
+
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">Todos</option>';
+
+    const sortedDiagnosis = Array.from(diagnosisSet).sort();
+    sortedDiagnosis.forEach(diagnosis => {
+        const option = document.createElement('option');
+        option.value = diagnosis;
+        // Usar el catálogo para mostrar texto legible
+        const diagnosisText = catalogos ? catalogos.getDiagnosisText(diagnosis) : diagnosis;
+        option.textContent = diagnosisText.length > 30 ? diagnosisText.substring(0, 27) + '...' : diagnosisText;
+        option.title = diagnosisText;
+        select.appendChild(option);
+    });
+
+    select.value = currentValue;
+}
+
+// Poblar filtro de médicos
+function populateDoctorFilterInline() {
+    const select = document.getElementById('filterDoctor');
+    if (!select) return;
+
+    const doctorSet = new Set();
+    const activePatients = patients.filter(p => p.status === 'active');
+
+    activePatients.forEach(patient => {
+        if (patient.admittedBy && patient.admittedBy.trim() !== '' && patient.admittedBy !== 'Sin asignar') {
+            doctorSet.add(patient.admittedBy);
+        }
+    });
+
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">Todos</option>';
+
+    const sortedDoctors = Array.from(doctorSet).sort();
+    sortedDoctors.forEach(doctor => {
+        const option = document.createElement('option');
+        option.value = doctor;
+        option.textContent = doctor;
+        select.appendChild(option);
+    });
+
+    select.value = currentValue;
+}
+
+// Filtrar por diagnóstico
+window.filterByDiagnosisInline = function() {
+    const select = document.getElementById('filterDiagnosis');
+    currentDiagnosisFilter = select ? select.value : '';
+    renderPatients(true);
+};
+
+// Filtrar por médico (inline)
+window.filterByDoctorInline = function() {
+    const select = document.getElementById('filterDoctor');
+    currentDoctorFilter = select ? select.value : '';
+    renderPatients(true);
+};
+
+// Filtrar por nombre (con debounce)
+let filterNameTimeout = null;
+window.filterByName = function() {
+    clearTimeout(filterNameTimeout);
+    filterNameTimeout = setTimeout(() => {
+        const input = document.getElementById('filterName');
+        currentNameFilter = input ? input.value.trim() : '';
+        renderPatients(true);
+    }, 300); // Esperar 300ms después de dejar de escribir
+};
+
+// Limpiar todos los filtros
+window.clearAllFilters = function() {
+    currentDoctorFilter = '';
+    currentDiagnosisFilter = '';
+    currentNameFilter = '';
+
+    const diagnosisSelect = document.getElementById('filterDiagnosis');
+    const doctorSelect = document.getElementById('filterDoctor');
+    const nameInput = document.getElementById('filterName');
+
+    if (diagnosisSelect) diagnosisSelect.value = '';
+    if (doctorSelect) doctorSelect.value = '';
+    if (nameInput) nameInput.value = '';
+
+    renderPatients(true);
 };
 
 // Eliminar pacientes seleccionados

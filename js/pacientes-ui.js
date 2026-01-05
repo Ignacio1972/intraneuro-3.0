@@ -103,40 +103,48 @@ function renderPatientTable(activePatients) {
     return `
         <table class="patients-table">
             <thead>
+                <!-- Fila de filtros inline (arriba de los títulos) -->
+                <tr class="filters-row">
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th>
+                        <input type="text" id="filterName" onkeyup="filterByName()" class="filter-inline" placeholder="Buscar..." title="Buscar por nombre">
+                    </th>
+                    <th></th>
+                    <th>
+                        <select id="filterDiagnosis" onchange="filterByDiagnosisInline()" class="filter-inline" title="Filtrar por diagnóstico">
+                            <option value="">Todos</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select id="filterDoctor" onchange="filterByDoctorInline()" class="filter-inline" title="Filtrar por médico">
+                            <option value="">Todos</option>
+                        </select>
+                    </th>
+                    <th></th>
+                    <th>
+                        <button onclick="clearAllFilters()" class="btn-clear-filters" title="Limpiar filtros">
+                            Limpiar
+                        </button>
+                    </th>
+                </tr>
+                <!-- Fila de títulos de columnas -->
                 <tr>
                     <th style="width: 40px;">
                         <input type="checkbox" id="selectAllTable" onchange="selectAll()" style="cursor: pointer;">
                     </th>
                     <th style="width: 40px; text-align: center;">#</th>
-                    <th onclick="sortByColumn('service')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Servicio <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
-                    <th onclick="sortByColumn('bed')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Cama <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
+                    <th>Servicio</th>
+                    <th>Cama</th>
                     <th></th>
-                    <th onclick="sortByColumn('name')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Nombre <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
-                    <th onclick="sortByColumn('age')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Edad <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
-                    <th onclick="sortByColumn('diagnosis')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Diagnóstico <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
-                    <th onclick="sortByColumn('doctor')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Médico Tratante <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
-                    <th onclick="sortByColumn('admission')" style="cursor: pointer; user-select: none; transition: background-color 0.2s;"
-                        onmouseover="this.style.backgroundColor='#f0f0f0'" onmouseout="this.style.backgroundColor='transparent'">
-                        Ingresado <span style="opacity: 0.6; font-size: 14px;">⇅</span>
-                    </th>
+                    <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Diagnóstico</th>
+                    <th>Médico Tratante</th>
+                    <th>Ingresado</th>
                     <th></th>
                 </tr>
             </thead>
@@ -384,13 +392,13 @@ function renderAdmissionData(patient) {
             <div class="task-manager-container" style="padding: 0;">
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem;">
                     <button class="btn-new-task" onclick="showNewTaskModal(${patient.id})">
-                        <span style="color: white; font-weight: bold;">+</span> Nueva Tarea
+                        <span style="color: white; font-weight: bold;">+</span> Pendientes
                     </button>
                 </div>
                 <div class="task-list-container" id="task-list-${patient.id}">
                     <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
                         <p style="font-size: 2em; margin-bottom: 10px;">📋</p>
-                        <p style="font-size: 1.1em; font-weight: 500; margin-bottom: 5px;">Cargando tareas...</p>
+                        <p style="font-size: 1.1em; font-weight: 500; margin-bottom: 5px;">Cargando pendientes...</p>
                     </div>
                 </div>
             </div>
@@ -632,6 +640,9 @@ function goToDischarge(patientId) {
     }
     if (!patient.prevision || patient.prevision.trim() === '') {
         missingFields.push('Previsión');
+    }
+    if (!patient.diagnosis || patient.diagnosis.trim() === '' || patient.diagnosis.trim().toLowerCase() === 'evaluación pendiente') {
+        missingFields.push('Diagnóstico');
     }
 
     if (missingFields.length > 0) {
