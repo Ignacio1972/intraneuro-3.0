@@ -10,7 +10,7 @@ const fs = require('fs');
 // Configurar almacenamiento temporal
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = process.env.OCR_UPLOAD_DIR || '/var/www/intraneuro-dev/uploads/ocr-temp';
+        const uploadDir = process.env.OCR_UPLOAD_DIR || '/var/www/intraneuro/uploads/ocr-temp';
 
         // Crear directorio si no existe
         if (!fs.existsSync(uploadDir)) {
@@ -52,7 +52,7 @@ const uploadOCRImage = upload.single('image');
 
 // Middleware de limpieza automática de archivos temporales
 const cleanupOldFiles = () => {
-    const uploadDir = process.env.OCR_UPLOAD_DIR || '/var/www/intraneuro-dev/uploads/ocr-temp';
+    const uploadDir = process.env.OCR_UPLOAD_DIR || '/var/www/intraneuro/uploads/ocr-temp';
     const maxAge = 3600000; // 1 hora en milisegundos
 
     if (!fs.existsSync(uploadDir)) return;
