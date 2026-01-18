@@ -3,12 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>INTRANEURO - Archivo de Pacientes</title>
 
+    <!-- Verificación de acceso - Solo usuarios con rol admin -->
+    <script>
+        (function() {
+            let role = null;
+            const token = localStorage.getItem('token');
+
+            // Obtener el rol del token JWT
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    role = payload.role;
+                } catch (e) {}
+            }
+
+            if (role !== 'admin') {
+                alert('Acceso restringido. Solo administradores.');
+                window.location.href = 'index.html';
+            }
+        })();
+    </script>
+
     <!-- CSS Files -->
-    <link rel="stylesheet" href="css/main.css?v=24">
-    <link rel="stylesheet" href="css/pacientes.css?v=25">
-    <link rel="stylesheet" href="css/modal.css?v=25">
+    <link rel="stylesheet" href="css/main.css?v=50">
+    <link rel="stylesheet" href="css/pacientes.css?v=50">
+    <link rel="stylesheet" href="css/modal.css?v=50">
     <link rel="stylesheet" href="css/archivos.css?v=8">
 
     <!-- Google Fonts -->
@@ -19,8 +43,10 @@
     <header class="main-header">
         <div class="header-content">
             <div class="logo-section">
-                <img src="assets/img/logo.png" alt="INTRANEURO" class="header-logo">
-                <span class="clinic-name">INTRANEURO</span>
+                <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                    <img src="assets/img/logo.png" alt="INTRANEURO" class="header-logo">
+                    <span class="clinic-name">INTRANEURO</span>
+                </a>
                 <span class="page-title">Archivo de Pacientes</span>
             </div>
             <div class="user-section">

@@ -107,7 +107,17 @@ function renderPatientTable(activePatients) {
                 <tr class="filters-row">
                     <th></th>
                     <th></th>
-                    <th></th>
+                    <th>
+                        <select id="filterService" onchange="filterByServiceInline()" class="filter-inline" title="Filtrar por servicio">
+                            <option value="">Todos</option>
+                            <option value="UCI">UCI</option>
+                            <option value="UTI">UTI</option>
+                            <option value="MQ">MQ</option>
+                            <option value="Urgencias">Urgencias</option>
+                            <option value="Interconsulta">IC</option>
+                            <option value="sin-servicio">Sin servicio</option>
+                        </select>
+                    </th>
                     <th></th>
                     <th></th>
                     <th>
@@ -124,7 +134,11 @@ function renderPatientTable(activePatients) {
                             <option value="">Todos</option>
                         </select>
                     </th>
-                    <th></th>
+                    <th>
+                        <select id="filterMonth" onchange="filterByMonthInline()" class="filter-inline" title="Filtrar por mes de ingreso">
+                            <option value="">Todos</option>
+                        </select>
+                    </th>
                     <th>
                         <button onclick="clearAllFilters()" class="btn-clear-filters" title="Limpiar filtros">
                             Limpiar
@@ -137,14 +151,28 @@ function renderPatientTable(activePatients) {
                         <input type="checkbox" id="selectAllTable" onchange="selectAll()" style="cursor: pointer;">
                     </th>
                     <th style="width: 40px; text-align: center;">#</th>
-                    <th>Servicio</th>
-                    <th>Cama</th>
+                    <th onclick="sortByColumn('service')" style="cursor: pointer;" title="Ordenar por servicio">
+                        Servicio <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
+                    <th onclick="sortByColumn('bed')" style="cursor: pointer;" title="Ordenar por cama">
+                        Cama <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
                     <th></th>
-                    <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Diagnóstico</th>
-                    <th>Médico Tratante</th>
-                    <th>Ingresado</th>
+                    <th onclick="sortByColumn('name')" style="cursor: pointer;" title="Ordenar por nombre">
+                        Nombre <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
+                    <th onclick="sortByColumn('age')" style="cursor: pointer;" title="Ordenar por edad">
+                        Edad <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
+                    <th onclick="sortByColumn('diagnosis')" style="cursor: pointer;" title="Ordenar por diagnóstico">
+                        Diagnóstico <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
+                    <th onclick="sortByColumn('doctor')" style="cursor: pointer;" title="Ordenar por médico">
+                        Médico Tratante <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
+                    <th onclick="sortByColumn('admission')" style="cursor: pointer;" title="Ordenar por fecha de ingreso">
+                        Ingresado <span style="opacity: 0.6; font-size: 10px;">⇅</span>
+                    </th>
                     <th></th>
                 </tr>
             </thead>

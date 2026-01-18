@@ -13,27 +13,18 @@ exports.login = async (req, res) => {
         
         // Validar entrada
         if (!finalPassword) {
-            return res.status(400).json({ 
-                error: 'Clave de acceso requerida' 
+            return res.status(400).json({
+                error: 'Clave de acceso requerida'
             });
         }
-        
-        // Buscar el usuario
-        const user = await User.findOne({ where: { username: finalUsername } });
-        
+
+        // Buscar usuario por clave directamente (sistema simple de claves únicas)
+        const user = await User.findOne({ where: { password: finalPassword } });
+
         if (!user) {
-            return res.status(401).json({ 
-                error: 'Sistema no configurado. Contacte al administrador.' 
-            });
-        }
-        
-        // Comparación temporal directa (sin bcrypt para desarrollo)
-        const isValidPassword = (finalPassword === user.password);
-        
-        if (!isValidPassword) {
-            console.log('Password comparison failed. Expected:', user.password, 'Got:', finalPassword);
-            return res.status(401).json({ 
-                error: 'Clave de acceso incorrecta' 
+            console.log('No user found with password:', finalPassword);
+            return res.status(401).json({
+                error: 'Clave de acceso incorrecta'
             });
         }
         

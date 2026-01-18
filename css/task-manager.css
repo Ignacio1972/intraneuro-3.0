@@ -590,7 +590,7 @@
     align-items: center;
     gap: 6px;
     padding: 10px 16px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    background: #25D366;
     color: white;
     border: none;
     border-radius: 6px;
@@ -599,12 +599,12 @@
     font-weight: 500;
     font-family: inherit;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 2px 4px rgba(37, 211, 102, 0.3);
 }
 
 .btn-record-new-task:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+    background: #20BD5A;
+    box-shadow: 0 4px 8px rgba(37, 211, 102, 0.4);
     transform: translateY(-1px);
 }
 

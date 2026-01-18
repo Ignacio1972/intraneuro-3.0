@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INTRANEURO - Ficha de Paciente Archivado</title>
     <link rel="icon" href="assets/favicon.ico">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/ficha-archivo.css">
-    <link rel="stylesheet" href="css/modals-archivo.css">
-    <link rel="stylesheet" href="css/dropdown-system.css?v=1">
+    <link rel="stylesheet" href="css/main.css?v=25">
+    <link rel="stylesheet" href="css/ficha-archivo.css?v=3">
+    <link rel="stylesheet" href="css/modals-archivo.css?v=1">
+    <link rel="stylesheet" href="css/dropdown-system.css?v=2">
 </head>
 <body>
     <!-- Header Principal -->
@@ -40,74 +40,38 @@
 
     <!-- Contenido Principal -->
     <main class="ficha-main">
-        <!-- Datos Personales -->
+        <!-- Ficha Completa - Un solo card -->
         <section class="ficha-section">
             <div class="section-header">
-                <h2>Datos Personales</h2>
-                <button id="editPatientBtn" onclick="toggleEditMode()" class="btn btn-small btn-secondary">
-                    <i class="icon">✏️</i> Editar
-                </button>
+                <h2>Ficha del Paciente</h2>
+                <span class="edit-hint">Click en cualquier campo para editar</span>
             </div>
-            
-            <!-- Modo Vista -->
+
+            <!-- Datos Personales -->
             <div id="patientDataView" class="patient-data-grid">
-                <div class="data-item">
+                <div class="data-item editable-field" onclick="editField('name')">
                     <label>Nombre Completo:</label>
-                    <span id="viewName" class="data-value">-</span>
+                    <span id="viewName" class="data-value clickable">-</span>
                 </div>
-                <div class="data-item">
+                <div class="data-item editable-field" onclick="editField('rut')">
                     <label>RUT:</label>
-                    <span id="viewRut" class="data-value">-</span>
+                    <span id="viewRut" class="data-value clickable">-</span>
                 </div>
-                <div class="data-item">
+                <div class="data-item editable-field" onclick="editField('age')">
                     <label>Edad:</label>
-                    <span id="viewAge" class="data-value">-</span>
+                    <span id="viewAge" class="data-value clickable">-</span>
                 </div>
-                <div class="data-item">
+                <div class="data-item editable-field" onclick="editField('prevision')">
                     <label>Previsión:</label>
-                    <span id="viewPrevision" class="data-value">-</span>
+                    <span id="viewPrevision" class="data-value clickable">-</span>
                 </div>
             </div>
 
-            <!-- Modo Edición -->
-            <div id="patientDataEdit" class="patient-data-grid" style="display: none;">
-                <div class="data-item">
-                    <label for="editName">Nombre Completo:</label>
-                    <input type="text" id="editName" class="form-control">
-                </div>
-                <div class="data-item">
-                    <label for="editRut">RUT:</label>
-                    <input type="text" id="editRut" class="form-control" placeholder="12345678-9">
-                </div>
-                <div class="data-item">
-                    <label for="editAge">Edad:</label>
-                    <input type="number" id="editAge" class="form-control" min="1" max="120">
-                </div>
-                <div class="data-item">
-                    <label for="editPrevision">Previsión:</label>
-                    <input type="hidden" id="editPrevision" value="">
-                    <div class="diagnosis-selector">
-                        <span id="editPrevisionText" class="diagnosis-display">Sin previsión</span>
-                        <button type="button" onclick="openPrevisionSelector()" class="btn btn-small btn-secondary">
-                            Seleccionar
-                        </button>
-                    </div>
-                </div>
-                <div class="edit-actions">
-                    <button onclick="savePatientData()" class="btn btn-success">
-                        <i class="icon">✓</i> Guardar
-                    </button>
-                    <button onclick="cancelEdit()" class="btn btn-secondary">
-                        <i class="icon">✗</i> Cancelar
-                    </button>
-                </div>
+            <!-- Datos de Admisión (se inserta aquí) -->
+            <div id="admissionsList" class="admissions-inline">
+                <!-- Se llena dinámicamente -->
             </div>
         </section>
-
-        <!-- Historial de Admisiones -->
-        <div id="admissionsList" class="admissions-container">
-            <!-- Se llena dinámicamente -->
-        </div>
         
 
         <!-- Observaciones por Admisión -->
@@ -201,10 +165,10 @@
     
 
     <!-- Scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/validaciones.js"></script>
-    <script src="js/data-catalogos.js"></script>
-    <script src="js/modules/dropdown-system.js"></script>
-    <script src="js/ficha-archivo.js"></script>
+    <script src="js/api.js?v=22"></script>
+    <script src="js/validaciones.js?v=25"></script>
+    <script src="js/data-catalogos.js?v=22"></script>
+    <script src="js/modules/dropdown-system.js?v=2"></script>
+    <script src="js/ficha-archivo.js?v=8"></script>
 </body>
 </html>

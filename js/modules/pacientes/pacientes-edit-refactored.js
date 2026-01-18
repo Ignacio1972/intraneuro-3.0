@@ -240,7 +240,7 @@ const FIELD_CONFIGS = {
         // API
         apiEndpoint: (id) => `/patients/${id}/admission`,
         apiMethod: 'PUT',
-        apiPayload: (value) => ({ diagnosis: value || null }),
+        apiPayload: (value) => ({ diagnosis_code: value || null, diagnosis_text: value || null }),
 
         // UI - CORREGIDO: Usar getDiagnosisText para consistencia con el renderizado
         updateElement: (patientId, value) => {
@@ -506,7 +506,7 @@ async function showPromptDialog(patient, config, currentValue, displayValue) {
 // Helper para modales con dropdown (usando DropdownSystem)
 async function showDropdownModal(patient, config, currentValue, displayValue) {
     return new Promise((resolve) => {
-        // NUEVO: Para diagnóstico, usar el modal acordeón
+        // Para diagnóstico, usar el modal acordeón
         if (config.dropdownType === 'diagnosis' && window.DropdownSystem && window.DropdownSystem.showDiagnosisAccordion) {
             window.DropdownSystem.showDiagnosisAccordion({
                 currentValue: currentValue,
@@ -520,102 +520,37 @@ async function showDropdownModal(patient, config, currentValue, displayValue) {
             return;
         }
 
-        const modalId = `edit-${config.apiField}-modal`;
-
-        // Remover modal existente si hay uno
-        const existing = document.getElementById(modalId);
-        if (existing) existing.remove();
-
-        // Crear modal
-        const modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal active';
-        modal.style.zIndex = '10000';
-
-        modal.innerHTML = `
-            <div class="modal-content" style="max-width: 500px; padding: 2rem;">
-                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
-                    Editar ${config.label}
-                </h3>
-                <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 14px;">
-                    ${config.label} actual: <strong>${displayValue}</strong>
-                </p>
-                <div id="${modalId}-dropdown-container" style="margin-bottom: 1.5rem;">
-                    <!-- El dropdown se insertará aquí -->
-                </div>
-                <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-primary" id="${modalId}-save-btn">
-                        Guardar
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="${modalId}-cancel-btn">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Crear dropdown usando DropdownSystem
-        let dropdownInstance = null;
-
-        if (window.DropdownSystem) {
-            const containerId = `${modalId}-dropdown-container`;
-
-            // Usar el tipo de dropdown apropiado
-            if (config.dropdownType === 'prevision') {
-                dropdownInstance = window.DropdownSystem.createPrevisionDropdown({
-                    containerId: containerId,
-                    required: false
-                });
-            } else if (config.dropdownType === 'doctor') {
-                // Nuevo: Dropdown de médicos tratantes con administración integrada
-                dropdownInstance = window.DropdownSystem.createDoctorDropdown({
-                    containerId: containerId,
-                    required: false,
-                    currentValue: currentValue
-                });
-            } else {
-                console.error('[DropdownModal] Tipo de dropdown desconocido:', config.dropdownType);
-            }
-
-            // Establecer valor actual si existe
-            // Para doctor dropdown, esperar más tiempo porque carga desde API
-            if (dropdownInstance && currentValue) {
-                const delay = config.dropdownType === 'doctor' ? 500 : 100;
-                setTimeout(() => {
-                    dropdownInstance.setValue(currentValue);
-                }, delay);
-            }
-        } else {
-            console.error('[DropdownModal] DropdownSystem no disponible');
-            modal.remove();
-            resolve(null);
+        // Para previsión, usar el modal con botones (igual que en egreso.html)
+        if (config.dropdownType === 'prevision' && window.DropdownSystem && window.DropdownSystem.showPrevisionSelector) {
+            window.DropdownSystem.showPrevisionSelector({
+                currentValue: currentValue,
+                onSelect: (value) => {
+                    resolve(value);
+                },
+                onCancel: () => {
+                    resolve(null);
+                }
+            });
             return;
         }
 
-        // Event listener para cancelar
-        document.getElementById(`${modalId}-cancel-btn`).addEventListener('click', () => {
-            modal.remove();
-            resolve(null);
-        });
+        // Para médico tratante, usar el modal con botones (igual que previsión)
+        if (config.dropdownType === 'doctor' && window.DropdownSystem && window.DropdownSystem.showDoctorSelector) {
+            window.DropdownSystem.showDoctorSelector({
+                currentValue: currentValue,
+                onSelect: (value) => {
+                    resolve(value);
+                },
+                onCancel: () => {
+                    resolve(null);
+                }
+            });
+            return;
+        }
 
-        // Event listener para guardar
-        document.getElementById(`${modalId}-save-btn`).addEventListener('click', () => {
-            const newValue = dropdownInstance ? dropdownInstance.getValue() : '';
-            modal.remove();
-            resolve(newValue);
-        });
-
-        // Permitir cerrar con ESC
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                document.removeEventListener('keydown', handleEscape);
-                resolve(null);
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
+        // Si llegamos aquí, es un tipo de dropdown no soportado
+        console.error('[DropdownModal] Tipo de dropdown no soportado:', config.dropdownType);
+        resolve(null);
     });
 }
 

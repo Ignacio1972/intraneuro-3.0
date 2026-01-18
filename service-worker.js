@@ -1,9 +1,9 @@
-// INTRANEURO - Service Worker v3.2
+// INTRANEURO - Service Worker v5.0
 // PWA con estrategia de cache para funcionalidad offline
-// v3.2: Corregido manejo de PUT/POST requests
+// v5.0: Migración a nuevo sitio de producción
 
-const CACHE_NAME = 'intraneuro-v3.9';
-const RUNTIME_CACHE = 'intraneuro-runtime-v3.9';
+const CACHE_NAME = 'intraneuro-v5.5';
+const RUNTIME_CACHE = 'intraneuro-runtime-v5.5';
 
 // Assets estáticos para cachear en instalación
 const STATIC_ASSETS = [
@@ -30,14 +30,16 @@ const STATIC_ASSETS = [
   '/js/services-integration.js',
   '/js/modules/pacientes/pacientes-api.js',
   '/js/modules/pacientes/pacientes-edit.js',
+  '/js/modules/pacientes/pacientes-edit-refactored.js',
   '/js/modules/pacientes/pacientes-discharge.js',
+  '/js/modules/dropdown-system.js',
   '/manifest.json',
   '/assets/img/logo.png'
 ];
 
 // Instalar Service Worker y cachear assets estáticos
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalando Service Worker v3.6');
+  console.log('[SW] Instalando Service Worker v5.0');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -83,7 +85,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Estrategia para assets estáticos
+  // HTML siempre desde la red (para asegurar versiones actualizadas)
+  if (url.pathname === '/archivos.html' || url.pathname === '/index.html' || url.pathname === '/' || url.pathname === '/ficha.html' || url.pathname === '/egreso.html') {
+    event.respondWith(networkFirstStrategy(request));
+    return;
+  }
+
+  // JS siempre desde la red (para asegurar versiones actualizadas)
+  if (url.pathname.endsWith('.js')) {
+    event.respondWith(networkFirstStrategy(request));
+    return;
+  }
+
+  // Estrategia para assets estáticos (CSS, imágenes, etc.)
   event.respondWith(cacheFirstStrategy(request));
 });
 

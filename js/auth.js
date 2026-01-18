@@ -114,6 +114,7 @@ async function handleLogin(e) {
             
             // Guardar usuario
             sessionStorage.setItem('currentUser', response.user.full_name);
+            sessionStorage.setItem('username', response.user.username);
             currentUser = response.user.full_name;
             
             showLoginMessage('¡Bienvenido!', 'success');

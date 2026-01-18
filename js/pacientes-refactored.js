@@ -11,6 +11,8 @@
 let currentDoctorFilter = '';
 let currentDiagnosisFilter = '';
 let currentNameFilter = '';
+let currentMonthFilter = '';
+let currentServiceFilter = '';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -85,9 +87,28 @@ async function renderPatients(skipAPILoad = false, forceReload = false) {
             p.admittedBy && p.admittedBy.toLowerCase() === filterLower
         );
     }
-    
+
+    // Aplicar filtro de mes de ingreso si está activo
+    if (currentMonthFilter) {
+        activePatients = activePatients.filter(p => {
+            if (!p.admissionDate) return false;
+            const admDate = new Date(p.admissionDate);
+            const monthYear = `${admDate.getFullYear()}-${String(admDate.getMonth() + 1).padStart(2, '0')}`;
+            return monthYear === currentMonthFilter;
+        });
+    }
+
+    // Aplicar filtro de servicio si está activo
+    if (currentServiceFilter) {
+        if (currentServiceFilter === 'sin-servicio') {
+            activePatients = activePatients.filter(p => !p.service || p.service === '');
+        } else {
+            activePatients = activePatients.filter(p => p.service === currentServiceFilter);
+        }
+    }
+
     // Verificar si hay algún filtro activo
-    const hasActiveFilters = currentNameFilter || currentDiagnosisFilter || currentDoctorFilter;
+    const hasActiveFilters = currentNameFilter || currentDiagnosisFilter || currentDoctorFilter || currentMonthFilter || currentServiceFilter;
 
     if (activePatients.length === 0) {
         if (hasActiveFilters) {
@@ -930,15 +951,18 @@ window.filterByDoctor = function() {
 function populateInlineFilters() {
     populateDiagnosisFilterInline();
     populateDoctorFilterInline();
+    populateMonthFilterInline();
 
     // Restaurar valores de filtros si existen
     const diagnosisSelect = document.getElementById('filterDiagnosis');
     const doctorSelect = document.getElementById('filterDoctor');
     const nameInput = document.getElementById('filterName');
+    const monthSelect = document.getElementById('filterMonth');
 
     if (diagnosisSelect) diagnosisSelect.value = currentDiagnosisFilter;
     if (doctorSelect) doctorSelect.value = currentDoctorFilter;
     if (nameInput) nameInput.value = currentNameFilter;
+    if (monthSelect) monthSelect.value = currentMonthFilter;
 }
 
 // Poblar filtro de diagnósticos
@@ -1000,6 +1024,40 @@ function populateDoctorFilterInline() {
     select.value = currentValue;
 }
 
+// Poblar filtro de meses de ingreso
+function populateMonthFilterInline() {
+    const select = document.getElementById('filterMonth');
+    if (!select) return;
+
+    const monthsSet = new Set();
+    const activePatients = patients.filter(p => p.status === 'active');
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+    activePatients.forEach(patient => {
+        if (patient.admissionDate) {
+            const date = new Date(patient.admissionDate);
+            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            monthsSet.add(monthYear);
+        }
+    });
+
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">Todos</option>';
+
+    // Ordenar meses de más reciente a más antiguo
+    const sortedMonths = Array.from(monthsSet).sort().reverse();
+    sortedMonths.forEach(monthYear => {
+        const [year, month] = monthYear.split('-');
+        const monthName = monthNames[parseInt(month) - 1];
+        const option = document.createElement('option');
+        option.value = monthYear;
+        option.textContent = `${monthName} ${year}`;
+        select.appendChild(option);
+    });
+
+    select.value = currentValue;
+}
+
 // Filtrar por diagnóstico
 window.filterByDiagnosisInline = function() {
     const select = document.getElementById('filterDiagnosis');
@@ -1014,15 +1072,46 @@ window.filterByDoctorInline = function() {
     renderPatients(true);
 };
 
+// Filtrar por servicio (inline)
+window.filterByServiceInline = function() {
+    const select = document.getElementById('filterService');
+    currentServiceFilter = select ? select.value : '';
+    renderPatients(true);
+};
+
 // Filtrar por nombre (con debounce)
 let filterNameTimeout = null;
 window.filterByName = function() {
     clearTimeout(filterNameTimeout);
+
+    // Guardar estado del input antes del timeout
+    const inputBefore = document.getElementById('filterName');
+    const hadFocus = document.activeElement === inputBefore;
+    const cursorPosition = inputBefore ? inputBefore.selectionStart : 0;
+
     filterNameTimeout = setTimeout(() => {
         const input = document.getElementById('filterName');
         currentNameFilter = input ? input.value.trim() : '';
         renderPatients(true);
+
+        // Restaurar foco y posición del cursor después de renderizar
+        if (hadFocus) {
+            const newInput = document.getElementById('filterName');
+            if (newInput) {
+                newInput.focus();
+                // Posicionar cursor al final del texto
+                const len = newInput.value.length;
+                newInput.setSelectionRange(len, len);
+            }
+        }
     }, 300); // Esperar 300ms después de dejar de escribir
+};
+
+// Filtrar por mes de ingreso
+window.filterByMonthInline = function() {
+    const select = document.getElementById('filterMonth');
+    currentMonthFilter = select ? select.value : '';
+    renderPatients(true);
 };
 
 // Limpiar todos los filtros
@@ -1030,14 +1119,20 @@ window.clearAllFilters = function() {
     currentDoctorFilter = '';
     currentDiagnosisFilter = '';
     currentNameFilter = '';
+    currentMonthFilter = '';
+    currentServiceFilter = '';
 
     const diagnosisSelect = document.getElementById('filterDiagnosis');
     const doctorSelect = document.getElementById('filterDoctor');
     const nameInput = document.getElementById('filterName');
+    const monthSelect = document.getElementById('filterMonth');
+    const serviceSelect = document.getElementById('filterService');
 
     if (diagnosisSelect) diagnosisSelect.value = '';
     if (doctorSelect) doctorSelect.value = '';
     if (nameInput) nameInput.value = '';
+    if (monthSelect) monthSelect.value = '';
+    if (serviceSelect) serviceSelect.value = '';
 
     renderPatients(true);
 };

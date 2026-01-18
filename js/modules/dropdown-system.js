@@ -17,110 +17,6 @@
     // CONFIGURACIÓN DE DATOS
     // ===========================================
 
-    // Estructura jerárquica de diagnósticos neurológicos
-    // - Líneas con ═══ son headers de categoría (disabled en el select)
-    // - Opciones con __INPUT__ muestran campo de texto para especificar causa
-    const DIAGNOSTICOS_NEUROLOGICOS = [
-        // ═══════════════════════════════════════════
-        // I) ENFERMEDADES CEREBROVASCULARES
-        // ═══════════════════════════════════════════
-        '═══ I) CEREBROVASCULARES ═══',
-        'ACV isquémico - ATE',
-        'ACV isquémico - Embólico',
-        'ACV isquémico - Lacunar',
-        'ACV isquémico - Otro',
-        'HIC - Hipertensiva',
-        'HIC - Amiloidea',
-        'HIC - Otra',
-        'HSA - Aneurismática',
-        'HSA - No aneurismática',
-        'TIA',
-        'Trombosis Venosa Cerebral',
-
-        // ═══════════════════════════════════════════
-        // II) TRASTORNOS CONVULSIVOS
-        // ═══════════════════════════════════════════
-        '═══ II) CONVULSIVOS ═══',
-        'Crisis secundaria',
-        'Epilepsia Focal',
-        'Epilepsia Generalizada',
-        'Síndrome Epiléptico',
-
-        // ═══════════════════════════════════════════
-        // III) DEGENERATIVAS
-        // ═══════════════════════════════════════════
-        '═══ III) DEGENERATIVAS ═══',
-        'Parkinson',
-        'Demencia - E.A',
-        'Demencia - Lewy',
-        'Demencia - DFT',
-        'Demencia - C-J',
-        'Demencia - Otra',
-
-        // ═══════════════════════════════════════════
-        // IV) INFLAMATORIA
-        // ═══════════════════════════════════════════
-        '═══ IV) INFLAMATORIA ═══',
-        'Meningitis bacteriana',
-        'Meningitis Viral',
-        'Meningitis líquido claro',
-        'Encefalitis:__INPUT__',
-        'Mielitis:__INPUT__',
-
-        // ═══════════════════════════════════════════
-        // V) DESMIELINIZANTES
-        // ═══════════════════════════════════════════
-        '═══ V) DESMIELINIZANTES ═══',
-        'Esclerosis Múltiple',
-        'NMO',
-        'MOG',
-        'EAI',
-
-        // ═══════════════════════════════════════════
-        // VI) TRAUMA
-        // ═══════════════════════════════════════════
-        '═══ VI) TRAUMA ═══',
-        'TEC simple',
-        'TEC complicado - Lesión axonal difusa',
-        'TEC complicado - Hematoma epidural',
-        'TEC complicado - Hematoma subdural',
-
-        // ═══════════════════════════════════════════
-        // VII) TUMOR
-        // ═══════════════════════════════════════════
-        '═══ VII) TUMOR ═══',
-        'Glioblastoma',
-        'Astrocitoma',
-        'Meningioma',
-        'Schwannoma',
-        'Metástasis',
-        'Tumor - Otro',
-
-        // ═══════════════════════════════════════════
-        // VIII) NEUROMUSCULAR
-        // ═══════════════════════════════════════════
-        '═══ VIII) NEUROMUSCULAR ═══',
-        'Miastenia Gravis',
-        'Síndrome Guillain-Barré',
-        'PNP:__INPUT__',
-        'ELA',
-
-        // ═══════════════════════════════════════════
-        // IX) CEFALEAS
-        // ═══════════════════════════════════════════
-        '═══ IX) CEFALEAS ═══',
-        'Migraña',
-        'Cefalea tensional',
-        'Cefalea por sobreuso',
-        'Cefalea en racimos',
-
-        // ═══════════════════════════════════════════
-        // X) TNF
-        // ═══════════════════════════════════════════
-        '═══ X) TNF ═══',
-        'Trastorno Neurológico Funcional'
-    ];
-
     const PREVISIONES = [
         'Fonasa',
         'Isapre Banmédica',
@@ -134,644 +30,13 @@
     ];
 
     // ===========================================
-    // CLASE DROPDOWN
-    // ===========================================
-
-    class Dropdown {
-        constructor(config) {
-            this.type = config.type; // 'diagnosis' o 'prevision'
-            this.containerId = config.containerId;
-            this.required = config.required !== false;
-            this.currentValue = config.currentValue || '';
-            this.onChange = config.onChange || null;
-            this.placeholder = config.placeholder || this.getDefaultPlaceholder();
-            this.options = config.options || this.getDefaultOptions();
-            this.allowOther = config.allowOther !== false;
-
-            // IDs únicos para esta instancia
-            this.instanceId = `dropdown_${this.type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            this.selectId = `select_${this.instanceId}`;
-            this.otherId = `other_${this.instanceId}`;
-            this.otherInputId = `input_${this.instanceId}`;
-
-            this.init();
-        }
-
-        getDefaultPlaceholder() {
-            return this.type === 'diagnosis'
-                ? '-- Seleccione un diagnóstico --'
-                : '-- Seleccione previsión --';
-        }
-
-        getDefaultOptions() {
-            return this.type === 'diagnosis' ? DIAGNOSTICOS_NEUROLOGICOS : PREVISIONES;
-        }
-
-        init() {
-            const container = document.getElementById(this.containerId);
-            if (!container) {
-                console.error(`[DropdownSystem] Contenedor ${this.containerId} no encontrado`);
-                return;
-            }
-
-            // Limpiar contenedor
-            container.innerHTML = '';
-
-            // Crear estructura HTML
-            this.render(container);
-
-            // Configurar eventos
-            this.setupEvents();
-
-            // Establecer valor inicial si existe
-            if (this.currentValue) {
-                this.setValue(this.currentValue);
-            }
-        }
-
-        render(container) {
-            // Crear select principal
-            const select = document.createElement('select');
-            select.id = this.selectId;
-            select.className = `intraneuro-dropdown ${this.type}-dropdown`;
-            select.required = this.required;
-
-            // Opción placeholder
-            const placeholderOption = document.createElement('option');
-            placeholderOption.value = '';
-            placeholderOption.textContent = this.placeholder;
-            select.appendChild(placeholderOption);
-
-            // Opciones predefinidas con soporte para headers y campos __INPUT__
-            this.options.forEach(opt => {
-                const option = document.createElement('option');
-
-                // Detectar headers de categoría (contienen ═══)
-                if (opt.includes('═══')) {
-                    option.value = '';
-                    option.textContent = opt;
-                    option.disabled = true;
-                    option.className = 'category-header';
-                    option.style.fontWeight = 'bold';
-                    option.style.backgroundColor = '#f0f0f0';
-                }
-                // Detectar campos con input de texto libre (__INPUT__)
-                else if (opt.includes(':__INPUT__')) {
-                    const baseName = opt.replace(':__INPUT__', '');
-                    option.value = `__input__:${baseName}`;
-                    option.textContent = `${baseName}: (especificar)`;
-                    option.className = 'input-option';
-                }
-                // Opción normal
-                else {
-                    option.value = opt;
-                    option.textContent = opt;
-                }
-
-                select.appendChild(option);
-            });
-
-            // Opción "Otro" si está permitida
-            if (this.allowOther) {
-                const otherOption = document.createElement('option');
-                otherOption.value = '__other__';
-                otherOption.textContent = `── Otro ${this.type === 'diagnosis' ? 'diagnóstico' : ''} ──`;
-                otherOption.className = 'other-option';
-                select.appendChild(otherOption);
-            }
-
-            // Contenedor para campo "otro" o campo de texto libre
-            const otherContainer = document.createElement('div');
-            otherContainer.id = this.otherId;
-            otherContainer.className = 'other-container';
-            otherContainer.style.display = 'none';
-            otherContainer.style.marginTop = '10px';
-
-            // Label dinámico para el campo de texto
-            const inputLabel = document.createElement('label');
-            inputLabel.id = `${this.otherInputId}_label`;
-            inputLabel.style.display = 'block';
-            inputLabel.style.marginBottom = '5px';
-            inputLabel.style.fontWeight = '500';
-            inputLabel.style.color = '#555';
-            inputLabel.textContent = 'Especifique:';
-
-            const otherInput = document.createElement('input');
-            otherInput.type = 'text';
-            otherInput.id = this.otherInputId;
-            otherInput.className = 'other-input';
-            otherInput.placeholder = `Escriba el ${this.type === 'diagnosis' ? 'diagnóstico' : 'tipo de previsión'}...`;
-
-            otherContainer.appendChild(inputLabel);
-            otherContainer.appendChild(otherInput);
-
-            // Agregar al contenedor
-            container.appendChild(select);
-            container.appendChild(otherContainer);
-        }
-
-        setupEvents() {
-            const select = document.getElementById(this.selectId);
-            const otherContainer = document.getElementById(this.otherId);
-            const otherInput = document.getElementById(this.otherInputId);
-            const inputLabel = document.getElementById(`${this.otherInputId}_label`);
-
-            if (!select) return;
-
-            // Evento change del select
-            select.addEventListener('change', () => {
-                const value = select.value;
-
-                // Campo "Otro" genérico
-                if (value === '__other__') {
-                    otherContainer.style.display = 'block';
-                    otherInput.required = this.required;
-                    otherInput.placeholder = 'Escriba el diagnóstico...';
-                    if (inputLabel) inputLabel.textContent = 'Otro diagnóstico:';
-                    otherInput.value = '';
-                    otherInput.focus();
-                }
-                // Campo con texto libre específico (Encefalitis, Mielitis, PNP)
-                else if (value.startsWith('__input__:')) {
-                    const baseName = value.replace('__input__:', '');
-                    otherContainer.style.display = 'block';
-                    otherInput.required = this.required;
-                    otherInput.placeholder = `Especifique causa de ${baseName}...`;
-                    if (inputLabel) inputLabel.textContent = `${baseName} - Causa:`;
-                    otherInput.value = '';
-                    otherInput.focus();
-                }
-                // Opción normal
-                else {
-                    otherContainer.style.display = 'none';
-                    otherInput.required = false;
-                    otherInput.value = '';
-                }
-
-                // Callback onChange
-                if (this.onChange) {
-                    this.onChange(this.getValue());
-                }
-            });
-
-            // Evento input del campo otro
-            if (otherInput) {
-                otherInput.addEventListener('input', () => {
-                    const value = select.value;
-                    if ((value === '__other__' || value.startsWith('__input__:')) && this.onChange) {
-                        this.onChange(this.getValue());
-                    }
-                });
-            }
-        }
-
-        getValue() {
-            const select = document.getElementById(this.selectId);
-            const otherInput = document.getElementById(this.otherInputId);
-
-            if (!select) return '';
-
-            const value = select.value;
-
-            // Campo "Otro" genérico
-            if (value === '__other__' && otherInput) {
-                return otherInput.value.trim();
-            }
-
-            // Campo con texto libre específico (Encefalitis, Mielitis, PNP)
-            if (value.startsWith('__input__:') && otherInput) {
-                const baseName = value.replace('__input__:', '');
-                const inputValue = otherInput.value.trim();
-                // Retorna formato: "Encefalitis: causa especificada"
-                return inputValue ? `${baseName}: ${inputValue}` : baseName;
-            }
-
-            return value;
-        }
-
-        setValue(value) {
-            const select = document.getElementById(this.selectId);
-            const otherContainer = document.getElementById(this.otherId);
-            const otherInput = document.getElementById(this.otherInputId);
-            const inputLabel = document.getElementById(`${this.otherInputId}_label`);
-
-            if (!select) return;
-
-            // Verificar si el valor está en las opciones predefinidas (opción normal)
-            if (this.options.includes(value)) {
-                select.value = value;
-                otherContainer.style.display = 'none';
-                otherInput.value = '';
-                return;
-            }
-
-            // Verificar si es un valor con formato "Diagnóstico: causa" (campos __INPUT__)
-            const inputFields = ['Encefalitis', 'Mielitis', 'PNP'];
-            for (const field of inputFields) {
-                if (value && value.startsWith(`${field}:`)) {
-                    // Extraer la causa después de ": "
-                    const causa = value.substring(field.length + 1).trim();
-                    select.value = `__input__:${field}`;
-                    otherContainer.style.display = 'block';
-                    otherInput.value = causa;
-                    if (inputLabel) inputLabel.textContent = `${field} - Causa:`;
-                    otherInput.placeholder = `Especifique causa de ${field}...`;
-                    return;
-                }
-                // También manejar el caso donde solo está el nombre sin causa
-                if (value === field) {
-                    select.value = `__input__:${field}`;
-                    otherContainer.style.display = 'block';
-                    otherInput.value = '';
-                    if (inputLabel) inputLabel.textContent = `${field} - Causa:`;
-                    otherInput.placeholder = `Especifique causa de ${field}...`;
-                    return;
-                }
-            }
-
-            // Valor no encontrado en la lista o vacío: mostrar placeholder
-            // El diagnóstico actual ya se muestra en el texto del modal,
-            // así que el dropdown inicia en "Seleccione un diagnóstico"
-            select.value = '';
-            otherContainer.style.display = 'none';
-            otherInput.value = '';
-        }
-
-        validate() {
-            const value = this.getValue();
-            return !this.required || (value && value.length > 0);
-        }
-
-        clear() {
-            this.setValue('');
-        }
-
-        destroy() {
-            const container = document.getElementById(this.containerId);
-            if (container) {
-                container.innerHTML = '';
-            }
-        }
-    }
-
-    // ===========================================
-    // NOTA: Los estilos CSS fueron extraídos a css/dropdown-system.css
-    // Asegúrese de incluir ese archivo en los HTML que usen este módulo
-    // ===========================================
-
-    // ===========================================
     // API PÚBLICA
     // ===========================================
 
     const DropdownSystem = {
-        // Crear dropdown de diagnóstico
-        createDiagnosisDropdown: function(config = {}) {
-            config.type = 'diagnosis';
-            return new Dropdown(config);
-        },
-
-        // Crear dropdown de previsión
-        createPrevisionDropdown: function(config = {}) {
-            config.type = 'prevision';
-            return new Dropdown(config);
-        },
-
-        // Crear dropdown genérico
-        createDropdown: function(config) {
-            return new Dropdown(config);
-        },
-
-        // Obtener listas de opciones
-        getDiagnosisOptions: function() {
-            return [...DIAGNOSTICOS_NEUROLOGICOS];
-        },
-
-        getPrevisionOptions: function() {
-            return [...PREVISIONES];
-        },
-
-        // Crear dropdown de médicos tratantes (con administración integrada)
-        createDoctorDropdown: function(config = {}) {
-            return new DoctorDropdown(config);
-        },
-
         // Versión del sistema
-        version: '3.0.0'
+        version: '4.0.0'
     };
-
-    // ===========================================
-    // CLASE DOCTOR DROPDOWN (con administración)
-    // ===========================================
-
-    class DoctorDropdown {
-        constructor(config) {
-            this.containerId = config.containerId;
-            this.required = config.required !== false;
-            this.currentValue = config.currentValue || '';
-            this.onChange = config.onChange || null;
-            this.placeholder = config.placeholder || '-- Seleccione médico tratante --';
-            this.doctors = []; // Se carga desde API
-
-            // IDs únicos
-            this.instanceId = `dropdown_doctor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            this.selectId = `select_${this.instanceId}`;
-
-            this.init();
-        }
-
-        async init() {
-            const container = document.getElementById(this.containerId);
-            if (!container) {
-                console.error(`[DoctorDropdown] Contenedor ${this.containerId} no encontrado`);
-                return;
-            }
-
-            // Limpiar contenedor
-            container.innerHTML = '<div style="padding: 10px; color: #666;">Cargando médicos...</div>';
-
-            // Cargar médicos desde API
-            await this.loadDoctors();
-
-            // Renderizar
-            this.render(container);
-
-            // Eventos
-            this.setupEvents();
-
-            // Valor inicial
-            if (this.currentValue) {
-                this.setValue(this.currentValue);
-            }
-        }
-
-        async loadDoctors() {
-            try {
-                if (typeof apiRequest === 'function') {
-                    const response = await apiRequest('/doctors');
-                    this.doctors = Array.isArray(response) ? response : [];
-                } else {
-                    console.warn('[DoctorDropdown] apiRequest no disponible');
-                    this.doctors = [];
-                }
-            } catch (error) {
-                console.error('[DoctorDropdown] Error cargando médicos:', error);
-                this.doctors = [];
-            }
-        }
-
-        render(container) {
-            container.innerHTML = '';
-
-            // Crear select principal
-            const select = document.createElement('select');
-            select.id = this.selectId;
-            select.className = 'intraneuro-dropdown doctor-dropdown';
-            select.required = this.required;
-
-            // Opción placeholder
-            const placeholderOption = document.createElement('option');
-            placeholderOption.value = '';
-            placeholderOption.textContent = this.placeholder;
-            select.appendChild(placeholderOption);
-
-            // Opciones de médicos
-            this.doctors.forEach(doctor => {
-                const option = document.createElement('option');
-                option.value = doctor.name;
-                option.textContent = doctor.name;
-                select.appendChild(option);
-            });
-
-            // Separador visual
-            const separator = document.createElement('option');
-            separator.disabled = true;
-            separator.textContent = '────────────────';
-            select.appendChild(separator);
-
-            // Opción: Agregar nuevo médico
-            const addOption = document.createElement('option');
-            addOption.value = '__add__';
-            addOption.textContent = '➕ Agregar nuevo médico...';
-            addOption.className = 'action-option';
-            select.appendChild(addOption);
-
-            // Opción: Administrar lista
-            const manageOption = document.createElement('option');
-            manageOption.value = '__manage__';
-            manageOption.textContent = '⚙️ Administrar lista...';
-            manageOption.className = 'action-option';
-            select.appendChild(manageOption);
-
-            container.appendChild(select);
-        }
-
-        setupEvents() {
-            const select = document.getElementById(this.selectId);
-            if (!select) return;
-
-            select.addEventListener('change', async () => {
-                const value = select.value;
-
-                if (value === '__add__') {
-                    // Resetear select mientras se muestra el modal
-                    select.value = this.currentValue || '';
-                    await this.showAddDoctorModal();
-                } else if (value === '__manage__') {
-                    // Resetear select mientras se muestra el modal
-                    select.value = this.currentValue || '';
-                    await this.showManageDoctorsModal();
-                } else {
-                    this.currentValue = value;
-                    if (this.onChange) {
-                        this.onChange(value);
-                    }
-                }
-            });
-        }
-
-        async showAddDoctorModal() {
-            const name = prompt('Ingrese el nombre del nuevo médico tratante:');
-
-            if (!name || name.trim() === '') {
-                return;
-            }
-
-            try {
-                const response = await apiRequest('/doctors', {
-                    method: 'POST',
-                    body: JSON.stringify({ name: name.trim() })
-                });
-
-                if (response.doctor) {
-                    // Recargar lista y seleccionar el nuevo
-                    await this.loadDoctors();
-                    this.render(document.getElementById(this.containerId));
-                    this.setupEvents();
-                    this.setValue(response.doctor.name);
-
-                    if (typeof showToast === 'function') {
-                        showToast(`Médico "${response.doctor.name}" agregado correctamente`);
-                    }
-
-                    // Disparar onChange
-                    if (this.onChange) {
-                        this.onChange(response.doctor.name);
-                    }
-                }
-            } catch (error) {
-                console.error('[DoctorDropdown] Error agregando médico:', error);
-                if (typeof showToast === 'function') {
-                    showToast('Error al agregar médico: ' + (error.message || 'Error desconocido'), 'error');
-                }
-            }
-        }
-
-        async showManageDoctorsModal() {
-            // Crear modal de administración
-            const modalId = `manage-doctors-modal-${this.instanceId}`;
-
-            // Remover si existe
-            const existing = document.getElementById(modalId);
-            if (existing) existing.remove();
-
-            const modal = document.createElement('div');
-            modal.id = modalId;
-            modal.className = 'modal active';
-            modal.style.zIndex = '10001';
-
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 450px; padding: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="margin: 0; color: var(--text-primary);">⚙️ Médicos Tratantes</h3>
-                        <button type="button" id="${modalId}-close" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
-                    </div>
-                    <div id="${modalId}-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem;">
-                        ${this.doctors.length === 0 ? '<p style="color: #999; text-align: center;">No hay médicos registrados</p>' : ''}
-                        ${this.doctors.map(doc => `
-                            <div class="doctor-item" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid #eee;">
-                                <span style="flex: 1;">${doc.name}</span>
-                                <span style="color: #999; font-size: 0.85rem; margin-right: 1rem;">${doc.frequency_count || 0} asignaciones</span>
-                                <button type="button" class="delete-doctor-btn" data-doctor-id="${doc.id}" data-doctor-name="${doc.name}"
-                                    style="background: none; border: none; color: #dc3545; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button type="button" id="${modalId}-add" class="btn btn-primary" style="flex: 1;">
-                            ➕ Agregar Médico
-                        </button>
-                        <button type="button" id="${modalId}-done" class="btn btn-secondary">
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            // Eventos del modal
-            document.getElementById(`${modalId}-close`).addEventListener('click', () => modal.remove());
-            document.getElementById(`${modalId}-done`).addEventListener('click', () => modal.remove());
-
-            document.getElementById(`${modalId}-add`).addEventListener('click', async () => {
-                modal.remove();
-                await this.showAddDoctorModal();
-            });
-
-            // Eventos de eliminar
-            modal.querySelectorAll('.delete-doctor-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const doctorId = e.target.dataset.doctorId;
-                    const doctorName = e.target.dataset.doctorName;
-
-                    if (!confirm(`¿Está seguro que desea eliminar a "${doctorName}" de la lista?`)) {
-                        return;
-                    }
-
-                    try {
-                        await apiRequest(`/doctors/${doctorId}`, { method: 'DELETE' });
-
-                        // Recargar lista
-                        await this.loadDoctors();
-                        this.render(document.getElementById(this.containerId));
-                        this.setupEvents();
-
-                        // Actualizar modal
-                        modal.remove();
-                        await this.showManageDoctorsModal();
-
-                        if (typeof showToast === 'function') {
-                            showToast(`Médico "${doctorName}" eliminado correctamente`);
-                        }
-                    } catch (error) {
-                        console.error('[DoctorDropdown] Error eliminando médico:', error);
-                        if (typeof showToast === 'function') {
-                            showToast('Error al eliminar médico', 'error');
-                        }
-                    }
-                });
-            });
-
-            // Cerrar con ESC
-            const handleEscape = (e) => {
-                if (e.key === 'Escape') {
-                    modal.remove();
-                    document.removeEventListener('keydown', handleEscape);
-                }
-            };
-            document.addEventListener('keydown', handleEscape);
-        }
-
-        getValue() {
-            const select = document.getElementById(this.selectId);
-            if (!select) return this.currentValue || '';
-
-            const value = select.value;
-            // No retornar valores especiales
-            if (value === '__add__' || value === '__manage__') {
-                return this.currentValue || '';
-            }
-            return value;
-        }
-
-        setValue(value) {
-            this.currentValue = value;
-            const select = document.getElementById(this.selectId);
-            if (!select) return;
-
-            // Verificar si el valor está en las opciones
-            const optionExists = Array.from(select.options).some(opt => opt.value === value);
-            if (optionExists) {
-                select.value = value;
-            } else if (value) {
-                // El valor no existe en la lista (caso raro)
-                // Agregar temporalmente como opción
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = value;
-                select.insertBefore(option, select.options[1]); // Después del placeholder
-                select.value = value;
-            }
-        }
-
-        validate() {
-            const value = this.getValue();
-            return !this.required || (value && value.length > 0);
-        }
-
-        clear() {
-            this.setValue('');
-        }
-
-        async refresh() {
-            await this.loadDoctors();
-            this.render(document.getElementById(this.containerId));
-            this.setupEvents();
-            if (this.currentValue) {
-                this.setValue(this.currentValue);
-            }
-        }
-    }
 
     // ===========================================
     // ESTRUCTURA JERÁRQUICA DE DIAGNÓSTICOS
@@ -1329,6 +594,510 @@
             };
             btn.onmouseout = () => {
                 if (!btn.dataset.value || btn.dataset.value !== config.currentValue) {
+                    btn.style.background = '#fff';
+                }
+            };
+            btn.onclick = () => {
+                const value = btn.dataset.value;
+                overlay.remove();
+                if (config.onSelect) config.onSelect(value);
+            };
+        });
+
+        // Cerrar con ESC
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    };
+
+    // Modal con botones para selección de médico tratante
+    DropdownSystem.showDoctorSelector = async function(config = {}) {
+        const modalId = 'doctor-selector-modal-' + Date.now();
+
+        // Cargar médicos desde API
+        let doctors = [];
+        try {
+            if (typeof apiRequest === 'function') {
+                const response = await apiRequest('/doctors');
+                doctors = Array.isArray(response) ? response : [];
+            }
+        } catch (error) {
+            console.error('[DoctorSelector] Error cargando médicos:', error);
+        }
+
+        // Crear overlay y modal
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'dropdown-modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+
+        const modal = document.createElement('div');
+        modal.className = 'dropdown-modal-content';
+        modal.style.cssText = 'background:#fff;border-radius:8px;max-width:450px;width:90%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+
+        // Header
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:16px 20px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;';
+        header.innerHTML = `
+            <h3 style="margin:0;font-size:18px;color:#333;">Seleccionar Médico Tratante</h3>
+            <button id="${modalId}-close" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;line-height:1;">&times;</button>
+        `;
+
+        // Body con opciones
+        const body = document.createElement('div');
+        body.style.cssText = 'padding:16px 20px;overflow-y:auto;flex:1;max-height:400px;';
+
+        let optionsHtml = '<div style="display:flex;flex-direction:column;gap:8px;">';
+
+        // Opciones de médicos existentes
+        if (doctors.length === 0) {
+            optionsHtml += '<p style="color:#999;text-align:center;padding:20px 0;">No hay médicos registrados</p>';
+        } else {
+            doctors.forEach(doc => {
+                const isSelected = config.currentValue === doc.name;
+                optionsHtml += `
+                    <button class="doctor-option" data-value="${doc.name}" style="
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        padding:12px 16px;
+                        border:1px solid ${isSelected ? '#007bff' : '#ddd'};
+                        border-radius:6px;
+                        background:${isSelected ? '#e7f1ff' : '#fff'};
+                        cursor:pointer;
+                        text-align:left;
+                        font-size:14px;
+                        transition:all 0.2s;
+                    ">
+                        <span style="display:flex;align-items:center;gap:10px;">
+                            <span style="font-size:18px;">👨‍⚕️</span>
+                            <span>${doc.name}</span>
+                        </span>
+                        ${doc.frequency_count ? `<span style="color:#999;font-size:12px;">${doc.frequency_count} pacientes</span>` : ''}
+                    </button>
+                `;
+            });
+        }
+
+        // Separador visual
+        optionsHtml += '<div style="border-top:1px solid #eee;margin:12px 0;"></div>';
+
+        // Botones de acción
+        optionsHtml += `
+            <button id="${modalId}-add" class="doctor-action-btn" style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                padding:12px 16px;
+                border:1px dashed #28a745;
+                border-radius:6px;
+                background:#f8fff8;
+                cursor:pointer;
+                text-align:left;
+                font-size:14px;
+                color:#28a745;
+                transition:all 0.2s;
+            ">
+                <span style="font-size:18px;">➕</span>
+                <span>Agregar nuevo médico...</span>
+            </button>
+            <button id="${modalId}-manage" class="doctor-action-btn" style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                padding:12px 16px;
+                border:1px dashed #6c757d;
+                border-radius:6px;
+                background:#f8f9fa;
+                cursor:pointer;
+                text-align:left;
+                font-size:14px;
+                color:#6c757d;
+                transition:all 0.2s;
+            ">
+                <span style="font-size:18px;">⚙️</span>
+                <span>Administrar lista de médicos...</span>
+            </button>
+        `;
+        optionsHtml += '</div>';
+        body.innerHTML = optionsHtml;
+
+        // Footer
+        const footer = document.createElement('div');
+        footer.style.cssText = 'padding:16px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:10px;';
+        footer.innerHTML = `
+            <button id="${modalId}-cancel" style="padding:8px 16px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;">Cancelar</button>
+        `;
+
+        modal.appendChild(header);
+        modal.appendChild(body);
+        modal.appendChild(footer);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Event handlers
+        const closeModal = () => {
+            overlay.remove();
+            document.removeEventListener('keydown', escHandler);
+            if (config.onCancel) config.onCancel();
+        };
+
+        document.getElementById(`${modalId}-close`).onclick = closeModal;
+        document.getElementById(`${modalId}-cancel`).onclick = closeModal;
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeModal();
+        };
+
+        // Selección de médico
+        body.querySelectorAll('.doctor-option').forEach(btn => {
+            btn.onmouseover = () => {
+                if (btn.dataset.value !== config.currentValue) {
+                    btn.style.background = '#f5f5f5';
+                    btn.style.borderColor = '#bbb';
+                }
+            };
+            btn.onmouseout = () => {
+                if (btn.dataset.value !== config.currentValue) {
+                    btn.style.background = '#fff';
+                    btn.style.borderColor = '#ddd';
+                }
+            };
+            btn.onclick = () => {
+                const value = btn.dataset.value;
+                overlay.remove();
+                document.removeEventListener('keydown', escHandler);
+                if (config.onSelect) config.onSelect(value);
+            };
+        });
+
+        // Botón agregar nuevo médico
+        document.getElementById(`${modalId}-add`).onclick = async () => {
+            const name = prompt('Ingrese el nombre del nuevo médico tratante:');
+
+            if (!name || name.trim() === '') {
+                return;
+            }
+
+            try {
+                const response = await apiRequest('/doctors', {
+                    method: 'POST',
+                    body: JSON.stringify({ name: name.trim() })
+                });
+
+                if (response.doctor) {
+                    if (typeof showToast === 'function') {
+                        showToast(`Médico "${response.doctor.name}" agregado correctamente`);
+                    }
+
+                    // Cerrar modal actual y devolver el nuevo médico
+                    overlay.remove();
+                    document.removeEventListener('keydown', escHandler);
+                    if (config.onSelect) config.onSelect(response.doctor.name);
+                }
+            } catch (error) {
+                console.error('[DoctorSelector] Error agregando médico:', error);
+                if (typeof showToast === 'function') {
+                    showToast('Error al agregar médico: ' + (error.message || 'Error desconocido'), 'error');
+                }
+            }
+        };
+
+        // Botón administrar lista
+        document.getElementById(`${modalId}-manage`).onclick = async () => {
+            // Cerrar este modal
+            overlay.remove();
+            document.removeEventListener('keydown', escHandler);
+
+            // Mostrar modal de administración
+            await DropdownSystem.showDoctorManagement({
+                onClose: () => {
+                    // Reabrir selector después de administrar
+                    DropdownSystem.showDoctorSelector(config);
+                }
+            });
+        };
+
+        // Cerrar con ESC
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    };
+
+    // Modal de administración de médicos
+    DropdownSystem.showDoctorManagement = async function(config = {}) {
+        const modalId = 'doctor-management-modal-' + Date.now();
+
+        // Cargar médicos desde API
+        let doctors = [];
+        try {
+            if (typeof apiRequest === 'function') {
+                const response = await apiRequest('/doctors');
+                doctors = Array.isArray(response) ? response : [];
+            }
+        } catch (error) {
+            console.error('[DoctorManagement] Error cargando médicos:', error);
+        }
+
+        // Crear overlay y modal
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'dropdown-modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10001;';
+
+        const modal = document.createElement('div');
+        modal.className = 'dropdown-modal-content';
+        modal.style.cssText = 'background:#fff;border-radius:8px;max-width:450px;width:90%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+
+        // Header
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:16px 20px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;';
+        header.innerHTML = `
+            <h3 style="margin:0;font-size:18px;color:#333;">⚙️ Administrar Médicos</h3>
+            <button id="${modalId}-close" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;line-height:1;">&times;</button>
+        `;
+
+        // Body con lista de médicos
+        const body = document.createElement('div');
+        body.style.cssText = 'padding:16px 20px;overflow-y:auto;flex:1;max-height:350px;';
+
+        let listHtml = '';
+        if (doctors.length === 0) {
+            listHtml = '<p style="color:#999;text-align:center;padding:20px 0;">No hay médicos registrados</p>';
+        } else {
+            listHtml = '<div style="display:flex;flex-direction:column;gap:8px;">';
+            doctors.forEach(doc => {
+                listHtml += `
+                    <div class="doctor-item" style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        padding:12px 16px;
+                        border:1px solid #eee;
+                        border-radius:6px;
+                        background:#fafafa;
+                    ">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span style="font-size:16px;">👨‍⚕️</span>
+                            <span style="font-weight:500;">${doc.name}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span style="color:#999;font-size:12px;">${doc.frequency_count || 0} pacientes</span>
+                            <button class="delete-doctor-btn" data-doctor-id="${doc.id}" data-doctor-name="${doc.name}"
+                                style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:18px;padding:4px;"
+                                title="Eliminar médico">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            listHtml += '</div>';
+        }
+        body.innerHTML = listHtml;
+
+        // Footer
+        const footer = document.createElement('div');
+        footer.style.cssText = 'padding:16px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;gap:10px;';
+        footer.innerHTML = `
+            <button id="${modalId}-add" style="padding:10px 16px;border:1px solid #28a745;border-radius:4px;background:#28a745;color:#fff;cursor:pointer;font-size:14px;">➕ Agregar Médico</button>
+            <button id="${modalId}-done" style="padding:10px 16px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;font-size:14px;">Cerrar</button>
+        `;
+
+        modal.appendChild(header);
+        modal.appendChild(body);
+        modal.appendChild(footer);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Event handlers
+        const closeModal = () => {
+            overlay.remove();
+            document.removeEventListener('keydown', escHandler);
+            if (config.onClose) config.onClose();
+        };
+
+        document.getElementById(`${modalId}-close`).onclick = closeModal;
+        document.getElementById(`${modalId}-done`).onclick = closeModal;
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeModal();
+        };
+
+        // Botón agregar
+        document.getElementById(`${modalId}-add`).onclick = async () => {
+            const name = prompt('Ingrese el nombre del nuevo médico tratante:');
+
+            if (!name || name.trim() === '') {
+                return;
+            }
+
+            try {
+                const response = await apiRequest('/doctors', {
+                    method: 'POST',
+                    body: JSON.stringify({ name: name.trim() })
+                });
+
+                if (response.doctor) {
+                    if (typeof showToast === 'function') {
+                        showToast(`Médico "${response.doctor.name}" agregado correctamente`);
+                    }
+
+                    // Recargar modal
+                    overlay.remove();
+                    document.removeEventListener('keydown', escHandler);
+                    await DropdownSystem.showDoctorManagement(config);
+                }
+            } catch (error) {
+                console.error('[DoctorManagement] Error agregando médico:', error);
+                if (typeof showToast === 'function') {
+                    showToast('Error al agregar médico', 'error');
+                }
+            }
+        };
+
+        // Eventos de eliminar
+        body.querySelectorAll('.delete-doctor-btn').forEach(btn => {
+            btn.onclick = async (e) => {
+                const doctorId = e.target.dataset.doctorId;
+                const doctorName = e.target.dataset.doctorName;
+
+                if (!confirm(`¿Está seguro que desea eliminar a "${doctorName}" de la lista?`)) {
+                    return;
+                }
+
+                try {
+                    await apiRequest(`/doctors/${doctorId}`, { method: 'DELETE' });
+
+                    if (typeof showToast === 'function') {
+                        showToast(`Médico "${doctorName}" eliminado correctamente`);
+                    }
+
+                    // Recargar modal
+                    overlay.remove();
+                    document.removeEventListener('keydown', escHandler);
+                    await DropdownSystem.showDoctorManagement(config);
+                } catch (error) {
+                    console.error('[DoctorManagement] Error eliminando médico:', error);
+                    if (typeof showToast === 'function') {
+                        showToast('Error al eliminar médico', 'error');
+                    }
+                }
+            };
+        });
+
+        // Cerrar con ESC
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    };
+
+    // Modal simple para selección de servicio hospitalario
+    DropdownSystem.showServiceSelector = function(config = {}) {
+        const modalId = 'service-selector-modal-' + Date.now();
+
+        // Configuración de servicios con colores
+        const servicios = [
+            { value: 'Urgencias', label: 'Urgencias', icon: '🚨', color: '#ca8a04' },
+            { value: 'UCI', label: 'UCI', icon: '🏥', color: '#dc2626' },
+            { value: 'UTI', label: 'UTI', icon: '⚕️', color: '#ea580c' },
+            { value: 'MQ', label: 'MQ', icon: '🔬', color: '#2563eb' },
+            { value: 'Interconsulta', label: 'Interconsulta', icon: '📋', color: '#16a34a' }
+        ];
+
+        // Crear overlay y modal
+        const overlay = document.createElement('div');
+        overlay.id = modalId;
+        overlay.className = 'dropdown-modal-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+
+        const modal = document.createElement('div');
+        modal.className = 'dropdown-modal-content';
+        modal.style.cssText = 'background:#fff;border-radius:8px;max-width:400px;width:90%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+
+        // Header
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:16px 20px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;';
+        header.innerHTML = `
+            <h3 style="margin:0;font-size:18px;color:#333;">Seleccionar Servicio</h3>
+            <button id="${modalId}-close" style="background:none;border:none;font-size:24px;cursor:pointer;color:#666;line-height:1;">&times;</button>
+        `;
+
+        // Body con opciones
+        const body = document.createElement('div');
+        body.style.cssText = 'padding:16px 20px;overflow-y:auto;flex:1;';
+
+        let optionsHtml = '<div style="display:flex;flex-direction:column;gap:10px;">';
+        servicios.forEach(serv => {
+            const isSelected = config.currentValue === serv.value;
+            optionsHtml += `
+                <button class="service-option" data-value="${serv.value}" style="
+                    display:flex;
+                    align-items:center;
+                    gap:12px;
+                    padding:14px 18px;
+                    border:2px solid ${isSelected ? serv.color : '#ddd'};
+                    border-radius:8px;
+                    background:${isSelected ? serv.color + '15' : '#fff'};
+                    cursor:pointer;
+                    text-align:left;
+                    font-size:15px;
+                    font-weight:${isSelected ? '600' : '500'};
+                    color:${isSelected ? serv.color : '#333'};
+                    transition:all 0.2s;
+                ">
+                    <span style="font-size:20px;">${serv.icon}</span>
+                    <span>${serv.label}</span>
+                </button>
+            `;
+        });
+        optionsHtml += '</div>';
+        body.innerHTML = optionsHtml;
+
+        // Footer
+        const footer = document.createElement('div');
+        footer.style.cssText = 'padding:16px 20px;border-top:1px solid #e0e0e0;display:flex;justify-content:flex-end;gap:10px;';
+        footer.innerHTML = `
+            <button id="${modalId}-cancel" style="padding:10px 20px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;font-size:14px;">Cancelar</button>
+        `;
+
+        modal.appendChild(header);
+        modal.appendChild(body);
+        modal.appendChild(footer);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Event handlers
+        const closeModal = () => {
+            overlay.remove();
+            if (config.onCancel) config.onCancel();
+        };
+
+        document.getElementById(`${modalId}-close`).onclick = closeModal;
+        document.getElementById(`${modalId}-cancel`).onclick = closeModal;
+        overlay.onclick = (e) => {
+            if (e.target === overlay) closeModal();
+        };
+
+        // Selección de opción
+        body.querySelectorAll('.service-option').forEach(btn => {
+            const servConfig = servicios.find(s => s.value === btn.dataset.value);
+
+            btn.onmouseover = () => {
+                if (btn.dataset.value !== config.currentValue) {
+                    btn.style.borderColor = servConfig.color;
+                    btn.style.background = servConfig.color + '10';
+                }
+            };
+            btn.onmouseout = () => {
+                if (btn.dataset.value !== config.currentValue) {
+                    btn.style.borderColor = '#ddd';
                     btn.style.background = '#fff';
                 }
             };

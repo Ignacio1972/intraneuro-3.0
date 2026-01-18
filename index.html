@@ -18,10 +18,10 @@
     <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
 
 <!-- CSS Files (en el <head>) -->
-<link rel="stylesheet" href="css/main.css?v=25">
-<link rel="stylesheet" href="css/pacientes.css?v=26">
+<link rel="stylesheet" href="css/main.css?v=50">
+<link rel="stylesheet" href="css/pacientes.css?v=50">
 <link rel="stylesheet" href="css/service-selector.css?v=1">
-<link rel="stylesheet" href="css/modal.css?v=25">
+<link rel="stylesheet" href="css/modal.css?v=50">
 <link rel="stylesheet" href="css/pacientes-print.css?v=23">
 <link rel="stylesheet" href="css/chat-notes.css?v=5">
 <!-- Sistema de chat desactivado - ahora usando sistema simple de textboxes -->
@@ -66,10 +66,10 @@
         <!-- Header -->
         <header class="main-header">
             <div class="header-content">
-                <div class="logo-section">
+                <a href="index.html" class="logo-section" style="text-decoration: none; color: inherit;">
                     <img src="assets/img/logo.png" alt="INTRANEURO" class="header-logo">
                     <span class="clinic-name">INTRANEURO</span>
-                </div>
+                </a>
                 <div class="user-section">
                     <span id="currentUser">Acceso autorizado</span>
                     <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
@@ -242,13 +242,13 @@
 <!-- Core y utilidades primero -->
 <!-- Configuración global de servicios - Debe cargarse primero -->
 <script src="js/services-config.js?v=1"></script>
-<script src="js/api.js?v=21"></script>
+<script src="js/api.js?v=50"></script>
 <script src="js/validaciones.js?v=25"></script>
 <script src="js/data-catalogos.js?v=21"></script>
 <!-- Módulos de UI -->
-<script src="js/pacientes-ui.js?v=51"></script>
+<script src="js/pacientes-ui.js?v=100"></script>
 <!-- Sistema Unificado de Dropdowns v2.0 - DEBE cargarse ANTES de ingreso.js -->
-<script src="js/modules/dropdown-system.js?v=2"></script>
+<script src="js/modules/dropdown-system.js?v=3"></script>
 <!-- Script de debug para dropdowns -->
 <script src="js/debug-dropdowns.js"></script>
 <!-- ✨ NUEVO: Módulos OCR para ingreso desde foto -->
@@ -256,7 +256,7 @@
 <script src="js/modules/ocr/ocr-integration.js?v=20251121"></script>
 <script src="js/modules/ocr/ocr-init.js?v=20251121"></script>
 <!-- Módulos principales -->
-<script src="js/auth.js?v=25"></script>
+<script src="js/auth.js?v=50"></script>
 <script src="js/ingreso.js?v=25"></script>
 
 <!-- ===== Sistema modular de componentes desactivado ===== -->
@@ -265,15 +265,15 @@
 <!-- El modal-orchestrator.js fue cancelado en el pivote de arquitectura -->
 
 <!-- Main DEBE ir antes de pacientes-refactored para declarar variables globales -->
-<script src="js/main.js?v=27"></script>
+<script src="js/main.js?v=50"></script>
 <!-- Módulos refactorizados de pacientes - DESPUÉS de main.js -->
 <script src="js/modules/pacientes/pacientes-api.js?v=34"></script>
 <!-- Sistema de edición refactorizado - SISTEMA UNIFICADO -->
-<script src="js/modules/pacientes/pacientes-edit-refactored.js?v=4"></script>
+<script src="js/modules/pacientes/pacientes-edit-refactored.js?v=5.5"></script>
 <!-- Sistema de edición de servicio hospitalario -->
-<script src="js/modules/pacientes/pacientes-service-edit.js?v=1"></script>
+<script src="js/modules/pacientes/pacientes-service-edit.js?v=2"></script>
 <script src="js/modules/pacientes/pacientes-discharge.js?v=37"></script>
-<script src="js/pacientes-refactored.js?v=41"></script>
+<script src="js/pacientes-refactored.js?v=100"></script>
 <!-- Sistema SIMPLIFICADO de notas - Solo textareas -->
 <script src="js/simple-notes.js?v=3"></script>
 <!-- Sistema de Tareas con Checkboxes y Audio -->
