@@ -499,9 +499,40 @@ input.filter-inline::placeholder {
     color: var(--text-primary);
 }
 
-/* Responsive: ocultar filtros en mobile */
+/* Responsive: filtros en mobile */
 @media (max-width: 768px) {
-    .filters-row {
-        display: none;
+    /* Fila de filtros: hacer invisibles todos los elementos excepto médico */
+    .filters-row .filter-inline,
+    .filters-row .btn-clear-filters {
+        visibility: hidden;
+        width: 0;
+        padding: 0;
+        border: none;
+        margin: 0;
+    }
+
+    /* Mostrar filtros de servicio y médico */
+    .filters-row #filterService,
+    .filters-row #filterDoctor {
+        visibility: visible;
+        width: auto;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.4rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--background);
+        color: var(--text-secondary);
+        min-width: 70px;
+    }
+
+    .filters-row #filterService:focus,
+    .filters-row #filterDoctor:focus {
+        border-color: var(--primary-color);
+        color: var(--text-primary);
+    }
+
+    /* Reducir padding de celdas vacías en fila de filtros */
+    .filters-row th {
+        padding: 0.2rem 0.1rem !important;
     }
 }

@@ -816,8 +816,8 @@ exports.getArchivedPatients = async (req, res) => {
                 diagnosisText: admission.diagnosis_text,
                 diagnosisDetails: admission.diagnosis_details,
                 bed: admission.bed,
-                admittedBy: admission.admitted_by, // Agregado: médico tratante
-                // ranking: admission.ranking, // Campo eliminado
+                service: admission.service,
+                admittedBy: admission.admitted_by,
                 dischargedBy: admission.discharged_by,
                 deceased: admission.deceased
             }))
@@ -1145,10 +1145,13 @@ exports.deletePatient = async (req, res) => {
 /**
  * Obtener notas de voz de un paciente
  * GET /api/patients/:id/voice-notes
+ * Query params:
+ *   - type: 'observation' | 'task' (opcional, filtra por tipo)
  */
 exports.getPatientVoiceNotes = async (req, res) => {
     try {
         const { id } = req.params;
+        const { type } = req.query;
 
         const patient = await Patient.findByPk(id, {
             attributes: ['id', 'name', 'voice_notes']
@@ -1161,9 +1164,14 @@ exports.getPatientVoiceNotes = async (req, res) => {
             });
         }
 
-        const voiceNotes = patient.voice_notes || [];
+        let voiceNotes = patient.voice_notes || [];
 
-        console.log(`[VoiceNotes] Paciente ${id}: ${voiceNotes.length} notas`);
+        // Filtrar por tipo si se especifica
+        if (type) {
+            voiceNotes = voiceNotes.filter(note => note.type === type);
+        }
+
+        console.log(`[VoiceNotes] Paciente ${id}: ${voiceNotes.length} notas${type ? ` (tipo: ${type})` : ''}`);
 
         res.json({
             success: true,
@@ -1182,10 +1190,15 @@ exports.getPatientVoiceNotes = async (req, res) => {
 /**
  * Subir nota de voz de un paciente
  * POST /api/patients/upload-voice-note
+ * Body params:
+ *   - patientId: ID del paciente
+ *   - duration: duracion en segundos
+ *   - createdBy: nombre del usuario
+ *   - type: 'observation' | 'task' (default: 'observation')
  */
 exports.uploadPatientVoiceNote = async (req, res) => {
     try {
-        const { patientId, duration, createdBy } = req.body;
+        const { patientId, duration, createdBy, type } = req.body;
         const file = req.file;
 
         if (!file) {
@@ -1214,7 +1227,8 @@ exports.uploadPatientVoiceNote = async (req, res) => {
             url: fileUrl,
             duration: parseInt(duration),
             createdAt: new Date().toISOString(),
-            createdBy: createdBy
+            createdBy: createdBy,
+            type: type || 'observation'
         };
 
         // Obtener notas existentes

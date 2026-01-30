@@ -59,26 +59,35 @@ class OCRService {
         try {
             await this.initialize();
 
-            console.log(`[OCR] Procesando imagen: ${imagePath}`);
+            console.log(`[OCR] Procesando imagen con documentTextDetection: ${imagePath}`);
 
-            // Realizar detección de texto
-            const [result] = await this.client.textDetection(imagePath);
-            const detections = result.textAnnotations;
+            // Usar documentTextDetection para mejor reconocimiento de documentos/pantallas
+            const request = {
+                image: { source: { filename: imagePath } },
+                imageContext: { languageHints: ['es'] }
+            };
 
-            if (!detections || detections.length === 0) {
+            const [result] = await this.client.documentTextDetection(request);
+            const fullTextAnnotation = result.fullTextAnnotation;
+
+            if (!fullTextAnnotation || !fullTextAnnotation.text) {
                 throw new Error('No se detectó texto en la imagen');
             }
 
-            // El primer elemento es el texto completo
-            const fullText = detections[0].description;
+            const fullText = fullTextAnnotation.text;
 
             console.log(`[OCR] Texto extraído (${fullText.length} caracteres)`);
 
-            // Retornar texto y bloques individuales
+            // Extraer bloques estructurados con confianza real
+            const blocks = this.extractStructuredBlocks(fullTextAnnotation);
+            const confidence = this.calculateOverallConfidence(fullTextAnnotation);
+
+            console.log(`[OCR] ${blocks.length} bloques extraídos, confianza general: ${(confidence * 100).toFixed(1)}%`);
+
             return {
                 fullText,
-                blocks: detections.slice(1), // Bloques individuales con coordenadas
-                confidence: this.calculateOverallConfidence(detections)
+                blocks,
+                confidence
             };
         } catch (error) {
             console.error('[OCR] Error extrayendo texto:', error);
@@ -86,12 +95,76 @@ class OCRService {
         }
     }
 
-    calculateOverallConfidence(detections) {
-        if (!detections || detections.length === 0) return 0;
+    extractStructuredBlocks(fullTextAnnotation) {
+        const blocks = [];
 
-        // Google Vision no devuelve confidence para text detection básico
-        // Retornamos un valor alto si se detectó texto
-        return detections.length > 10 ? 0.90 : 0.70;
+        if (!fullTextAnnotation.pages) return blocks;
+
+        for (const page of fullTextAnnotation.pages) {
+            if (!page.blocks) continue;
+
+            for (const block of page.blocks) {
+                const blockText = [];
+                const wordConfidences = [];
+
+                if (!block.paragraphs) continue;
+
+                for (const paragraph of block.paragraphs) {
+                    if (!paragraph.words) continue;
+
+                    for (const word of paragraph.words) {
+                        const wordText = word.symbols
+                            ? word.symbols.map(s => s.text).join('')
+                            : '';
+                        if (wordText) {
+                            blockText.push(wordText);
+                            if (word.confidence != null) {
+                                wordConfidences.push(word.confidence);
+                            }
+                        }
+                    }
+                }
+
+                if (blockText.length > 0) {
+                    const avgConfidence = wordConfidences.length > 0
+                        ? wordConfidences.reduce((a, b) => a + b, 0) / wordConfidences.length
+                        : 0;
+
+                    blocks.push({
+                        text: blockText.join(' '),
+                        confidence: avgConfidence,
+                        boundingBox: block.boundingBox || null
+                    });
+                }
+            }
+        }
+
+        return blocks;
+    }
+
+    calculateOverallConfidence(fullTextAnnotation) {
+        if (!fullTextAnnotation || !fullTextAnnotation.pages) return 0;
+
+        const allConfidences = [];
+
+        for (const page of fullTextAnnotation.pages) {
+            if (!page.blocks) continue;
+            for (const block of page.blocks) {
+                if (!block.paragraphs) continue;
+                for (const paragraph of block.paragraphs) {
+                    if (!paragraph.words) continue;
+                    for (const word of paragraph.words) {
+                        if (word.confidence != null) {
+                            allConfidences.push(word.confidence);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (allConfidences.length === 0) return 0.70;
+
+        return allConfidences.reduce((a, b) => a + b, 0) / allConfidences.length;
     }
 
     async checkHealth() {

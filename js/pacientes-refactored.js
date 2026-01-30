@@ -958,11 +958,13 @@ function populateInlineFilters() {
     const doctorSelect = document.getElementById('filterDoctor');
     const nameInput = document.getElementById('filterName');
     const monthSelect = document.getElementById('filterMonth');
+    const serviceSelect = document.getElementById('filterService');
 
     if (diagnosisSelect) diagnosisSelect.value = currentDiagnosisFilter;
     if (doctorSelect) doctorSelect.value = currentDoctorFilter;
     if (nameInput) nameInput.value = currentNameFilter;
     if (monthSelect) monthSelect.value = currentMonthFilter;
+    if (serviceSelect) serviceSelect.value = currentServiceFilter;
 }
 
 // Poblar filtro de diagnósticos
@@ -1071,6 +1073,7 @@ window.filterByDoctorInline = function() {
     currentDoctorFilter = select ? select.value : '';
     renderPatients(true);
 };
+
 
 // Filtrar por servicio (inline)
 window.filterByServiceInline = function() {

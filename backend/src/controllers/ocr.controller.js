@@ -37,8 +37,8 @@ class OCRController {
                 });
             }
 
-            // Paso 2: Parsear campos estructurados
-            const parsedData = ocrParser.parsePatientData(ocrResult.fullText);
+            // Paso 2: Parsear campos estructurados (con bloques para mejor extracción)
+            const parsedData = ocrParser.parsePatientData(ocrResult.fullText, ocrResult.blocks);
 
             // Paso 3: Preparar respuesta
             const response = {

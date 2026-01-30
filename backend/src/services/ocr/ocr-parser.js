@@ -4,11 +4,14 @@
  */
 
 class OCRParser {
-    parsePatientData(ocrText) {
+    parsePatientData(ocrText, blocks) {
         console.log('[Parser] Procesando texto OCR...');
 
+        // Intentar extracción por bloques primero, fallback a regex
+        const nameFromBlocks = blocks ? this.extractNameFromBlocks(blocks) : null;
+
         const data = {
-            name: this.extractName(ocrText),
+            name: nameFromBlocks || this.extractName(ocrText),
             rut: this.extractRUT(ocrText),
             age: this.extractAge(ocrText),
             prevision: this.extractPrevision(ocrText),
@@ -38,7 +41,8 @@ class OCRParser {
             'LEY DE URGENCIA', 'LEY URGENCIA', 'URGENCIA',
             'HOSPITALIZACION', 'HOSPITALIZACIÓN', 'HOSPITALIZACION INTEGRAL',
             'FICHA CLINICA', 'FICHA CLÍNICA', 'DATOS PACIENTE',
-            'INGRESO', 'EGRESO', 'ADMISION', 'ADMISIÓN'
+            'INGRESO', 'EGRESO', 'ADMISION', 'ADMISIÓN',
+            'CONVENCIONAL', 'CONVENCIONA', 'TIPO PACIENTE', 'PROCEDENCIA'
         ];
 
         // Buscar nombre después de etiquetas comunes
@@ -63,12 +67,89 @@ class OCRParser {
                 );
 
                 if (name.length >= 10 && !/\d/.test(name) && !esProhibido) {
-                    return name;
+                    return this.cleanName(name);
                 }
             }
         }
 
         return null;
+    }
+
+    extractNameFromBlocks(blocks) {
+        if (!blocks || blocks.length === 0) return null;
+
+        const labelPatterns = /^(nombre|paciente|titular|nombre\s+paciente|nombre\s+y\s+apellido)/i;
+
+        const textosProhibidos = [
+            'LEY DE URGENCIA', 'LEY URGENCIA', 'URGENCIA',
+            'HOSPITALIZACION', 'HOSPITALIZACIÓN', 'HOSPITALIZACION INTEGRAL',
+            'FICHA CLINICA', 'FICHA CLÍNICA', 'DATOS PACIENTE',
+            'INGRESO', 'EGRESO', 'ADMISION', 'ADMISIÓN',
+            'CONVENCIONAL', 'CONVENCIONA', 'TIPO PACIENTE', 'PROCEDENCIA'
+        ];
+
+        for (let i = 0; i < blocks.length; i++) {
+            const blockText = blocks[i].text.trim();
+
+            // Check if this block contains a label like "Nombre"
+            if (labelPatterns.test(blockText)) {
+                // The name might be in the same block after the label
+                const inlineMatch = blockText.match(/(?:nombre|paciente|titular)[:\s]+(.+)/i);
+                if (inlineMatch && inlineMatch[1]) {
+                    const candidate = this.cleanName(inlineMatch[1].trim());
+                    if (this.isValidName(candidate, textosProhibidos)) {
+                        console.log(`[Parser] Nombre encontrado en bloque (inline): "${candidate}"`);
+                        return candidate;
+                    }
+                }
+
+                // Or in the next block(s)
+                for (let j = i + 1; j < Math.min(i + 3, blocks.length); j++) {
+                    const candidate = this.cleanName(blocks[j].text.trim());
+                    if (this.isValidName(candidate, textosProhibidos)) {
+                        console.log(`[Parser] Nombre encontrado en bloque siguiente: "${candidate}"`);
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    isValidName(text, textosProhibidos) {
+        if (!text || text.length < 5) return false;
+        if (/\d/.test(text)) return false;
+
+        const upper = text.toUpperCase();
+        for (const prohibido of textosProhibidos) {
+            if (upper === prohibido || upper.includes(prohibido)) return false;
+        }
+
+        // Must have at least 2 words (first + last name)
+        const words = text.trim().split(/\s+/);
+        if (words.length < 2) return false;
+
+        return true;
+    }
+
+    // Limpiar nombre: truncar en palabras que indican fin del nombre
+    cleanName(text) {
+        if (!text) return null;
+
+        // Palabras que indican que el nombre terminó
+        const delimiters = ['RUT', 'EDAD', 'SEXO', 'FECHA', 'FONO', 'DIRECCION', 'DIRECCIÓN', 'ASEGURADOR', 'PREVISION', 'PREVISIÓN'];
+
+        let cleaned = text.trim();
+
+        for (const delimiter of delimiters) {
+            const idx = cleaned.toUpperCase().indexOf(delimiter);
+            if (idx > 0) {
+                cleaned = cleaned.substring(0, idx).trim();
+            }
+        }
+
+        return cleaned;
     }
 
     extractRUT(text) {
@@ -112,17 +193,75 @@ class OCRParser {
     }
 
     extractPrevision(text) {
-        // Previsiones de salud chilenas
-        const previsiones = [
-            'FONASA', 'ISAPRE', 'CAPREDENA', 'DIPRECA',
-            'PARTICULAR', 'BANMEDICA', 'CONSALUD', 'CRUZ BLANCA',
-            'COLMENA', 'VIDA TRES', 'MAS VIDA', 'NUEVA MASVIDA'
+        // Mapeo de términos OCR a valores del PrevisionModal
+        const previsionMap = {
+            'FONASA': 'Fonasa',
+            'BANMEDICA': 'Isapre Banmédica',
+            'BANMÉDICA': 'Isapre Banmédica',
+            'COLMENA': 'Isapre Colmena',
+            'CONSALUD': 'Isapre Consalud',
+            'CRUZ BLANCA': 'Isapre Cruz Blanca',
+            'CRUZBLANCA': 'Isapre Cruz Blanca',
+            'NUEVA MASVIDA': 'Isapre Nueva Masvida',
+            'NUEVAMASVIDA': 'Isapre Nueva Masvida',
+            'MAS VIDA': 'Isapre Nueva Masvida',
+            'MASVIDA': 'Isapre Nueva Masvida',
+            'VIDA TRES': 'Isapre Vida Tres',
+            'VIDA TRE': 'Isapre Vida Tres',
+            'VIDATRES': 'Isapre Vida Tres',
+            'VIDATRE': 'Isapre Vida Tres',
+            'ESENCIAL': 'Isapre Esencial',
+            'PARTICULAR': 'Particular',
+            'CONVENIO': 'Convenio',
+            'CAPREDENA': 'Fonasa',
+            'DIPRECA': 'Fonasa'
+        };
+
+        // 1. Buscar por etiqueta ASEGURADOR/PLAN o ASEGURADOR
+        const aseguradorPatterns = [
+            /ASEGURADOR\s*\/?\s*PLAN[:\s]+([A-ZÁÉÍÓÚÑ\s]+?)(?=\n|FECHA|FAMILIAR|PROCEDENCIA|$)/i,
+            /ASEGURADOR[:\s]+([A-ZÁÉÍÓÚÑ\s]+?)(?=\n|FECHA|FAMILIAR|PROCEDENCIA|PLAN|$)/i,
+            /PREVISI[OÓ]N[:\s]+([A-ZÁÉÍÓÚÑ\s]+?)(?=\n|$)/i
         ];
 
-        for (const prevision of previsiones) {
-            const regex = new RegExp(prevision, 'i');
+        for (const pattern of aseguradorPatterns) {
+            const match = text.match(pattern);
+            if (match && match[1]) {
+                let value = match[1].trim().toUpperCase();
+
+                // Si es Fonasa, truncar en "/" (ej: "FONASA/TRAMO B" → "FONASA")
+                if (value.includes('FONASA')) {
+                    return 'Fonasa';
+                }
+
+                // Buscar en el mapeo
+                for (const [key, mapped] of Object.entries(previsionMap)) {
+                    if (value.includes(key)) {
+                        return mapped;
+                    }
+                }
+
+                // Si contiene ISAPRE pero no matcheó, intentar extraer el nombre
+                if (value.includes('ISAPRE')) {
+                    const isapre = value.replace('ISAPRE', '').trim();
+                    for (const [key, mapped] of Object.entries(previsionMap)) {
+                        if (isapre.includes(key) || key.includes(isapre)) {
+                            return mapped;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Fallback: buscar términos sueltos en el texto
+        for (const [key, mapped] of Object.entries(previsionMap)) {
+            const regex = new RegExp(key, 'i');
             if (regex.test(text)) {
-                return prevision;
+                // Si es Fonasa con algo después, solo retornar Fonasa
+                if (key === 'FONASA') {
+                    return 'Fonasa';
+                }
+                return mapped;
             }
         }
 

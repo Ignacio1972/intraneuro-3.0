@@ -2,8 +2,8 @@
 // PWA con estrategia de cache para funcionalidad offline
 // v5.0: Migración a nuevo sitio de producción
 
-const CACHE_NAME = 'intraneuro-v5.5';
-const RUNTIME_CACHE = 'intraneuro-runtime-v5.5';
+const CACHE_NAME = 'intraneuro-v5.6';
+const RUNTIME_CACHE = 'intraneuro-runtime-v5.6';
 
 // Assets estáticos para cachear en instalación
 const STATIC_ASSETS = [
