@@ -1,27 +1,32 @@
 # INTRANEURO - Sistema de Gestión Hospitalaria
 
-## Estado del Sistema (Actualizado 17-Enero-2026)
+## Estado del Sistema (Actualizado 7-Febrero-2026)
 
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                               ║
 ║  PRODUCCIÓN:                                                                  ║
 ║  ├── URL: https://intraneurodavila.com                                        ║
-║  ├── Código: /var/www/intraneuro/                                             ║
-║  ├── Backend: pm2 process "intraneuro-api" (puerto 3001)                      ║
-║  └── Base de datos: intraneuro_db (253 pacientes al 17-ene-2026)              ║
+║  ├── Frontend: /var/www/intraneuro-vue/dist (Vue 3 + Vite build)             ║
+║  ├── Backend: /var/www/intraneuro/backend/ → PM2 "intraneuro-api" (:3001)    ║
+║  ├── Uploads: /var/www/intraneuro/uploads/                                    ║
+║  └── Base de datos: intraneuro_db (300 pacientes al 7-feb-2026)              ║
 ║                                                                               ║
 ║  Sistema en uso activo 24/7                                                   ║
+║                                                                               ║
+║  LEGACY (frontend anterior, ya no se sirve):                                  ║
+║  └── /var/www/intraneuro/ (vanilla JS - reemplazado por Vue)                 ║
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 ```
 
 | Componente | Valor |
 |------------|-------|
-| **Código** | `/var/www/intraneuro/` |
-| **Backend PM2** | `intraneuro-api` (puerto 3001) |
+| **Frontend (Nginx root)** | `/var/www/intraneuro-vue/dist` |
+| **Backend PM2** | `intraneuro-api` (puerto 3001) — código en `/var/www/intraneuro/backend/` |
+| **Uploads** | `/var/www/intraneuro/uploads/` |
 | **Base de datos** | `intraneuro_db` |
-| **Nginx root** | `/var/www/intraneuro` |
+| **Frontend legacy** | `/var/www/intraneuro/` (vanilla JS, ya no se sirve) |
 
 ---
 
@@ -31,7 +36,7 @@ Sistema web para gestión de pacientes en clínica psiquiátrica. Incluye contro
 
 **URL Producción**: https://intraneurodavila.com
 **Repositorio**: https://github.com/Ignacio1972/intraneuro-3.0
-**Stack**: Node.js + Express + PostgreSQL + Nginx + PM2
+**Stack**: Vue 3 + Vite + Tailwind v4 + DaisyUI v5 + Node.js + Express + PostgreSQL + Nginx + PM2
 
 ---
 
@@ -51,7 +56,8 @@ SSH:       root@64.176.7.170
 ### Stack Tecnológico
 
 ```
-Backend:       Node.js 20.x
+Frontend:      Vue 3.5 + Vite 6 + Tailwind v4 + DaisyUI v5
+Backend:       Node.js 20.x + Express
 Gestor:        PM2
 Base de datos: PostgreSQL 14
 Web Server:    Nginx 1.18.0
@@ -63,42 +69,76 @@ Firewall:      UFW (puertos 22, 80, 443)
 
 | Proceso | Puerto | Código | BD |
 |---------|--------|--------|-----|
-| `intraneuro-api` | 3001 | /var/www/intraneuro | intraneuro_db |
+| `intraneuro-api` | 3001 | /var/www/intraneuro/backend | intraneuro_db |
 
 ---
 
 ## Estructura del Proyecto
 
+### Frontend en producción: `/var/www/intraneuro-vue/`
+
+```
+/var/www/intraneuro-vue/
+├── dist/                       # Build de producción (Nginx root)
+│   ├── index.html
+│   └── assets/                # JS/CSS compilados con hash
+│
+├── src/
+│   ├── main.js                # Entry point
+│   ├── App.vue                # Layout raíz
+│   ├── assets/
+│   │   └── main.css           # Tailwind v4 + DaisyUI v5 + tema personalizado
+│   ├── components/
+│   │   ├── AppHeader.vue      # Navbar + Drawer móvil
+│   │   ├── AppToast.vue       # Sistema de notificaciones
+│   │   ├── PatientCard.vue    # Card de paciente (móvil)
+│   │   ├── NewPatientModal.vue # Modal nuevo ingreso con OCR
+│   │   ├── DiagnosisModal.vue # Modal acordeón de diagnósticos
+│   │   ├── ServiceModal.vue   # Modal selector de servicio
+│   │   ├── DoctorModal.vue    # Modal selector de médico
+│   │   └── VoiceNotes.vue     # Grabación/reproducción notas de voz
+│   ├── views/
+│   │   ├── LoginView.vue      # Login
+│   │   ├── DashboardView.vue  # Pacientes activos
+│   │   ├── PatientView.vue    # Detalle de paciente
+│   │   └── ArchivosView.vue   # Pacientes egresados
+│   ├── stores/
+│   │   ├── auth.js            # Autenticación (JWT en localStorage)
+│   │   └── patients.js        # Pacientes, filtros, CRUD, observaciones, tareas
+│   ├── services/
+│   │   └── api.js             # Cliente Axios configurado
+│   └── router/
+│       └── index.js           # Rutas con guards de autenticación
+│
+├── vite.config.js             # Configuración Vite
+├── package.json               # Dependencias npm
+└── CLAUDE.md                  # Instrucciones del proyecto Vue
+```
+
+### Backend: `/var/www/intraneuro/backend/`
+
+```
+/var/www/intraneuro/backend/
+├── server.js                  # Punto de entrada principal
+├── .env                       # Variables de entorno (NO commitear)
+├── package.json               # Dependencias npm
+└── src/
+    ├── controllers/           # Lógica de negocio
+    ├── models/                # Modelos Sequelize (ORM)
+    ├── routes/                # Definición de endpoints
+    └── middleware/            # Middlewares (auth, validación)
+```
+
+### Otros directorios en `/var/www/intraneuro/`
+
 ```
 /var/www/intraneuro/
-├── backend/                    # API REST Node.js + Express
-│   ├── server.js              # Punto de entrada principal
-│   ├── .env                   # Variables de entorno (NO commitear)
-│   ├── package.json           # Dependencias npm
-│   └── src/
-│       ├── controllers/       # Lógica de negocio
-│       ├── models/            # Modelos Sequelize (ORM)
-│       ├── routes/            # Definición de endpoints
-│       └── middleware/        # Middlewares (auth, validación)
-│
-├── js/                        # Frontend JavaScript (Vanilla)
-│   ├── api.js                # Cliente HTTP para el API
-│   ├── auth.js               # Gestión de autenticación
-│   ├── main.js               # Inicialización y routing
-│   ├── pacientes-refactored.js
-│   ├── pacientes-ui.js
-│   └── modules/
-│       ├── dropdown-system.js
-│       ├── services.js
-│       └── pacientes/
-│
-├── css/                       # Estilos CSS
-├── assets/                    # Recursos estáticos
-├── uploads/                   # Archivos subidos (OCR, audio, etc.)
-├── index.html                 # Dashboard principal
-├── egreso.html               # Página de egresos
-├── ficha.html                # Ficha de pacientes
-└── archivos.html             # Gestión de archivos
+├── backend/                   # API REST (ver arriba)
+├── uploads/                   # Archivos subidos (OCR, audio, etc.) — servido por Nginx
+├── js/                        # Frontend LEGACY (vanilla JS, ya no se sirve)
+├── css/                       # Estilos LEGACY
+├── index.html                 # LEGACY — ya no es el frontend activo
+└── ...
 ```
 
 ---
@@ -115,9 +155,9 @@ User:     intraneuro_user
 Password: IntraNeuro2025
 ```
 
-**Estadísticas actuales** (17-ene-2026):
-- Pacientes: 253
-- Admisiones: 258
+**Estadísticas actuales** (7-feb-2026):
+- Pacientes: 300
+- Admisiones: 307
 
 **Tablas principales:**
 - `users` - Usuarios del sistema
@@ -161,22 +201,48 @@ OCR_MAX_FILE_SIZE=5242880
 server {
     server_name intraneurodavila.com www.intraneurodavila.com 64.176.7.170;
 
-    root /var/www/intraneuro;
+    root /var/www/intraneuro-vue/dist;
     index index.html;
 
+    # Headers de seguridad básicos
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Frontend (Vue SPA)
     location / {
         try_files $uri $uri/ /index.html;
     }
 
+    # Archivos de uploads (audios, voice notes, etc)
     location /uploads/ {
         alias /var/www/intraneuro/uploads/;
         autoindex off;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header Access-Control-Allow-Origin "*";
     }
 
+    # === DESARROLLO VUE (temporal) ===
+    location /dev {
+        proxy_pass http://localhost:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # API Proxy
     location /api/ {
         proxy_pass http://localhost:3001;
         proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -184,11 +250,14 @@ server {
         proxy_connect_timeout 10s;
         proxy_send_timeout 10s;
         proxy_read_timeout 10s;
+        send_timeout 10s;
     }
 
     listen 443 ssl;
     ssl_certificate /etc/letsencrypt/live/intraneurodavila.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/intraneurodavila.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
 ```
 
@@ -352,7 +421,9 @@ ss -tlnp | grep 3001
 
 ### ANTES de Hacer Cambios
 
-1. Verificar que estás en `/var/www/intraneuro/`
+1. Verificar en qué directorio trabajas:
+   - Frontend Vue: `/var/www/intraneuro-vue/`
+   - Backend API: `/var/www/intraneuro/backend/`
 2. Hacer backup de la BD: `sudo -u postgres pg_dump intraneuro_db > backup.sql`
 3. Verificar git status
 4. Documentar cambios
@@ -374,25 +445,44 @@ ss -tlnp | grep 3001
 
 ## Flujo de Deploy
 
+### Deploy Frontend (Vue)
+
 ```bash
-# 1. Conectar al servidor
-ssh root@64.176.7.170
+# 1. Ir al directorio Vue
+cd /var/www/intraneuro-vue
 
-# 2. Ir al directorio de producción
-cd /var/www/intraneuro
-
-# 3. Backup de BD
+# 2. Backup de BD
 sudo -u postgres pg_dump intraneuro_db > /tmp/backup_pre_deploy_$(date +%Y%m%d_%H%M%S).sql
 
-# 4. Actualizar código
+# 3. Actualizar código
 git pull origin main
 
-# 5. Si hay cambios en backend
-cd backend
-npm install  # Si hay nuevas dependencias
+# 4. Instalar dependencias si hay cambios
+npm install
+
+# 5. Build de producción (genera /dist)
+npm run build
+
+# 6. Verificar (Nginx sirve /dist automáticamente)
+curl -s https://intraneurodavila.com | head -5
+```
+
+### Deploy Backend (API)
+
+```bash
+# 1. Ir al directorio backend
+cd /var/www/intraneuro/backend
+
+# 2. Actualizar código
+cd /var/www/intraneuro && git pull origin main
+
+# 3. Instalar dependencias si hay cambios
+cd backend && npm install
+
+# 4. Reiniciar
 pm2 restart intraneuro-api
 
-# 6. Verificar
+# 5. Verificar
 curl -s https://intraneurodavila.com/api/health
 pm2 logs intraneuro-api --lines 20
 ```
@@ -406,7 +496,10 @@ git log --oneline -10
 # Volver al commit anterior
 git reset --hard <commit-hash>
 
-# Reiniciar backend
+# Si fue cambio de frontend: rebuild
+cd /var/www/intraneuro-vue && npm run build
+
+# Si fue cambio de backend: reiniciar
 pm2 restart intraneuro-api
 
 # Si es necesario, restaurar BD
@@ -424,9 +517,9 @@ sudo -u postgres psql intraneuro_db < /tmp/backup_pre_deploy_XXXXXXXX.sql
 3. **Admisiones/Ingresos** - Control de camas y fechas
 4. **Observaciones Médicas** - Notas y evolución
 5. **Tareas Pendientes** - Seguimiento de actividades
-6. **Egresos** - Página dedicada (egreso.html)
-7. **Dashboard** - Estadísticas en tiempo real
-8. **Archivos** - Upload y gestión de documentos
+6. **Egresos/Archivos** - Vista de pacientes egresados (ArchivosView.vue)
+7. **Dashboard** - Pacientes activos en tiempo real (DashboardView.vue)
+8. **Notas de Voz** - Grabación y reproducción de audio
 9. **OCR** - Lectura de documentos con Google Vision
 
 ---
@@ -463,10 +556,19 @@ systemctl restart postgresql
 
 ## Información de Contacto
 
-**Repositorio**: https://github.com/Ignacio1972/intraneuro-3.0
+**Repositorio backend**: https://github.com/Ignacio1972/intraneuro-3.0
 **Producción**: https://intraneurodavila.com
 
 ---
 
-**Última actualización**: 17 de Enero de 2026
-**Estado**: En producción
+## Nota sobre la Transición
+
+El frontend fue migrado de vanilla JS (`/var/www/intraneuro/`) a Vue 3 (`/var/www/intraneuro-vue/`).
+El backend sigue siendo el mismo en `/var/www/intraneuro/backend/`.
+Los uploads siguen en `/var/www/intraneuro/uploads/`.
+El código legacy de vanilla JS (`js/`, `css/`, `index.html`, `egreso.html`, etc.) ya no se sirve pero permanece en el repositorio.
+
+---
+
+**Última actualización**: 7 de Febrero de 2026
+**Estado**: En producción (Vue 3)
